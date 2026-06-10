@@ -1,5 +1,6 @@
-# Local Simulation Validation Report — Module 01 (Kubernetes GPU Scheduling)
+# Local Simulation Validation Report — Lesson 1 (Kubernetes GPU Scheduling)
 
+> Your [lab notebook](./README.md) entry for [Lesson 1](../01-k8s-gpu-platform/README.md).
 > Fill this in after running `make phase1-up`, `make phase1-demo`, `make phase1-evidence`.
 > A report without an evidence directory reference is not complete.
 

@@ -1,5 +1,10 @@
 # Fake vs Real: The Limitations Ledger
 
+> Part of [★ Your Lab Notebook](./README.md) · Course home:
+> [AI Factory Operations Lab](../../README.md). Every lesson's "🔬 What you proved /
+> did NOT prove" box traces back to this table — it is the course's source of truth
+> for honest claims.
+
 The credibility of this project rests on this file. It states exactly which
 claims each lab mode can support.
 

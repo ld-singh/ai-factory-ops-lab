@@ -1,8 +1,32 @@
-# gpu-operator-real/ — Real GPU Validation Guide (Phase 2)
+# Lesson 2 — Real GPU Validation
 
-This is the **real hardware** half of Module 01. Everything here requires one
-machine with an NVIDIA GPU: a rented cloud GPU VM (a single L4/T4/A10G-class
-instance is enough) or a local NVIDIA GPU machine.
+> Course home: [AI Factory Operations Lab](../../../README.md) · Previous:
+> [Lesson 1 — Kubernetes GPU Scheduling](../README.md) · Next:
+> [Lesson 3 — Slurm GPU Platform](../../02-slurm-gpu-platform/README.md)
+
+This is the **real hardware** half of Module 01. In Lesson 1 you deliberately could
+not prove anything below the kubelet. Here you prove all of it — the complete GPU
+path to a running pod — on actual silicon.
+
+🎯 **Learning objectives** — after this lesson you can:
+
+1. Validate each link of the GPU path independently: driver → container toolkit →
+   runtime class → device plugin → kubelet → scheduler → CUDA container.
+2. Confirm the GPU Operator advertises *real* `nvidia.com/gpu` and *discovered* GFD
+   labels, and compare them to the script-written labels from Lesson 1.
+3. Run a CUDA pod that executes `nvidia-smi` on a real GPU — the single most
+   important artifact in the course.
+4. Pull real DCGM telemetry, the foundation [Lesson 4](../../03-observability/README.md)
+   builds on.
+
+🧭 **Mode:** 🟥 Real GPU. Everything here requires one machine with an NVIDIA GPU: a
+rented cloud GPU VM (a single L4/T4/A10G-class instance is enough) or a local NVIDIA
+GPU machine.
+
+📋 **Prerequisites:** [Lesson 1](../README.md) complete (you understand what the
+simulation did and didn't prove). A budget of a few dollars if renting a GPU VM.
+
+Each step below has a **Pass criteria** line — treat it as the step's checkpoint.
 
 > **VERSION WARNING:** exact package names, image tags, and Helm chart versions
 > change with driver/CUDA/Kubernetes releases. Treat every command below as a
@@ -138,3 +162,20 @@ version, GPU Operator chart version, and the evidence directory produced by
 `scripts/collect-gpu-evidence.sh`. Until that report contains captured output,
 this module's status is "guide complete, evidence pending hardware run" — and
 the project status table states exactly that.
+
+---
+
+## 🔬 What this lesson proves — and did NOT
+
+**Proves:** the real, end-to-end GPU runtime path on one node, plus real DCGM
+telemetry. This is what Lesson 1's simulation explicitly could not.
+
+**Does NOT prove:** because it's single-node by design — no NCCL collective
+performance, no NVLink/NVSwitch topology, no GPUDirect RDMA, no multi-node
+distributed training, and nothing about production-scale fleet operations. It proves
+the *path and telemetry*, not scale. Full ledger:
+[`fake-vs-real-limitations.md`](../../06-validation-reports/fake-vs-real-limitations.md).
+
+➡️ **Next:** [Lesson 3 — Slurm GPU Platform](../../02-slurm-gpu-platform/README.md).
+You've now seen GPU scheduling under Kubernetes both ways; next you schedule GPU
+*jobs* under Slurm, the other dominant AI/HPC scheduler.
