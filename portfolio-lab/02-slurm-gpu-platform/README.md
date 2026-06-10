@@ -30,7 +30,7 @@ training clusters. This lesson is the Slurm counterpart to Lesson 1: same goal
 💡 **Why fake GRES is legitimate (same idea as Lesson 1):** `slurmctld` scheduling
 does not require the device to exist — GRES scheduling is control-plane logic. So
 fake GRES proves Slurm's *scheduling* behaviour, and nothing about CUDA. The same
-honesty boundary you learned in Lesson 1 applies here.
+sim-vs-real boundary you learned in Lesson 1 applies here.
 
 📋 **Will cover:** Slurm-in-Docker cluster, fake GRES vs real `--gres=gpu` (strictly
 separated), the four config files above, GPU job scripts, QoS limits, fair-share,

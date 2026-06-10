@@ -62,7 +62,7 @@ Each fake node carries:
 See [`fake-gpu-node-template.yaml`](./fake-gpu-node-template.yaml) for the annotated
 template — read it top to bottom; every field is commented with why it's there.
 
-## Honest labelling note
+## Where these labels come from
 
 The `nvidia.com/gpu.product` values here are written by our script, not discovered by
 GFD. On a real cluster, GFD discovers them from the driver. The label *names* are

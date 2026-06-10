@@ -2,10 +2,9 @@
 
 > Course home: [AI Factory Operations Lab](../../README.md)
 
-This directory is where the course's honesty contract becomes concrete. **A lesson
-is only "Complete" when its report here holds real, captured output.** No evidence
-directory, no completion — that rule is what separates "I read about it" from "I ran
-it and watched it happen."
+This directory is where claims become concrete. **A lesson is only "Complete" when
+its report here holds real, captured output.** No evidence directory, no completion —
+that rule is what separates "I read about it" from "I ran it and watched it happen."
 
 ## How to use it
 
@@ -26,11 +25,10 @@ Each time you finish a runnable lesson:
 | [slurm-gres-validation.md](./slurm-gres-validation.md) | [3 — Slurm](../02-slurm-gpu-platform/README.md) | 🟦 Sim (+opt real) | *Phase 3* |
 | [inference-benchmark-report.md](./inference-benchmark-report.md) | [5 — Inference serving](../04-inference-serving/README.md) | 🟥 Real | *Phase 5* |
 
-## The honesty ledger — read this to grade your own claims
+## The limitations ledger — read this to grade your own claims
 
 [**fake-vs-real-limitations.md**](./fake-vs-real-limitations.md) is the single source
 of truth for what each lab *mode* can and cannot prove. Before you write any claim in
-a report — or on a résumé — check it against that ledger. Keeping that line honest is
-itself one of the skills this course teaches.
+a report — or on a résumé — check it against that ledger.
 
 ➡️ **Back to:** [the Learning Path](../../README.md#the-learning-path).

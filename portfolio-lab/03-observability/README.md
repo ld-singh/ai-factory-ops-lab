@@ -29,8 +29,8 @@ rules are queries and thresholds — they're correct or not regardless of whethe
 underlying numbers are real. So you design and validate the *pipeline* on synthetic
 metrics, then point it at real DCGM data from [Lesson 2](../01-k8s-gpu-platform/gpu-operator-real/README.md).
 
-> **HONESTY MARKER:** synthetic-metric dashboards (fake-gpu-operator) will be labelled
-> as design artifacts. Real DCGM evidence comes from Lesson 2 hardware runs only.
+> **Note:** synthetic-metric dashboards (fake-gpu-operator) are labelled as design
+> artifacts. Real DCGM evidence comes from Lesson 2 hardware runs only.
 
 📎 **The runbooks this lesson's alerts link to already exist** — browse
 [`/runbooks`](../../runbooks/) (e.g.

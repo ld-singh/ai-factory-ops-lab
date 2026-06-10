@@ -170,8 +170,8 @@ make phase1-evidence
 snapshots node, pod, and event state into a timestamped directory under
 [`../06-validation-reports/evidence/`](../06-validation-reports/). In ops work, "I
 saw it happen" doesn't count — the captured artifact does. This is also how the
-course enforces honesty: a lesson is only "Complete" once its report holds real
-output.
+rule that keeps "Complete" meaningful: a lesson counts as done only once its report
+holds real output.
 
 ✅ **Checkpoint:** fill in
 [`../06-validation-reports/local-simulation-report.md`](../06-validation-reports/local-simulation-report.md)

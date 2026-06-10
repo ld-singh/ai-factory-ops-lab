@@ -23,9 +23,9 @@ SLOs that actually matter.
 🧭 **Mode:** 🟥 Real GPU. A small model on a single mid-range GPU is enough for
 meaningful benchmarking — reuse the Lesson 2 machine.
 
-> **HONESTY MARKER:** benchmark numbers will only ever be published from real GPU
-> runs. Anything else in the report is an unloaded template — a number you can't
-> reproduce on hardware doesn't belong in a benchmark.
+> **Note:** benchmark numbers are only ever published from real GPU runs. Anything
+> else in the report is an unloaded template — a number you can't reproduce on
+> hardware doesn't belong in a benchmark.
 
 ✅ **Evidence (when implemented):** lands in
 [`../06-validation-reports/inference-benchmark-report.md`](../06-validation-reports/inference-benchmark-report.md).

@@ -9,7 +9,7 @@ break it on purpose, diagnose it the way you would on a real cluster, and captur
 the evidence. Most of the course needs **no GPU at all**; one lesson uses a single
 rented GPU VM and is clearly marked.
 
-> **Read this before anything else — the honesty contract**
+> **Read this first — what the course claims, and what it doesn't**
 >
 > This course teaches production cloud/Kubernetes/DevOps operational discipline
 > applied to the NVIDIA GPU stack. It does **not** pretend a laptop is a GPU
@@ -18,9 +18,9 @@ rented GPU VM and is clearly marked.
 > Every lesson declares one of two **modes** (simulation vs real GPU) and states
 > exactly what it proves and what it does not. The boundary between "I simulated
 > the control plane" and "I validated real GPU hardware" is kept explicit in every
-> lesson and is fully documented in
+> lesson and documented in
 > [`portfolio-lab/06-validation-reports/fake-vs-real-limitations.md`](./portfolio-lab/06-validation-reports/fake-vs-real-limitations.md).
-> Keeping that line honest is itself one of the skills this course teaches.
+> Knowing exactly where that line sits is itself one of the skills this course teaches.
 
 ---
 
@@ -47,7 +47,7 @@ Each lesson follows the same rhythm so you always know where you are:
 | 🔧 **Steps** | Copy-paste commands, each with the **expected output** |
 | 💡 **Why it works** | The concept behind the command — the part that transfers |
 | ✅ **Checkpoint** | A concrete check to confirm the step worked before moving on |
-| 🔬 **What you proved / did NOT prove** | The honesty boundary for that lesson |
+| 🔬 **What you proved / did NOT prove** | What that lesson's mode does and doesn't establish |
 | ➡️ **Next** | Where to go next |
 
 The two **modes** you'll see throughout:
@@ -79,7 +79,7 @@ the mental model you form there.
 
 > Lessons 3–6 are **not yet implemented** (their phases are planned). Their pages
 > teach the concepts and learning objectives now, and will gain runnable steps as
-> each phase lands. The honest status table is at the bottom of this file.
+> each phase lands. The status table is at the bottom of this file.
 
 ---
 
@@ -131,7 +131,7 @@ make help
 ```
 
 💡 **Why:** the [Makefile](./Makefile) is the course's command index. Every `make`
-target maps to a lesson phase, and unimplemented phases print an honest "not yet"
+target maps to a lesson phase, and unimplemented phases print a "not yet"
 message rather than pretending to work.
 
 ➡️ **Next:** [Lesson 1 — Kubernetes GPU scheduling](./portfolio-lab/01-k8s-gpu-platform/README.md).
@@ -193,7 +193,7 @@ runtime path and telemetry, not scale. The full ledger:
 
 ---
 
-## Course status (honest)
+## Course status
 
 A lesson is only marked **Complete** when its validation report in
 [`portfolio-lab/06-validation-reports/`](./portfolio-lab/06-validation-reports/)

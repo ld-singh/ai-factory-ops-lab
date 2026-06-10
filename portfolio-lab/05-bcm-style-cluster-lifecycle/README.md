@@ -27,8 +27,8 @@ tools you know:
 equivalents, not run. If a real BCM evaluation is ever performed, its evidence (and
 only then) upgrades this from conceptual to validated.
 
-💡 **Why conceptual is still honest and useful:** the course's whole discipline is
-not overclaiming. Rather than fake BCM output, this lesson connects BCM's lifecycle
+💡 **Why conceptual is still useful:** the course's whole discipline is not
+overclaiming. Rather than fake BCM output, this lesson connects BCM's lifecycle
 model to image pipelines, node pools, and lifecycle hooks you *have* operated — which
 is a transferable, defensible understanding without pretending to hands-on BCM
 experience.

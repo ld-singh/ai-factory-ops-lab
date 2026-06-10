@@ -106,7 +106,7 @@ binding, the gang check, the quota math, the reclaim/eviction — all happen at 
 level, which is exactly what KWOK serves. The containers never execute, but the
 **scheduling decisions are real**.
 
-> **HONESTY MARKER — read before you copy anything below.** KAI Scheduler is actively
+> **⚠️ Don't copy the manifests below blindly.** KAI Scheduler is actively
 > evolving. The exact Helm chart name/values, the `Queue` CRD `apiVersion`/fields, and
 > the queue/priority **label keys** change between releases. Every manifest in this
 > lesson is marked **ILLUSTRATIVE** and shows the *shape* of the concept, not a
