@@ -69,6 +69,7 @@ the mental model you form there.
 |---|---|---|---|---|
 | **0** | [Orientation & setup](#lesson-0--orientation--setup) | — | No | Install the toolchain and verify your machine is ready |
 | **1** | [Kubernetes GPU scheduling](./portfolio-lab/01-k8s-gpu-platform/README.md) | 🟦 Sim | No | Build a fake GPU fleet and diagnose why GPU pods stay Pending |
+| **1B** | [Queue-based scheduling — KAI Scheduler](./portfolio-lab/01-k8s-gpu-platform/kai-scheduler/README.md) | 🟦 Sim | No | Reproduce quota, **borrowing, reclaim, and gang scheduling** on the fake fleet |
 | **2** | [Real GPU validation](./portfolio-lab/01-k8s-gpu-platform/gpu-operator-real/README.md) | 🟥 Real | Yes (1) | Prove the full driver → toolkit → device plugin → pod path on real hardware |
 | **3** | [Slurm GPU workload management](./portfolio-lab/02-slurm-gpu-platform/README.md) | 🟦 Sim | No | *(Phase 3)* Schedule GPU jobs with GRES, QoS, fair-share, accounting |
 | **4** | [GPU observability](./portfolio-lab/03-observability/README.md) | 🟦 Sim | No | *(Phase 4)* Build DCGM dashboards, SLO alerts, and the runbooks behind them |

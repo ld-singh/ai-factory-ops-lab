@@ -2,7 +2,7 @@
 
 > Course home: [AI Factory Operations Lab](../../README.md) · Previous:
 > [Lesson 0 — Orientation](../../README.md#lesson-0--orientation--setup) ·
-> Next: [Lesson 2 — Real GPU validation](./gpu-operator-real/README.md)
+> Next: [Lesson 1B — KAI Scheduler](./kai-scheduler/README.md)
 
 In this lesson you build a **heterogeneous GPU fleet that has no GPUs in it**, run
 real workloads against it, and learn to diagnose why GPU pods get stuck Pending —
@@ -18,7 +18,9 @@ using the exact same `kubectl` workflow you'd use on a production cluster.
 4. Diagnose two different Pending causes — capacity mismatch vs fleet mismatch —
    from `kubectl describe` and Events alone.
 5. Reproduce queue pressure (more demand than GPUs) and explain why the default
-   scheduler can't solve it — motivating [KAI Scheduler](./kai-scheduler/README.md).
+   scheduler can't solve it — then go on to **[Lesson 1B](./kai-scheduler/README.md)**
+   and actually solve it with queues, quota, borrowing, reclaim, and gang scheduling,
+   all on the fake fleet.
 
 🧭 **Mode:** 🟦 Simulation (no GPU). The real-hardware half of this module is
 [Lesson 2](./gpu-operator-real/README.md).
@@ -206,6 +208,16 @@ The full ledger: [`fake-vs-real-limitations.md`](../06-validation-reports/fake-v
 
 ---
 
+## ⭐ Continue to Lesson 1B — solve the queue-pressure mess
+
+Step 3's scenario 4 leaves you with a pile of Pending pods and a default scheduler
+that has no answer. **[Lesson 1B — Queue-Based GPU Scheduling with KAI Scheduler](./kai-scheduler/README.md)**
+is where you fix it: hierarchical queues, quota, over-quota **borrowing**, **reclaim**,
+**gang scheduling**, and starvation control — and the headline is that *all of it is
+learnable on the fake fleet*, because queue policy and gang scheduling are pure
+control-plane decisions. It's the highest-value, lowest-cost thing in the whole
+course. Do it before moving to Lesson 2.
+
 ## Go deeper (optional sub-pages)
 
 These expand on parts of the lesson. Read them when the corresponding step makes you
@@ -213,9 +225,6 @@ curious:
 
 - [kind/](./kind/README.md) — the local cluster, and kind vs k3d.
 - [kwok/](./kwok/README.md) — how fake GPU nodes are built and why it's legitimate.
-- [kai-scheduler/](./kai-scheduler/README.md) — **the natural follow-on to Step 3's
-  scenario 4:** queues, quotas-with-borrowing, gang scheduling. Solve the
-  queue-pressure mess with policy.
 - [fake-gpu-operator/](./fake-gpu-operator/README.md) — a richer simulation that runs
   real containers with fake GPUs and emits DCGM-shaped metrics (sets up Lesson 4).
 - [gpu-operator-real/](./gpu-operator-real/README.md) — **Lesson 2:** prove the real
@@ -231,6 +240,7 @@ curious:
 - `gpu-operator-real/` — Lesson 2: real GPU validation guide
 - `scripts/` — setup and demo automation
 
-➡️ **Next:** [Lesson 2 — Real GPU validation](./gpu-operator-real/README.md), where
-the same manifests run on actual hardware and you prove everything this lesson
-deliberately couldn't.
+➡️ **Next:** [Lesson 1B — Queue-Based GPU Scheduling with KAI Scheduler](./kai-scheduler/README.md),
+where you turn the queue-pressure pile into policy — quota, borrowing, reclaim, and
+gang scheduling — all on this same fake fleet. Then [Lesson 2](./gpu-operator-real/README.md)
+runs the manifests on real hardware.

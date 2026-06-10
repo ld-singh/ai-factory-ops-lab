@@ -1,7 +1,7 @@
 # Lesson 2 — Real GPU Validation
 
 > Course home: [AI Factory Operations Lab](../../../README.md) · Previous:
-> [Lesson 1 — Kubernetes GPU Scheduling](../README.md) · Next:
+> [Lesson 1B — KAI Scheduler](../kai-scheduler/README.md) · Next:
 > [Lesson 3 — Slurm GPU Platform](../../02-slurm-gpu-platform/README.md)
 
 This is the **real hardware** half of Module 01. In Lesson 1 you deliberately could
