@@ -1,0 +1,24 @@
+# SCENARIO 2 — deliberately Pending: capacity mismatch.
+# Requests 16 GPUs in one pod; the largest simulated node exposes 8.
+# Expected: Pending forever with events showing "Insufficient nvidia.com/gpu".
+# This is the canonical "someone asked for a node that doesn't exist" triage drill.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cuda-train-16gpu
+  namespace: gpu-demo
+  labels:
+    scenario: pending-capacity
+spec:
+  tolerations:
+    - key: kwok.x-k8s.io/node
+      operator: Equal
+      value: fake
+      effect: NoSchedule
+  containers:
+    - name: trainer
+      image: nvidia/cuda:12.4.1-base-ubuntu22.04
+      command: ["sleep", "infinity"]
+      resources:
+        limits:
+          nvidia.com/gpu: 16   # > any single node's allocatable (max is 8)

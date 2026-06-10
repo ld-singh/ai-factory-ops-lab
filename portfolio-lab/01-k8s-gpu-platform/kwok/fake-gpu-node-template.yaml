@@ -1,0 +1,49 @@
+# fake-gpu-node-template.yaml
+# Annotated reference template for a KWOK-managed fake GPU node.
+# The generator script (../scripts/create-fake-gpu-nodes.sh) stamps out concrete
+# nodes from this shape with pool-specific values substituted.
+#
+# SIMULATION HONESTY: this Node object is pure API state. There is no kubelet,
+# no driver, no GPU. It proves scheduler behaviour only.
+apiVersion: v1
+kind: Node
+metadata:
+  name: kwok-gpu-a100-0                  # pattern: kwok-gpu-<pool>-<index>
+  annotations:
+    kwok.x-k8s.io/node: fake             # tells KWOK to manage this node's lifecycle
+    node.alpha.kubernetes.io/ttl: "0"
+  labels:
+    kubernetes.io/arch: amd64
+    kubernetes.io/os: linux
+    kubernetes.io/hostname: kwok-gpu-a100-0
+    node-role.kubernetes.io/gpu-worker: ""
+    type: kwok                           # easy bulk selection: kubectl get nodes -l type=kwok
+    # --- Lab-specific pool label -------------------------------------------
+    gpu-pool: a100
+    # --- GFD-style labels (script-written here; GFD-discovered on real HW) --
+    nvidia.com/gpu.product: NVIDIA-A100-SXM4-80GB
+    nvidia.com/gpu.count: "8"
+spec:
+  taints:
+    # Standard KWOK taint. Demo workloads tolerate it explicitly; anything that
+    # doesn't tolerate it can never land on a fake node by accident.
+    - key: kwok.x-k8s.io/node
+      value: fake
+      effect: NoSchedule
+status:
+  allocatable:
+    cpu: "96"
+    memory: 1024Gi
+    pods: "110"
+    nvidia.com/gpu: "8"                  # the integer the scheduler actually uses
+  capacity:
+    cpu: "96"
+    memory: 1024Gi
+    pods: "110"
+    nvidia.com/gpu: "8"
+  nodeInfo:
+    architecture: amd64
+    operatingSystem: linux
+    kubeletVersion: fake
+    kubeProxyVersion: fake
+    containerRuntimeVersion: fake

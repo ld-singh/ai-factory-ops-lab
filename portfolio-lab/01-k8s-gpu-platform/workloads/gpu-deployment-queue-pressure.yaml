@@ -1,0 +1,36 @@
+# SCENARIO 4 — queue pressure: demand exceeds fleet capacity.
+# 40 replicas x 1 GPU against a 32-GPU simulated fleet. Expected: ~32 replicas
+# schedule, the remainder stay Pending. With the default kube-scheduler there is
+# no queueing policy here — just first-come placement and a pile of Pending pods.
+# This is the motivating scenario for the kai-scheduler/ module: quotas, queues
+# and fair sharing are what turn this mess into a policy.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: queue-pressure
+  namespace: gpu-demo
+  labels:
+    scenario: queue-pressure
+spec:
+  replicas: 40
+  selector:
+    matchLabels:
+      app: queue-pressure
+  template:
+    metadata:
+      labels:
+        app: queue-pressure
+        scenario: queue-pressure
+    spec:
+      tolerations:
+        - key: kwok.x-k8s.io/node
+          operator: Equal
+          value: fake
+          effect: NoSchedule
+      containers:
+        - name: worker
+          image: nvidia/cuda:12.4.1-base-ubuntu22.04
+          command: ["sleep", "infinity"]
+          resources:
+            limits:
+              nvidia.com/gpu: 1

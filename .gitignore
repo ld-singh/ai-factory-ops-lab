@@ -1,0 +1,11 @@
+# Evidence directories contain captured command output — keep them in git
+# intentionally (they ARE the portfolio). Ignore only local noise.
+.DS_Store
+*.swp
+__pycache__/
+*.pyc
+.venv/
+kubeconfig*
+
+# Personal career toolkit — never push
+private/

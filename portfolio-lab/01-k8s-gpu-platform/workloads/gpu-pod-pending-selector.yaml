@@ -1,0 +1,27 @@
+# SCENARIO 3 — deliberately Pending: fleet mismatch.
+# nodeSelector targets a GPU pool that doesn't exist in this fleet (b200).
+# Expected: Pending with "didn't match Pod's node affinity/selector" events.
+# Real-world analogue: a manifest written for a pool that was decommissioned,
+# renamed, or never purchased.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cuda-needs-b200
+  namespace: gpu-demo
+  labels:
+    scenario: pending-selector
+spec:
+  nodeSelector:
+    gpu-pool: b200             # no such pool in this fleet
+  tolerations:
+    - key: kwok.x-k8s.io/node
+      operator: Equal
+      value: fake
+      effect: NoSchedule
+  containers:
+    - name: app
+      image: nvidia/cuda:12.4.1-base-ubuntu22.04
+      command: ["sleep", "infinity"]
+      resources:
+        limits:
+          nvidia.com/gpu: 1
