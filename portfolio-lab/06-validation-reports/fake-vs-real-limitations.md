@@ -17,6 +17,7 @@ claims each lab mode can support.
 | Heterogeneous fleet modelling (pools, labels, taints) | Pure API-level design |
 | Queue pressure and contention dynamics | Real scheduler, real contention, fake capacity |
 | Queue/quota policy behaviour (with KAI Scheduler) | Scheduling policy is control-plane logic |
+| Fractional-GPU *scheduling arithmetic* (HAMi/KAI concepts, Lesson 1C Parts 1–2) | Deciding whether a memory/core slice fits a device is bookkeeping over integers |
 | Slurm GRES *scheduling* logic (Phase 3, fake GRES) | slurmctld scheduling does not require the device to exist |
 
 ## Claims ONLY the REAL mode supports
@@ -26,6 +27,7 @@ claims each lab mode can support.
 | CUDA containers execute on GPU | Driver + Container Toolkit + real GPU |
 | Device plugin advertises real GPUs | GPU Operator on real hardware |
 | Real GPU telemetry | DCGM Exporter on real hardware |
+| Multi-pod sharing of one GPU with enforced memory slices (HAMi, Lesson 1C Part 3) | HAMi device plugin + HAMi-core intercepting real CUDA calls |
 | Real GRES enforcement in Slurm | Slurm on a GPU machine |
 | Inference SLO numbers (TTFT, tokens/sec, p95/p99) | Real GPU serving real model |
 
@@ -38,6 +40,8 @@ State these unprompted when presenting the project:
 - NVLink / NVSwitch topology effects
 - GPUDirect RDMA or any GPU networking data path
 - MIG partitioning and isolation behaviour
+- GPU-sharing performance interference under sustained load (HAMi compute-throttling
+  accuracy, noisy-neighbour effects)
 - Real GPU memory pressure, fragmentation, OOM dynamics at scale
 - Production-scale fleet operations (hundreds+ GPUs, multi-tenant SLAs)
 

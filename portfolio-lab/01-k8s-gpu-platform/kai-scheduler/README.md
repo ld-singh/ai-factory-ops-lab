@@ -2,7 +2,7 @@
 
 > Course home: [AI Factory Operations Lab](../../../README.md) · Previous:
 > [Lesson 1 — Kubernetes GPU Scheduling](../README.md) · Next:
-> [Lesson 2 — Real GPU validation](../gpu-operator-real/README.md)
+> [Lesson 1C — GPU sharing with HAMi](../hami/README.md)
 >
 > Do [Lesson 1, Step 3 scenario 4 (queue pressure)](../README.md#step-3--triage-like-its-a-real-cluster)
 > first — this lesson picks up exactly where that wall is.
@@ -62,8 +62,9 @@ kubectl get pods -n gpu-demo -l app=queue-pressure -o wide
 kubectl get pods -n gpu-demo -l app=queue-pressure --field-selector status.phase=Pending | wc -l
 ```
 
-With the **default kube-scheduler** you get 32 Running and 8 Pending pods in arrival
-order — and that's *all* it can do. The default scheduler has no concept of:
+With the **default kube-scheduler** you get roughly 31 Running and 9 Pending pods
+(the fleet has 32 GPUs, and scenario 1's `cuda-batch-small` already holds one) — in
+arrival order, and that's *all* it can do. The default scheduler has no concept of:
 
 | Missing capability | The question it can't answer | What it costs you |
 |---|---|---|
@@ -286,7 +287,7 @@ all scheduler logic.
 | Gang scheduling (all-or-none) | ✅ Yes | Admission decision before binding |
 | Priority & starvation dynamics | ✅ Yes | Ordering logic |
 | Bin-pack vs spread placement | ✅ Yes | Node-selection strategy |
-| **GPU sharing / fractional GPUs (scheduling view)** | ⚠️ Partly | KAI's *bookkeeping* of fractions is visible; **runtime memory isolation is NOT** |
+| **GPU sharing / fractional GPUs (scheduling view)** | ⚠️ Partly | KAI's *bookkeeping* of fractions is visible; **runtime memory isolation is NOT** — [Lesson 1C (HAMi)](../hami/README.md) is where you prove enforcement on real hardware |
 | **MIG partitioning** | ❌ No | Requires real GPU + driver |
 | **Actual CUDA / NCCL the gang would run** | ❌ No | Requires real GPUs (and, for scale, real network) |
 
@@ -325,6 +326,8 @@ backed once those captures exist. See
 
 📎 **Related runbook:** [kai-scheduler-queue-starvation.md](../../../runbooks/kai-scheduler-queue-starvation.md).
 
-➡️ **Back to:** [Lesson 1](../README.md) · **Next lesson:**
+➡️ **Back to:** [Lesson 1](../README.md) · **Next:**
+[Lesson 1C — GPU sharing & fractional GPUs with HAMi](../hami/README.md) (the
+sharing concepts are free; its hands-on part shares the Lesson 2 rental), then
 [Lesson 2 — Real GPU validation](../gpu-operator-real/README.md), where you finally
 run something below the kubelet on real hardware.

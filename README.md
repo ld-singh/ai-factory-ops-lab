@@ -58,6 +58,10 @@ The two **modes** you'll see throughout:
 - **🟥 Real GPU mode (one NVIDIA GPU).** Real driver, container toolkit, GPU
   Operator, CUDA pod, DCGM telemetry. Proves the *real runtime path*, single-node.
 
+A few lessons are marked **🟦+🟥 Split**: their concepts and scheduling halves are
+free simulation, and a clearly-marked final part runs on the same rented GPU as
+Lesson 2.
+
 ---
 
 ## The Learning Path
@@ -70,6 +74,7 @@ the mental model you form there.
 | **0** | [Orientation & setup](#lesson-0--orientation--setup) | — | No | Install the toolchain and verify your machine is ready |
 | **1** | [Kubernetes GPU scheduling](./portfolio-lab/01-k8s-gpu-platform/README.md) | 🟦 Sim | No | Build a fake GPU fleet and diagnose why GPU pods stay Pending |
 | **1B** | [Queue-based scheduling — KAI Scheduler](./portfolio-lab/01-k8s-gpu-platform/kai-scheduler/README.md) | 🟦 Sim | No | Reproduce quota, **borrowing, reclaim, and gang scheduling** on the fake fleet |
+| **1C** | [GPU sharing & fractional GPUs — HAMi](./portfolio-lab/01-k8s-gpu-platform/hami/README.md) | 🟦+🟥 Split | Optional (1) | Compare time-slicing/MPS/MIG/HAMi, then **split one real GPU between pods** with enforced memory slices |
 | **2** | [Real GPU validation](./portfolio-lab/01-k8s-gpu-platform/gpu-operator-real/README.md) | 🟥 Real | Yes (1) | Prove the full driver → toolkit → device plugin → pod path on real hardware |
 | **3** | [Slurm GPU workload management](./portfolio-lab/02-slurm-gpu-platform/README.md) | 🟦 Sim | No | *(Phase 3)* Schedule GPU jobs with GRES, QoS, fair-share, accounting |
 | **4** | [GPU observability](./portfolio-lab/03-observability/README.md) | 🟦 Sim | No | *(Phase 4)* Build DCGM dashboards, SLO alerts, and the runbooks behind them |
@@ -80,6 +85,29 @@ the mental model you form there.
 > Lessons 3–6 are **not yet implemented** (their phases are planned). Their pages
 > teach the concepts and learning objectives now, and will gain runnable steps as
 > each phase lands. The status table is at the bottom of this file.
+
+---
+
+## What this course costs
+
+Designed to be as close to free as honesty allows. The cost ladder:
+
+| Tier | Lessons | What you pay | What you get |
+|---|---|---|---|
+| **$0 — simulation** | 0, 1, 1B, 1C (parts 1–2), 3, 4 | Nothing — a laptop runs it | All scheduling, queueing, sharing-*decision*, triage, and observability-design skills. This is most of the course. |
+| **~$5 — one GPU session** | 2, 1C (part 3), 5 | A few hours on one rented entry-level NVIDIA GPU VM | The real runtime path, enforced GPU sharing, real DCGM telemetry, and real inference benchmarks |
+
+Three habits keep the paid tier at a few dollars:
+
+1. **Batch the GPU lessons into one rental session.** Lesson 2 (runtime path),
+   Lesson 1C Part 3 (sharing), and Lesson 5 (inference) all run on the same
+   single-GPU machine. Do them back-to-back, capture evidence as you go.
+2. **Cheapest GPU that works.** Everything real-mode here needs only one
+   entry-level datacenter or consumer NVIDIA GPU (T4/L4/A10G-class). You never need
+   an A100/H100 in this course.
+3. **Tear down immediately.** The evidence captures (`scripts/collect-*-evidence.sh`)
+   are the deliverable — once they're on your machine, the VM has no further value.
+   A forgotten GPU VM is the only way this course gets expensive.
 
 ---
 
@@ -157,7 +185,8 @@ Lesson 1 walks each of these with expected output and checkpoints.
 
 ```
 portfolio-lab/
-  01-k8s-gpu-platform/        Lesson 1 & 2 — K8s GPU scheduling: simulation + real GPU path
+  01-k8s-gpu-platform/        Lessons 1, 1B, 1C & 2 — K8s GPU scheduling, queueing (KAI),
+                              sharing (HAMi): simulation + real GPU path
   02-slurm-gpu-platform/      Lesson 3 — Slurm GRES/TRES, jobs, QoS, accounting
   03-observability/           Lesson 4 — Prometheus, Grafana, DCGM, queue metrics, alerts
   04-inference-serving/       Lesson 5 — Triton/vLLM, gateway, load tests, benchmark reports
@@ -179,10 +208,12 @@ Supporting material you'll be pointed to from inside lessons:
 ## What this course proves (and does not)
 
 **Proves:** designing/operating a Kubernetes GPU scheduling environment;
-diagnosing Pending GPU pods; Slurm GPU scheduling (GRES/TRES, QoS, accounting);
-GPU-aware observability and the runbooks behind alerts; the full driver→pod GPU
-path on real hardware; standing up and benchmarking inference serving; and
-documenting infrastructure work to a production standard.
+diagnosing Pending GPU pods; queue policy (quota, borrowing, reclaim, gang
+scheduling) with KAI Scheduler; GPU sharing and fractional-GPU placement with HAMi
+(with enforcement proven on real hardware); Slurm GPU scheduling (GRES/TRES, QoS,
+accounting); GPU-aware observability and the runbooks behind alerts; the full
+driver→pod GPU path on real hardware; standing up and benchmarking inference
+serving; and documenting infrastructure work to a production standard.
 
 **Does NOT prove (in simulation mode):** CUDA kernel performance, NCCL collective
 performance, NVLink/NVSwitch topology, GPUDirect RDMA, MIG isolation, real GPU
@@ -203,6 +234,8 @@ contains real captured output.
 |---|---|---|
 | 0 | Repo foundation / Orientation | Complete |
 | 1 | Kubernetes fake-GPU scheduling (simulation) | Complete |
+| 1B | Queue-based scheduling with KAI Scheduler | Guide complete, evidence pending run |
+| 1C | GPU sharing & fractional GPUs with HAMi | Guide complete, isolation evidence pending hardware run |
 | 2 | Real Kubernetes GPU validation | Guide complete, evidence pending hardware run |
 | 3 | Slurm GPU workload management | Planned |
 | 4 | Observability | Planned |
@@ -211,6 +244,6 @@ contains real captured output.
 
 ## License and attribution
 
-All third-party tools (kind, KWOK, NVIDIA GPU Operator, KAI Scheduler, Slurm,
+All third-party tools (kind, KWOK, NVIDIA GPU Operator, KAI Scheduler, HAMi, Slurm,
 Triton, vLLM, Prometheus, Grafana) belong to their respective projects; this repo
 only contains configuration, automation and documentation written for this course.

@@ -32,7 +32,8 @@ This module has two halves, and the line between them is the whole point:
 
 | Half | Mode | GPU required | Lesson |
 |---|---|---|---|
-| `kind/`, `kwok/`, `workloads/`, `kai-scheduler/`, `fake-gpu-operator/` | 🟦 Control-plane simulation | No | This lesson |
+| `kind/`, `kwok/`, `workloads/`, `kai-scheduler/`, `fake-gpu-operator/` | 🟦 Control-plane simulation | No | This lesson + [1B](./kai-scheduler/README.md) |
+| `hami/` | 🟦+🟥 Split — sharing concepts free, isolation needs the Lesson 2 GPU | Optional | [Lesson 1C](./hami/README.md) |
 | `gpu-operator-real/` | 🟥 Real GPU runtime validation | Yes (one NVIDIA GPU) | [Lesson 2](./gpu-operator-real/README.md) |
 
 ---
@@ -227,6 +228,9 @@ curious:
 - [kwok/](./kwok/README.md) — how fake GPU nodes are built and why it's legitimate.
 - [fake-gpu-operator/](./fake-gpu-operator/README.md) — a richer simulation that runs
   real containers with fake GPUs and emits DCGM-shaped metrics (sets up Lesson 4).
+- [hami/](./hami/README.md) — **Lesson 1C:** GPU sharing and fractional GPUs
+  (time-slicing vs MPS vs MIG vs HAMi), with a real-hardware part that splits one
+  GPU between pods.
 - [gpu-operator-real/](./gpu-operator-real/README.md) — **Lesson 2:** prove the real
   GPU path on actual hardware.
 
@@ -235,12 +239,15 @@ curious:
 - `kind/` — kind cluster config (control plane + one real worker for system pods)
 - `kwok/` — KWOK installation notes and fake GPU node manifests/templates
 - `fake-gpu-operator/` — notes on run.ai's fake-gpu-operator as a richer alternative
-- `kai-scheduler/` — queue/quota scheduling concepts and KAI Scheduler notes
+- `kai-scheduler/` — Lesson 1B: queue/quota scheduling concepts and KAI Scheduler notes
+- `hami/` — Lesson 1C: GPU sharing / fractional GPUs with HAMi
 - `workloads/` — the four demo workloads (schedulable, two Pending, queue pressure)
 - `gpu-operator-real/` — Lesson 2: real GPU validation guide
 - `scripts/` — setup and demo automation
 
 ➡️ **Next:** [Lesson 1B — Queue-Based GPU Scheduling with KAI Scheduler](./kai-scheduler/README.md),
 where you turn the queue-pressure pile into policy — quota, borrowing, reclaim, and
-gang scheduling — all on this same fake fleet. Then [Lesson 2](./gpu-operator-real/README.md)
+gang scheduling — all on this same fake fleet. Then
+[Lesson 1C — GPU sharing with HAMi](./hami/README.md) (concepts free; its hands-on
+part piggybacks on the Lesson 2 rental), and [Lesson 2](./gpu-operator-real/README.md)
 runs the manifests on real hardware.

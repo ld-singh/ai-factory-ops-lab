@@ -1,7 +1,7 @@
 # Lesson 2 — Real GPU Validation
 
 > Course home: [AI Factory Operations Lab](../../../README.md) · Previous:
-> [Lesson 1B — KAI Scheduler](../kai-scheduler/README.md) · Next:
+> [Lesson 1C — GPU sharing with HAMi](../hami/README.md) · Next:
 > [Lesson 3 — Slurm GPU Platform](../../02-slurm-gpu-platform/README.md)
 
 This is the **real hardware** half of Module 01. In Lesson 1 you deliberately could
@@ -25,6 +25,29 @@ GPU machine.
 
 📋 **Prerequisites:** [Lesson 1](../README.md) complete (you understand what the
 simulation did and didn't prove). A budget of a few dollars if renting a GPU VM.
+
+### Renting the GPU cheaply
+
+This lesson — plus [Lesson 1C Part 3 (HAMi sharing)](../hami/README.md) and later
+[Lesson 5 (inference)](../../04-inference-serving/README.md) — needs only **one**
+entry-level NVIDIA GPU for a few hours. To keep it to a few dollars:
+
+- **Pick the cheapest tier that has an NVIDIA GPU.** T4, L4, or A10G-class on a
+  hyperscaler; or an RTX-class card on a GPU marketplace (RunPod, Vast.ai,
+  Lambda-style providers). Everything in this lesson works the same on any of them.
+  You never need an A100/H100 for this course. Check current pricing — entry GPUs
+  commonly run well under $1/hour, and spot/interruptible pricing is lower still.
+- **Spot/preemptible is fine here.** The lesson is a sequence of short validations
+  with evidence captured at each step; an interruption costs you minutes, not work.
+- **Prefer images with the NVIDIA driver pre-installed** (most "deep learning" or
+  "GPU" images). That removes the slowest, most error-prone step and means you start
+  at Step 1's *evidence* rather than its install.
+- **Plan the session before you boot.** Read this whole page first, have the
+  commands ready, run Lesson 1C Part 3 in the same session, capture evidence with
+  `scripts/collect-gpu-evidence.sh` as you go — then **terminate the VM**. The
+  evidence directory is the deliverable; the VM has no residual value, and a
+  forgotten one is the only way this course gets expensive. Watch for storage:
+  delete the boot volume too if your provider bills it separately.
 
 Each step below has a **Pass criteria** line — treat it as the step's checkpoint.
 
@@ -147,8 +170,11 @@ curl -s localhost:9400/metrics | grep -E 'DCGM_FI_DEV_(GPU_UTIL|FB_USED|GPU_TEMP
 **Pass criteria:** real `DCGM_FI_*` metrics with non-placeholder values.
 Capture the curl output — this is the telemetry evidence Phase 4 builds on.
 
-## Step 7 — Optional extensions
+## Step 7 — Optional extensions (same rental session)
 
+- **GPU sharing with HAMi ([Lesson 1C Part 3](../hami/README.md)):** ~30 extra
+  minutes turns this one GPU into several enforced slices and proves multi-pod
+  co-residency — the highest-value add-on to this session.
 - **Slurm `--gres=gpu` on the same machine:** see Module 02 once Phase 3 lands.
 - **Inference workload (Triton/vLLM):** see Module 04 once Phase 5 lands.
   A small model on a single mid-range GPU is sufficient for meaningful
