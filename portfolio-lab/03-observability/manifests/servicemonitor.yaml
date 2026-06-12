@@ -1,0 +1,21 @@
+# ServiceMonitor — tells the Prometheus Operator (from kube-prometheus-stack) to
+# scrape the fake-dcgm-exporter Service. The `release: kube-prometheus-stack`
+# label is what the operator's default serviceMonitorSelector matches.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: fake-dcgm-exporter
+  namespace: gpu-observability
+  labels:
+    release: kube-prometheus-stack
+spec:
+  selector:
+    matchLabels:
+      app: fake-dcgm-exporter
+  namespaceSelector:
+    matchNames:
+      - gpu-observability
+  endpoints:
+    - port: metrics
+      interval: 5s
+      path: /metrics

@@ -1,0 +1,46 @@
+{
+  "uid": "gpu-idle-money",
+  "title": "[DESIGN] Idle-GPU / Money-Fire",
+  "tags": ["gpu", "design-artifact", "cost"],
+  "schemaVersion": 39,
+  "version": 1,
+  "time": { "from": "now-30m", "to": "now" },
+  "refresh": "10s",
+  "templating": { "list": [] },
+  "panels": [
+    {
+      "id": 1,
+      "type": "text",
+      "title": "What this answers",
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
+      "options": {
+        "mode": "markdown",
+        "content": "**The most expensive question in GPU ops:** which GPUs are *allocated* (holding memory) yet doing ~no work (low SM_ACTIVE)? Those are billed-for, idle silicon. A GPU can read 100% on `GPU_UTIL` and still be here — that's why this joins memory-occupancy with `SM_ACTIVE`, not `GPU_UTIL`. SYNTHETIC data: design artifact."
+      }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "SM Active per GPU (low + memory-resident = wasted)",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 4 },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "max": 1 }, "overrides": [] },
+      "targets": [ { "expr": "DCGM_FI_PROF_SM_ACTIVE", "legendFormat": "{{Hostname}}/{{gpu}} ({{modelName}})", "refId": "A" } ]
+    },
+    {
+      "id": 3,
+      "type": "table",
+      "title": "Currently allocated-but-idle (SM_ACTIVE < 5% while memory-resident)",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 9, "w": 24, "x": 0, "y": 13 },
+      "targets": [
+        {
+          "expr": "(DCGM_FI_PROF_SM_ACTIVE < 0.05) and (DCGM_FI_DEV_FB_USED / (DCGM_FI_DEV_FB_USED + DCGM_FI_DEV_FB_FREE) > 0.02)",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

@@ -4,14 +4,15 @@
 > [Lesson 5 — Inference Serving](../04-inference-serving/README.md) · Next:
 > [★ Your lab notebook](../06-validation-reports/)
 
-> 🚧 **STATUS: PLANNED (Phase 6).**
+> 🟡 **STATUS: RUNNABLE DRILL (Phase 6), conceptual mapping.**
 >
-> **HONESTY MARKER:** unless an actual NVIDIA Base Command Manager evaluation install
-> is performed and evidenced, this lesson is explicitly a *BCM-style conceptual lab*.
-> It maps BCM concepts to equivalents the author has operated in production (image
-> pipelines, node pools, lifecycle hooks). **No invented BCM commands.** For BCM
-> specifics, the only source used is the official documentation:
-> https://docs.nvidia.com/base-command-manager/
+> **HONESTY MARKER:** this lesson does **not** use NVIDIA Base Command Manager and
+> invents **no BCM commands**. Instead it ships a runnable drill that implements the
+> *generic* node lifecycle BCM automates — provision → health-gate → in-service →
+> patch → retire — as real Kubernetes state transitions on the KWOK fake fleet, then
+> maps each stage back to its BCM concept. If a real BCM evaluation is ever performed,
+> its evidence (and only then) upgrades the BCM-specific claims from conceptual to
+> validated. BCM reference: https://docs.nvidia.com/base-command-manager/
 
 The final lesson zooms out from "schedule and observe workloads" to "operate the
 cluster itself over its lifetime" — the layer a tool like NVIDIA Base Command Manager
@@ -66,13 +67,36 @@ understanding without pretending to hands-on BCM experience. In an interview, "I
 mapped BCM's concepts onto systems I've run, and here's the mapping" is a stronger
 position than recited command names.
 
-## What Phase 6 will ship
+## The drill (run this)
 
-- This concept map expanded with a narrative walk-through of one full lifecycle:
-  new GPU node → provision → health-gate → join Slurm/K8s → patch cycle → retire.
-- A diagram tying it to [bcm-style-cluster-lifecycle.md](../../diagrams/bcm-style-cluster-lifecycle.md).
-- Optionally (and only if performed): a real BCM evaluation install with captured
-  evidence, upgrading this lesson's status.
+Needs the Phase 1 kind cluster up (`make phase1-up`). No GPU. It steps through the
+full lifecycle interactively (press enter between stages):
+
+```bash
+make phase6-drill
+```
+
+It will:
+
+1. **Provision** a new KWOK node at `image-version=v1`, `lifecycle=provisioning`,
+   health-gated with a `NoSchedule` taint so nothing lands prematurely.
+2. **Health-gate** it: run a scripted check (does it advertise GPUs?), and on pass
+   flip `lifecycle=in-service` and remove the gate taint.
+3. **In-service:** a workload pod (selector `lifecycle=in-service`) schedules onto it.
+4. **Patch:** cordon + drain, recreate the node at `image-version=v2`, re-gate,
+   re-check, reopen — the workload is evicted then reschedules (a rolling reimage).
+5. **Retire:** drain and delete the node from the cluster.
+
+✅ **Checkpoint:** you watch a node move provisioning → in-service → (v1→v2) → retired
+as real `kubectl` state, with a workload correctly evicted and rescheduled across the
+patch. Each stage maps to a BCM concept in the table above.
+
+💡 **Why this is honest:** it never claims to be BCM. It demonstrates the *mechanism*
+BCM automates (image-based, health-gated, drain-before-reimage lifecycle) using tools
+you can actually run, which is a defensible "I understand what BCM does" — stronger
+than reciting commands you've never executed.
+
+See also: [bcm-style-cluster-lifecycle.md](../../diagrams/bcm-style-cluster-lifecycle.md).
 
 ➡️ **Next:** [★ Your lab notebook](../06-validation-reports/) — close the loop by
 making sure every lesson you ran has captured evidence.

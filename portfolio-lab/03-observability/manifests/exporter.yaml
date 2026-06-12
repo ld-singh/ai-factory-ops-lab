@@ -1,0 +1,60 @@
+# fake-dcgm-exporter — Deployment + Service.
+# The Python app is delivered via a ConfigMap (created by scripts/up.sh from
+# fake-dcgm-exporter/app.py) and run on a stock python image, so NO image build
+# or registry is needed. SYNTHETIC metrics only — see the app's honesty marker.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: gpu-observability
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fake-dcgm-exporter
+  namespace: gpu-observability
+  labels:
+    app: fake-dcgm-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fake-dcgm-exporter
+  template:
+    metadata:
+      labels:
+        app: fake-dcgm-exporter
+    spec:
+      containers:
+        - name: exporter
+          image: python:3.12-slim
+          command: ["python", "/app/app.py"]
+          ports:
+            - name: metrics
+              containerPort: 9400
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 9400
+            initialDelaySeconds: 2
+          volumeMounts:
+            - name: app
+              mountPath: /app
+      volumes:
+        - name: app
+          configMap:
+            name: fake-dcgm-app
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fake-dcgm-exporter
+  namespace: gpu-observability
+  labels:
+    app: fake-dcgm-exporter
+spec:
+  selector:
+    app: fake-dcgm-exporter
+  ports:
+    - name: metrics      # named 'metrics' so the ServiceMonitor can select it
+      port: 9400
+      targetPort: 9400

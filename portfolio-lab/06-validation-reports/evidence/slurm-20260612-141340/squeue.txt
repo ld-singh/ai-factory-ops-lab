@@ -1,0 +1,22 @@
+$ squeue -l
+
+Fri Jun 12 04:13:40 2026
+             JOBID PARTITION     NAME     USER    STATE       TIME TIME_LIMI  NODES NODELIST(REASON)
+                 3       gpu gpu-qosc     root  PENDING       0:00      5:00      1 (QOSMaxGRESPerUser)
+         4_[17-24]       gpu       qp     root  PENDING       0:00      2:00      1 (Resources)
+              4_16       gpu       qp     root  RUNNING       0:04      2:00      1 c1
+               4_1       gpu       qp     root  RUNNING       0:21      2:00      1 c1
+               4_2       gpu       qp     root  RUNNING       0:21      2:00      1 c1
+               4_3       gpu       qp     root  RUNNING       0:21      2:00      1 c1
+               4_4       gpu       qp     root  RUNNING       0:21      2:00      1 c1
+               4_5       gpu       qp     root  RUNNING       0:21      2:00      1 c1
+               4_6       gpu       qp     root  RUNNING       0:21      2:00      1 c1
+               4_7       gpu       qp     root  RUNNING       0:21      2:00      1 c1
+               4_8       gpu       qp     root  RUNNING       0:21      2:00      1 c2
+               4_9       gpu       qp     root  RUNNING       0:21      2:00      1 c2
+              4_10       gpu       qp     root  RUNNING       0:21      2:00      1 c2
+              4_11       gpu       qp     root  RUNNING       0:21      2:00      1 c2
+              4_12       gpu       qp     root  RUNNING       0:21      2:00      1 c2
+              4_13       gpu       qp     root  RUNNING       0:21      2:00      1 c2
+              4_14       gpu       qp     root  RUNNING       0:21      2:00      1 c2
+              4_15       gpu       qp     root  RUNNING       0:21      2:00      1 c2

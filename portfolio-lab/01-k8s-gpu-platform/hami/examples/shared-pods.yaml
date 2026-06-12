@@ -1,0 +1,35 @@
+# ILLUSTRATIVE — Lesson 1C Part 3. Two pods that each take a ~2 GiB slice of ONE
+# physical GPU and run concurrently — something stock Kubernetes cannot do, since
+# it would hand the whole device to the first pod. CONFIRM resource names/units
+# against your HAMi version. Run on the Lesson 2 real-GPU machine.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: share-a
+spec:
+  restartPolicy: Never
+  containers:
+    - name: cuda
+      image: nvidia/cuda:12.4.1-base-ubuntu22.04
+      command: ["bash", "-c", "nvidia-smi; sleep 600"]
+      resources:
+        limits:
+          nvidia.com/gpu: 1              # one (virtual) GPU
+          nvidia.com/gpumem: 2000        # CONFIRM name/unit: ~2 GiB memory slice (MiB)
+          nvidia.com/gpucores: 30        # CONFIRM: 30% of the device's compute
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: share-b
+spec:
+  restartPolicy: Never
+  containers:
+    - name: cuda
+      image: nvidia/cuda:12.4.1-base-ubuntu22.04
+      command: ["bash", "-c", "nvidia-smi; sleep 600"]
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+          nvidia.com/gpumem: 2000        # CONFIRM
+          nvidia.com/gpucores: 30        # CONFIRM

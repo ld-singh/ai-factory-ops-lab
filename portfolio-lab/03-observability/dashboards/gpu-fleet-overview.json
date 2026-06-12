@@ -1,0 +1,72 @@
+{
+  "uid": "gpu-fleet-overview",
+  "title": "[DESIGN] GPU Fleet Overview",
+  "tags": ["gpu", "design-artifact"],
+  "schemaVersion": 39,
+  "version": 1,
+  "time": { "from": "now-15m", "to": "now" },
+  "refresh": "10s",
+  "templating": { "list": [] },
+  "panels": [
+    {
+      "id": 1,
+      "type": "text",
+      "title": "About this dashboard",
+      "gridPos": { "h": 3, "w": 24, "x": 0, "y": 0 },
+      "options": {
+        "mode": "markdown",
+        "content": "**DESIGN ARTIFACT** — built on SYNTHETIC fake-dcgm-exporter metrics. It proves dashboard/query design, not real GPU telemetry. Point it at real DCGM (Lesson 2) to validate."
+      }
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "SM Active (honest utilization) vs GPU_UTIL (the liar)",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 3 },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "max": 1 }, "overrides": [] },
+      "targets": [
+        { "expr": "DCGM_FI_PROF_SM_ACTIVE", "legendFormat": "SM_ACTIVE {{Hostname}}/{{gpu}}", "refId": "A" },
+        { "expr": "DCGM_FI_DEV_GPU_UTIL / 100", "legendFormat": "GPU_UTIL {{Hostname}}/{{gpu}}", "refId": "B" }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "GPU memory used (% of capacity)",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 3 },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "max": 1 }, "overrides": [] },
+      "targets": [
+        { "expr": "DCGM_FI_DEV_FB_USED / (DCGM_FI_DEV_FB_USED + DCGM_FI_DEV_FB_FREE)", "legendFormat": "{{Hostname}}/{{gpu}}", "refId": "A" }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Temperature (C)",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 12 },
+      "fieldConfig": { "defaults": { "unit": "celsius" }, "overrides": [] },
+      "targets": [ { "expr": "DCGM_FI_DEV_GPU_TEMP", "legendFormat": "{{Hostname}}/{{gpu}}", "refId": "A" } ]
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Power draw (W)",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 12 },
+      "fieldConfig": { "defaults": { "unit": "watt" }, "overrides": [] },
+      "targets": [ { "expr": "DCGM_FI_DEV_POWER_USAGE", "legendFormat": "{{Hostname}}/{{gpu}}", "refId": "A" } ]
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "XID errors (driver health canary)",
+      "datasource": "Prometheus",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 12 },
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } }, "overrides": [] },
+      "targets": [ { "expr": "sum(DCGM_FI_DEV_XID_ERRORS)", "refId": "A" } ]
+    }
+  ]
+}

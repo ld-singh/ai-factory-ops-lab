@@ -1,0 +1,81 @@
+# PrometheusRule — GPU SLO/health alerts, each annotated with the runbook it maps
+# to. The Prometheus Operator picks this up via the `release` label. Thresholds
+# are deliberately lab-friendly (short `for:`) so the break-it drill trips them in
+# under a minute. On a real fleet you'd lengthen the windows.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: gpu-alerts
+  namespace: gpu-observability
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: gpu.health
+      rules:
+        - alert: DCGMExporterAbsent
+          # Control-plane alert: fully testable on the fake fleet (delete the pod).
+          expr: absent(DCGM_FI_DEV_GPU_UTIL) == 1
+          for: 30s
+          labels:
+            severity: critical
+          annotations:
+            summary: "DCGM metrics are not being scraped"
+            runbook: "runbooks/dcgm-exporter-no-metrics.md"
+
+        - alert: GPUXidErrors
+          expr: max(DCGM_FI_DEV_XID_ERRORS) > 0
+          for: 0m
+          labels:
+            severity: critical
+          annotations:
+            summary: "XID error reported on a GPU ({{ $labels.Hostname }} gpu {{ $labels.gpu }})"
+            runbook: "runbooks/gpu-node-not-ready.md"
+
+        - alert: GPUMemoryPressure
+          # FB used sustained above 95% of a card's capacity.
+          expr: >
+            DCGM_FI_DEV_FB_USED / (DCGM_FI_DEV_FB_USED + DCGM_FI_DEV_FB_FREE) > 0.95
+          for: 30s
+          labels:
+            severity: warning
+          annotations:
+            summary: "GPU memory pressure on {{ $labels.Hostname }} gpu {{ $labels.gpu }}"
+            runbook: "runbooks/gpu-memory-pressure.md"
+
+        - alert: GPUThermalHigh
+          expr: DCGM_FI_DEV_GPU_TEMP > 90
+          for: 30s
+          labels:
+            severity: warning
+          annotations:
+            summary: "GPU temperature high on {{ $labels.Hostname }} gpu {{ $labels.gpu }}"
+            runbook: "runbooks/gpu-node-not-ready.md"
+
+    - name: gpu.efficiency
+      rules:
+        - alert: GPUAllocatedButIdle
+          # The money-fire: a GPU holding memory (allocated) yet ~no SM activity.
+          expr: >
+            (DCGM_FI_PROF_SM_ACTIVE < 0.05)
+            and
+            (DCGM_FI_DEV_FB_USED / (DCGM_FI_DEV_FB_USED + DCGM_FI_DEV_FB_FREE) > 0.02)
+          for: 2m
+          labels:
+            severity: info
+          annotations:
+            summary: "GPU allocated but idle on {{ $labels.Hostname }} gpu {{ $labels.gpu }}"
+            runbook: "runbooks/gpu-capacity-planning.md"
+
+    - name: gpu.scheduling
+      rules:
+        - alert: GPUPodsPendingHigh
+          # Control-plane saturation signal — fires on the Phase 1 fake fleet too.
+          # kube_pod_status_phase comes from kube-state-metrics (bundled).
+          expr: sum(kube_pod_status_phase{namespace="gpu-demo",phase="Pending"}) > 5
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Many GPU pods Pending in gpu-demo (queue pressure)"
+            runbook: "runbooks/gpu-capacity-planning.md"

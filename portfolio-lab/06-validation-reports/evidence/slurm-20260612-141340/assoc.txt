@@ -1,0 +1,8 @@
+$ sacctmgr show assoc format=Account,User,QOS%30
+
+   Account       User                            QOS 
+---------- ---------- ------------------------------ 
+      root                                    normal 
+      root       root                         normal 
+       lab                             capped,normal 
+       lab       root                  capped,normal 

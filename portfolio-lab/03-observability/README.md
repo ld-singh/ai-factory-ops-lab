@@ -4,10 +4,11 @@
 > [Lesson 3 — Slurm GPU Platform](../02-slurm-gpu-platform/README.md) · Next:
 > [Lesson 5 — Inference Serving](../04-inference-serving/README.md)
 
-> 🚧 **STATUS: PLANNED (Phase 4).** The concept sections below are teachable now;
-> runnable steps (kube-prometheus-stack install, dashboard JSON, alert rules) land
-> with Phase 4. Metric names cited are standard DCGM Exporter field names — verify
-> against the exporter version you deploy.
+> ✅ **STATUS: RUNNABLE (Phase 4).** This lesson installs a real Prometheus/Grafana
+> stack onto the Phase 1 kind cluster, scrapes a **synthetic DCGM exporter**, ships
+> two dashboards and six alert rules, and trips the alerts on purpose — all with **no
+> GPU**. Validated end to end (target scraping, rules loading, alerts firing,
+> dashboards importing). Metric names are the standard DCGM Exporter field names.
 
 You've scheduled GPU work under both Kubernetes (Lessons 1–2) and Slurm (Lesson 3).
 Now you make a fleet *observable* — so you can see utilization, catch problems before
@@ -24,16 +25,55 @@ users do, and back every alert with a runbook.
 5. Distinguish a *design* artifact (dashboard built on synthetic metrics) from a
    *validated* one (built on real DCGM data).
 
-🧭 **Mode:** 🟦 Simulation — you can build the entire pipeline against the synthetic
-DCGM-shaped metrics from [fake-gpu-operator](../01-k8s-gpu-platform/fake-gpu-operator/README.md).
+🧭 **Mode:** 🟦 Simulation — the whole pipeline runs against a **synthetic DCGM
+exporter** ([`fake-dcgm-exporter/`](./fake-dcgm-exporter/README.md)) shipped with
+this lesson; [run.ai's fake-gpu-operator](../01-k8s-gpu-platform/fake-gpu-operator/README.md)
+is an alternative source.
 
 💡 **Why you can build observability before owning a GPU:** dashboards and alert
 rules are queries and thresholds — they're correct or not regardless of whether the
 underlying numbers are real. So you design and validate the *pipeline* on synthetic
 metrics, then point it at real DCGM data from [Lesson 2](../01-k8s-gpu-platform/gpu-operator-real/README.md).
 
-> **Note:** synthetic-metric dashboards (fake-gpu-operator) are labelled as design
-> artifacts. Real DCGM evidence comes from Lesson 2 hardware runs only.
+> **Note:** synthetic-metric dashboards are labelled `[DESIGN]`. Real DCGM evidence
+> comes from Lesson 2 hardware runs only.
+
+---
+
+## The loop (run this)
+
+Needs the Phase 1 kind cluster up (`make phase1-up`). No GPU.
+
+```bash
+make phase4-up        # kube-prometheus-stack + fake-DCGM exporter + dashboards + alerts
+make phase4-break     # trip DCGMExporterAbsent / GPUMemoryPressure / GPUXidErrors on purpose
+make phase4-evidence  # snapshot Prometheus targets, rules, and alert state
+make phase4-down      # remove the stack (keeps the kind cluster)
+```
+
+Open the UIs:
+
+```bash
+kubectl -n monitoring port-forward svc/kube-prometheus-stack-grafana 3000:80      # admin/admin
+kubectl -n monitoring port-forward svc/kube-prometheus-stack-prometheus 9090:9090
+```
+
+✅ **Checkpoint:** after `make phase4-up`, the exporter target is `up` in Prometheus
+and `DCGM_FI_PROF_SM_ACTIVE` returns one series per simulated GPU (one — the L40S —
+sits near zero: the stranded GPU the idle dashboard hunts). After `make phase4-break`,
+`GPUMemoryPressure` and `DCGMExporterAbsent` move to firing, each carrying a `runbook`
+annotation into [`/runbooks`](../../runbooks/).
+
+💡 **The break-it drill is the point.** An alert you've never watched fire is one you
+don't trust. The drill deletes the exporter (→ absent), pushes a GPU to 98%
+framebuffer (→ memory pressure), and injects an XID (→ driver health), so you see the
+alert→runbook wiring work *before* a real incident exercises it. These are all
+control-plane alerts — fully testable for free.
+
+> **How it works with no GPU:** [`fake-dcgm-exporter/app.py`](./fake-dcgm-exporter/app.py)
+> serves the *exact* DCGM field names and labels with synthetic values, delivered as
+> a ConfigMap-mounted script on a stock `python` image (no image build). A `/scenario`
+> endpoint lets the drill change the numbers on demand.
 
 ---
 
@@ -107,14 +147,20 @@ fleet (Pending pods, device plugin absent, queue starvation) — control-plane a
 are fully testable for free, which is itself a Phase 4 exercise: break the sim
 cluster on purpose and watch the right alert fire.
 
-## What Phase 4 will ship
+## What's in this directory
 
-- kube-prometheus-stack install with a scrape config for DCGM Exporter (synthetic
-  first, real later) and kube-state-metrics over the fake fleet.
-- The five dashboards as committed JSON, each labelled **design** or **validated**.
-- The alert rules above as PrometheusRule manifests, each linking its runbook.
-- A break-it drill per control-plane alert (delete the device plugin, starve a
-  queue, flood Pending pods) with captured firing evidence.
+- [`fake-dcgm-exporter/`](./fake-dcgm-exporter/README.md) — the synthetic DCGM
+  metrics source (a ~150-line Python app + its honesty marker and `/scenario` switch).
+- [`manifests/`](./manifests/) — `exporter.yaml`, `servicemonitor.yaml`, and
+  `alerts.yaml` (the six PrometheusRules above, each with a `runbook` annotation).
+- [`dashboards/`](./dashboards/) — `gpu-fleet-overview.json` and `idle-gpu.json`,
+  both tagged `[DESIGN]`, auto-imported by Grafana's sidecar.
+- [`scripts/`](./scripts/) — `up` / `break-it` / `collect-evidence` / `down`.
+
+Phase 4 ships two of the five dashboards from Concept 3 (fleet overview + idle-GPU);
+the Slurm-queue, K8s-workloads, and inference-SLO panels extend naturally from the
+same Prometheus once Phases 3/5 feed it. The control-plane alerts (`GPUPodsPendingHigh`,
+`DCGMExporterAbsent`) fire against the fake fleet today.
 
 🔬 **What the sim will and won't prove:** pipeline design, query correctness,
 control-plane alerting, and dashboard/runbook wiring — all provable for free.

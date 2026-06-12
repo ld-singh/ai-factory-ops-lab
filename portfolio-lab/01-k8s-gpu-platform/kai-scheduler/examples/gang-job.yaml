@@ -1,0 +1,53 @@
+# ILLUSTRATIVE — Lesson 1B Exercise D (gang scheduling). The concept: a group of
+# pods that must ALL bind together or none do (min-member), so a distributed job
+# never half-allocates and deadlocks the fleet. KAI expresses this via a pod-group
+# (the pod-grouper reads it, or you create the object directly). The exact kind,
+# apiVersion, and annotation keys CHANGE BY RELEASE — confirm in the KAI docs.
+#
+# Shown as the two pieces you'd typically have:
+#   1) a pod-group-like object declaring minMember
+#   2) a workload whose pods reference that group
+#
+# Drive it by submitting a 10-pod gang into a fleet with only 8 free GPUs: the gang
+# stays entirely Pending (does NOT grab 8 and block); free capacity and it binds
+# all at once.
+
+apiVersion: scheduling.run.ai/v2        # CONFIRM group/version + kind
+kind: PodGroup
+metadata:
+  name: distributed-train
+  namespace: gpu-demo
+spec:
+  minMember: 10                          # CONFIRM: bind all 10 or none
+  queue: team-prod                       # CONFIRM: how a group references its queue
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: distributed-train
+  namespace: gpu-demo
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: distributed-train
+  template:
+    metadata:
+      labels:
+        app: distributed-train
+      annotations:
+        pod-group-name: distributed-train   # CONFIRM: the annotation/label the grouper reads
+    spec:
+      schedulerName: kai-scheduler        # CONFIRM
+      tolerations:
+        - key: kwok.x-k8s.io/node
+          operator: Equal
+          value: fake
+          effect: NoSchedule
+      containers:
+        - name: worker
+          image: nvidia/cuda:12.4.1-base-ubuntu22.04
+          command: ["sleep", "infinity"]
+          resources:
+            limits:
+              nvidia.com/gpu: 1

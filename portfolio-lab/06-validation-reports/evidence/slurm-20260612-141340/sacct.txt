@@ -1,0 +1,24 @@
+$ sacct -X --starttime today --format=JobID,JobName,Partition,QOS,AllocTRES%30,State,Elapsed
+
+JobID           JobName  Partition        QOS                      AllocTRES      State    Elapsed 
+------------ ---------- ---------- ---------- ------------------------------ ---------- ---------- 
+1             gpu-small        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:20 
+2            gpu-toobig        gpu     normal                                    FAILED   00:00:00 
+3            gpu-qoscap        gpu     capped                                   PENDING   00:00:00 
+4_1                  qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+    RUNNING   00:00:23 
+4_2                  qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+    RUNNING   00:00:23 
+4_3                  qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+    RUNNING   00:00:23 
+4_4                  qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+    RUNNING   00:00:23 
+4_5                  qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+    RUNNING   00:00:23 
+4_6                  qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+    RUNNING   00:00:23 
+4_7                  qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+    RUNNING   00:00:23 
+4_8                  qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+    RUNNING   00:00:23 
+4_9                  qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+    RUNNING   00:00:23 
+4_10                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+    RUNNING   00:00:23 
+4_11                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+    RUNNING   00:00:23 
+4_12                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+    RUNNING   00:00:23 
+4_13                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+    RUNNING   00:00:23 
+4_14                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+    RUNNING   00:00:23 
+4_15                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+    RUNNING   00:00:23 
+4_16                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+    RUNNING   00:00:06 
+4_[16-24]            qp        gpu     normal                                   PENDING   00:00:00 

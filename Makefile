@@ -6,6 +6,10 @@
 SHELL := /bin/bash
 CLUSTER_NAME ?= ai-factory-lab
 LAB1 := portfolio-lab/01-k8s-gpu-platform
+LAB2 := portfolio-lab/02-slurm-gpu-platform
+LAB3 := portfolio-lab/03-observability
+LAB4 := portfolio-lab/04-inference-serving
+LAB5 := portfolio-lab/05-bcm-style-cluster-lifecycle
 
 .DEFAULT_GOAL := help
 
@@ -48,17 +52,81 @@ phase2-guide: ## Print the real-GPU validation guide location
 	@echo "Then capture evidence with: ./scripts/collect-gpu-evidence.sh"
 
 # ---------------------------------------------------------------------------
-# Phase 3+ — stubs (honest project map; implemented in later phases)
+# Lessons 1B / 1C — guided (install drifts; we ship example manifests, not an
+# automated install, to respect the no-invented-commands rule).
 # ---------------------------------------------------------------------------
-.PHONY: phase3-up phase4-up phase5-up
-phase3-up: ## [PLANNED] Slurm-in-Docker cluster with fake GRES
-	@echo "Phase 3 (Slurm) not implemented yet. See portfolio-lab/02-slurm-gpu-platform/README.md"
+.PHONY: kai-guide hami-guide
+kai-guide: ## Lesson 1B (KAI Scheduler): print example manifests + install check
+	@echo "Lesson 1B — Queue-based scheduling with KAI Scheduler."
+	@echo "Guide:    $(LAB1)/kai-scheduler/README.md"
+	@echo "Examples: $(LAB1)/kai-scheduler/examples/ (ILLUSTRATIVE — confirm vs KAI docs)"
+	@echo "Is KAI installed?"
+	@kubectl get crds 2>/dev/null | grep -i kai || echo "  (no KAI CRDs found — install per the official docs first)"
 
-phase4-up: ## [PLANNED] Prometheus/Grafana observability stack
-	@echo "Phase 4 (Observability) not implemented yet. See portfolio-lab/03-observability/README.md"
+hami-guide: ## Lesson 1C (HAMi): print example manifests + install check
+	@echo "Lesson 1C — GPU sharing / fractional GPUs with HAMi."
+	@echo "Guide:    $(LAB1)/hami/README.md"
+	@echo "Examples: $(LAB1)/hami/examples/ (ILLUSTRATIVE — run on the Lesson 2 GPU)"
+	@echo "Is HAMi installed?"
+	@kubectl get pods -A 2>/dev/null | grep -i hami || echo "  (no HAMi pods found — install per the official docs on the GPU machine)"
 
-phase5-up: ## [PLANNED] Inference serving (Triton/vLLM)
-	@echo "Phase 5 (Inference) not implemented yet. See portfolio-lab/04-inference-serving/README.md"
+# ---------------------------------------------------------------------------
+# Phase 3 — Slurm GPU workload management (Slurm-in-Docker, fake GRES, no GPU)
+# ---------------------------------------------------------------------------
+.PHONY: phase3-up phase3-demo phase3-drain phase3-evidence phase3-down
+phase3-up: ## Build + start the Slurm-in-Docker cluster and bootstrap accounting
+	$(LAB2)/scripts/up.sh
+
+phase3-demo: ## Submit the four GPU scheduling scenarios; show the queue + reasons
+	$(LAB2)/scripts/demo.sh
+
+phase3-drain: ## Run the drain/resume node-maintenance drill
+	$(LAB2)/scripts/drain-drill.sh
+
+phase3-evidence: ## Capture sinfo/squeue/sacct/qos evidence into 06-validation-reports/
+	./scripts/collect-slurm-evidence.sh
+
+phase3-down: ## Stop and remove the Slurm cluster (containers + volumes)
+	$(LAB2)/scripts/down.sh
+
+# ---------------------------------------------------------------------------
+# Phase 4 — GPU observability (Prometheus/Grafana over synthetic DCGM metrics)
+# Runs against the Phase 1 kind cluster. No GPU required.
+# ---------------------------------------------------------------------------
+.PHONY: phase4-up phase4-break phase4-evidence phase4-down
+phase4-up: ## Deploy fake-DCGM exporter + kube-prometheus-stack into the kind cluster
+	$(LAB3)/scripts/up.sh
+
+phase4-break: ## Break-it drills: trip the control-plane alerts on purpose
+	$(LAB3)/scripts/break-it.sh
+
+phase4-evidence: ## Capture Prometheus targets, rules, and alert state
+	$(LAB3)/scripts/collect-evidence.sh
+
+phase4-down: ## Remove the observability stack (keeps the kind cluster)
+	$(LAB3)/scripts/down.sh
+
+# ---------------------------------------------------------------------------
+# Phase 5 — Inference serving / benchmarking
+# $0 harness tier runs against a CPU-served model; numbers are NOT a benchmark.
+# Real benchmark numbers require the Lesson 2 GPU machine.
+# ---------------------------------------------------------------------------
+.PHONY: phase5-serve-cpu phase5-bench phase5-down
+phase5-serve-cpu: ## [$0] Serve a tiny model on CPU to validate the load harness
+	$(LAB4)/scripts/serve-cpu.sh
+
+phase5-bench: ## Run the load harness against $ENDPOINT (default: local CPU server)
+	$(LAB4)/harness/run-bench.sh
+
+phase5-down: ## Stop the local CPU model server
+	$(LAB4)/scripts/down.sh
+
+# ---------------------------------------------------------------------------
+# Phase 6 — BCM-style cluster lifecycle drill (runs on the Phase 1 kind cluster)
+# ---------------------------------------------------------------------------
+.PHONY: phase6-drill
+phase6-drill: ## Run the node provision -> health-gate -> patch -> retire lifecycle drill
+	$(LAB5)/scripts/lifecycle-drill.sh
 
 # ---------------------------------------------------------------------------
 # Cleanup

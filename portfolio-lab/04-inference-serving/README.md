@@ -4,9 +4,12 @@
 > [Lesson 4 — Observability](../03-observability/README.md) · Next:
 > [Lesson 6 — BCM-Style Cluster Lifecycle](../05-bcm-style-cluster-lifecycle/README.md)
 
-> 🚧 **STATUS: PLANNED (Phase 5).** The concept sections below are teachable now;
-> runnable steps (server deploy, load generator, benchmark harness) land with
-> Phase 5.
+> 🟡 **STATUS: HARNESS RUNNABLE (Phase 5).** The load-test harness is built and
+> validated — you can run a full concurrency sweep ($0) against a CPU-served model
+> *today* to learn the harness and the SLOs. The harness emits TTFT / TPOT /
+> p95-p99 / tokens-per-sec / goodput. **Benchmark *numbers* are only meaningful from
+> a real-GPU server** (Lesson 2 machine) — the CPU tier validates the harness, not
+> the hardware.
 
 The point of all that scheduling and observability is to *serve something*. This
 lesson stands up an inference server, drives load through it, and benchmarks it with
@@ -30,6 +33,36 @@ meaningful benchmarking — reuse the Lesson 2 machine (and the
 > **Note:** benchmark numbers are only ever published from real GPU runs. Anything
 > else in the report is an unloaded template — a number you can't reproduce on
 > hardware doesn't belong in a benchmark.
+
+---
+
+## The loop (run this)
+
+**$0 harness-validation tier** (CPU; numbers are NOT a benchmark):
+
+```bash
+make phase5-serve-cpu   # Ollama-in-Docker serves a tiny model on CPU (OpenAI-compatible /v1)
+make phase5-bench       # sweep concurrency; print TTFT/TPOT/p95-p99/tokens-per-sec/goodput
+make phase5-down        # stop the CPU server
+```
+
+**Real benchmark tier** (🟥, Lesson 2 GPU machine): serve a model with vLLM, then
+point the same harness at it:
+
+```bash
+ENDPOINT=http://<gpu-host>:8000 MODEL=<served-model> make phase5-bench
+```
+
+✅ **Checkpoint:** the harness prints a table where, as concurrency rises, **tokens/sec
+climbs while ttft_p95 / e2e_p99 degrade** — the throughput-vs-latency trade-off made
+visible. The right operating point is the highest concurrency that still meets your
+goodput SLO. Raw results are written to `06-validation-reports/evidence/`.
+
+💡 **Why a CPU tier at all:** building a correct load generator (streaming TTFT
+capture, percentile math, concurrency control) is real work you shouldn't debug while
+paying for a GPU. Validate the harness for free here, then spend the rented GPU hour
+*measuring*, not debugging. The harness is
+[`harness/loadgen.py`](./harness/loadgen.py) — stdlib only, no pip install.
 
 ---
 
@@ -75,17 +108,20 @@ Phase 5's harness sweeps concurrency and plots both curves.
 This table is the course's capstone argument: Lessons 1–3 weren't scheduler
 trivia — they were the decision framework for *placing* these three shapes.
 
-## What Phase 5 will ship
+## What's in this directory
 
-- A small open model served via vLLM (OpenAI-compatible endpoint) and/or Triton,
-  deployed onto the Lesson 2 single-GPU cluster.
-- A load-generation harness sweeping concurrency levels, emitting
-  TTFT/TPOT/p95/p99/tokens-per-sec per level.
-- The throughput-vs-latency curve plotted from real runs, plus a goodput analysis at
-  a declared SLO.
-- An optional [Lesson 1C](../01-k8s-gpu-platform/hami/README.md) tie-in: two small
-  model replicas sharing one GPU via HAMi slices vs one dedicated replica —
-  measuring what sharing costs in p99.
+- [`harness/loadgen.py`](./harness/loadgen.py) — the concurrency-sweeping load
+  generator (stdlib only): streaming TTFT capture, TPOT, p50/p95/p99, tokens-per-sec,
+  goodput-at-SLO.
+- [`harness/run-bench.sh`](./harness/run-bench.sh) — wraps it, writes raw results to
+  the evidence tree. Override `ENDPOINT` / `MODEL` / `CONCURRENCY`.
+- [`scripts/serve-cpu.sh`](./scripts/serve-cpu.sh) — the $0 Ollama-on-CPU server for
+  harness validation; [`scripts/down.sh`](./scripts/down.sh) stops it.
+
+**Still to come (needs the GPU run):** a committed throughput-vs-latency plot from
+real vLLM numbers, and the [Lesson 1C](../01-k8s-gpu-platform/hami/README.md) tie-in —
+two model replicas sharing one GPU via HAMi slices vs one dedicated replica,
+measuring what sharing costs in p99.
 
 ✅ **Evidence (when implemented):** lands in
 [`../06-validation-reports/inference-benchmark-report.md`](../06-validation-reports/inference-benchmark-report.md).

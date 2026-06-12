@@ -76,15 +76,17 @@ the mental model you form there.
 | **1B** | [Queue-based scheduling — KAI Scheduler](./portfolio-lab/01-k8s-gpu-platform/kai-scheduler/README.md) | 🟦 Sim | No | Reproduce quota, **borrowing, reclaim, and gang scheduling** on the fake fleet |
 | **1C** | [GPU sharing & fractional GPUs — HAMi](./portfolio-lab/01-k8s-gpu-platform/hami/README.md) | 🟦+🟥 Split | Optional (1) | Compare time-slicing/MPS/MIG/HAMi, then **split one real GPU between pods** with enforced memory slices |
 | **2** | [Real GPU validation](./portfolio-lab/01-k8s-gpu-platform/gpu-operator-real/README.md) | 🟥 Real | Yes (1) | Prove the full driver → toolkit → device plugin → pod path on real hardware |
-| **3** | [Slurm GPU workload management](./portfolio-lab/02-slurm-gpu-platform/README.md) | 🟦 Sim | No | *(Phase 3)* Schedule GPU jobs with GRES, QoS, fair-share, accounting |
-| **4** | [GPU observability](./portfolio-lab/03-observability/README.md) | 🟦 Sim | No | *(Phase 4)* Build DCGM dashboards, SLO alerts, and the runbooks behind them |
-| **5** | [Inference serving](./portfolio-lab/04-inference-serving/README.md) | 🟥 Real | Yes (1) | *(Phase 5)* Serve and benchmark a model (TTFT, p95/p99, tokens/sec) |
-| **6** | [BCM-style cluster lifecycle](./portfolio-lab/05-bcm-style-cluster-lifecycle/README.md) | 🟨 Concept | No | *(Phase 6)* Map head/compute node, imaging, and lifecycle concepts |
+| **3** | [Slurm GPU workload management](./portfolio-lab/02-slurm-gpu-platform/README.md) | 🟦 Sim | No | Run a Slurm-in-Docker cluster with fake GRES; schedule GPU jobs, QoS caps, queue pressure, drain/resume |
+| **4** | [GPU observability](./portfolio-lab/03-observability/README.md) | 🟦 Sim | No | Stand up Prometheus/Grafana over synthetic DCGM; build dashboards + SLO alerts; **trip them on purpose** |
+| **5** | [Inference serving](./portfolio-lab/04-inference-serving/README.md) | 🟡 Split | Opt (1) | Run the load harness ($0 CPU) for TTFT/p95-p99/tokens-per-sec; real benchmark numbers on the Lesson 2 GPU |
+| **6** | [BCM-style cluster lifecycle](./portfolio-lab/05-bcm-style-cluster-lifecycle/README.md) | 🟨 Concept+drill | No | Run a provision→health-gate→patch→retire node-lifecycle drill; map it to BCM |
 | **★** | [Your lab notebook](./portfolio-lab/06-validation-reports/) | — | — | Capture evidence; a lesson is only "done" when its report holds real output |
 
-> Lessons 3–6 are **not yet implemented** (their phases are planned). Their pages
-> teach the concepts and learning objectives now, and will gain runnable steps as
-> each phase lands. The status table is at the bottom of this file.
+> All lessons are now runnable on a laptop with no GPU, except where a real GPU is
+> explicitly called for (Lesson 2; the real-benchmark tier of Lesson 5). Lessons 3,
+> 4 and 6 stand up real clusters/stacks against fake GPUs; Lesson 5 ships a load
+> harness with a $0 CPU validation tier. The status table is at the bottom of this
+> file.
 
 ---
 
@@ -166,18 +168,32 @@ message rather than pretending to work.
 
 ---
 
-## Quick reference — the Lesson 1 loop
+## Quick reference — the loops
 
-Once you've done Lesson 0, the core simulation loop is:
+`make help` is the full command index. The per-lesson loops:
 
 ```bash
-make phase1-up        # kind cluster + KWOK + fake GPU node pools
-make phase1-demo      # deploy schedulable + intentionally-Pending GPU workloads
-make phase1-evidence  # capture kubectl evidence into 06-validation-reports/
-make phase1-down      # tear it all down
+# Lesson 1 — Kubernetes fake-GPU scheduling (kind + KWOK)
+make phase1-up && make phase1-demo && make phase1-evidence && make phase1-down
+
+# Lesson 1B / 1C — queueing (KAI) and sharing (HAMi): guided
+make kai-guide        # example manifests + install check
+make hami-guide
+
+# Lesson 3 — Slurm-in-Docker with fake GRES
+make phase3-up && make phase3-demo && make phase3-drain && make phase3-evidence && make phase3-down
+
+# Lesson 4 — observability (needs the Lesson 1 cluster up)
+make phase4-up && make phase4-break && make phase4-evidence && make phase4-down
+
+# Lesson 5 — inference load harness ($0 CPU tier)
+make phase5-serve-cpu && make phase5-bench && make phase5-down
+
+# Lesson 6 — BCM-style lifecycle drill (needs the Lesson 1 cluster up)
+make phase6-drill
 ```
 
-Lesson 1 walks each of these with expected output and checkpoints.
+Each lesson walks its loop with expected output and checkpoints.
 
 ---
 
@@ -187,16 +203,16 @@ Lesson 1 walks each of these with expected output and checkpoints.
 portfolio-lab/
   01-k8s-gpu-platform/        Lessons 1, 1B, 1C & 2 — K8s GPU scheduling, queueing (KAI),
                               sharing (HAMi): simulation + real GPU path
-  02-slurm-gpu-platform/      Lesson 3 — Slurm GRES/TRES, jobs, QoS, accounting
-  03-observability/           Lesson 4 — Prometheus, Grafana, DCGM, queue metrics, alerts
-  04-inference-serving/       Lesson 5 — Triton/vLLM, gateway, load tests, benchmark reports
-  05-bcm-style-cluster-lifecycle/  Lesson 6 — Conceptual BCM-style lifecycle module
+  02-slurm-gpu-platform/      Lesson 3 — Slurm-in-Docker (docker/ config/ jobs/ scripts/), fake GRES
+  03-observability/           Lesson 4 — fake-dcgm-exporter/ manifests/ dashboards/ scripts/
+  04-inference-serving/       Lesson 5 — harness/ (loadgen) + scripts/ (CPU serve); real bench on GPU
+  05-bcm-style-cluster-lifecycle/  Lesson 6 — scripts/ lifecycle drill + conceptual BCM mapping
   06-validation-reports/      Your lab notebook — what you ran, observed, and proved
 control-plane/                Small FastAPI app unifying K8s + Slurm inventory views
 runbooks/                     Operational runbooks for GPU/Slurm/K8s failure modes
 diagrams/                     Architecture and lifecycle diagrams (Mermaid)
 scripts/                      Prereq checks, evidence collection, cleanup
-private/                      (gitignored) personal notes — not part of the public repo
+
 ```
 
 Supporting material you'll be pointed to from inside lessons:
@@ -237,10 +253,10 @@ contains real captured output.
 | 1B | Queue-based scheduling with KAI Scheduler | Guide complete, evidence pending run |
 | 1C | GPU sharing & fractional GPUs with HAMi | Guide complete, isolation evidence pending hardware run |
 | 2 | Real Kubernetes GPU validation | Guide complete, evidence pending hardware run |
-| 3 | Slurm GPU workload management | Planned |
-| 4 | Observability | Planned |
-| 5 | Inference serving | Planned |
-| 6 | BCM-style cluster lifecycle (conceptual) | Planned |
+| 3 | Slurm GPU workload management | Complete (runnable; validated with captured output) |
+| 4 | Observability | Complete (runnable; metrics/alerts/dashboards validated) |
+| 5 | Inference serving | Harness runnable + validated; real benchmark pending GPU run |
+| 6 | BCM-style cluster lifecycle (conceptual + drill) | Drill runnable + validated; BCM specifics conceptual |
 
 ## License and attribution
 
