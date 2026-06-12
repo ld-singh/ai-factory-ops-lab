@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# install-kwok.sh — install KWOK in-cluster from official release manifests (idempotent).
+# install-kwok.sh - install KWOK in-cluster from official release manifests (idempotent).
 # Docs: https://kwok.sigs.k8s.io/docs/user/kwok-in-cluster/
 set -euo pipefail
 
@@ -14,7 +14,7 @@ fi
 
 echo "Installing KWOK ${KWOK_RELEASE} ..."
 kubectl apply -f "https://github.com/${KWOK_REPO}/releases/download/${KWOK_RELEASE}/kwok.yaml"
-# stage-fast makes pods on fake nodes reach Running quickly — ideal for demos.
+# stage-fast makes pods on fake nodes reach Running quickly - ideal for demos.
 kubectl apply -f "https://github.com/${KWOK_REPO}/releases/download/${KWOK_RELEASE}/stage-fast.yaml"
 
 kubectl -n kube-system rollout status deployment/kwok-controller --timeout=120s

@@ -1,7 +1,7 @@
-# fake-dcgm-exporter — Deployment + Service.
+# fake-dcgm-exporter - Deployment + Service.
 # The Python app is delivered via a ConfigMap (created by scripts/up.sh from
 # fake-dcgm-exporter/app.py) and run on a stock python image, so NO image build
-# or registry is needed. SYNTHETIC metrics only — see the app's honesty marker.
+# or registry is needed. SYNTHETIC metrics only - see the app's honesty marker.
 apiVersion: v1
 kind: Namespace
 metadata:

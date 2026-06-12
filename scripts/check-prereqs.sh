@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check-prereqs.sh — verify local tooling for the AI Factory Operations Lab.
+# check-prereqs.sh - verify local tooling for the AI Factory Operations Lab.
 # Safe: read-only, makes no changes. Exit code 0 = all required tools present.
 
 set -uo pipefail
@@ -26,7 +26,7 @@ check_tool() {
   fi
 }
 
-echo "AI Factory Operations Lab — prerequisite check"
+echo "AI Factory Operations Lab - prerequisite check"
 echo
 echo "Required tools:"
 for t in "${REQUIRED[@]}"; do check_tool "$t" required; done

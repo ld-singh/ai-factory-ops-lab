@@ -1,4 +1,4 @@
-# PrometheusRule — GPU SLO/health alerts, each annotated with the runbook it maps
+# PrometheusRule - GPU SLO/health alerts, each annotated with the runbook it maps
 # to. The Prometheus Operator picks this up via the `release` label. Thresholds
 # are deliberately lab-friendly (short `for:`) so the break-it drill trips them in
 # under a minute. On a real fleet you'd lengthen the windows.
@@ -70,7 +70,7 @@ spec:
     - name: gpu.scheduling
       rules:
         - alert: GPUPodsPendingHigh
-          # Control-plane saturation signal — fires on the Phase 1 fake fleet too.
+          # Control-plane saturation signal - fires on the Phase 1 fake fleet too.
           # kube_pod_status_phase comes from kube-state-metrics (bundled).
           expr: sum(kube_pod_status_phase{namespace="gpu-demo",phase="Pending"}) > 5
           for: 1m

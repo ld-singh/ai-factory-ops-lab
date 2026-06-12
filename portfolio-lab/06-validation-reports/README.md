@@ -1,9 +1,9 @@
-# ★ Your Lab Notebook — Validation Reports
+# ★ Your Lab Notebook - Validation Reports
 
 > Course home: [AI Factory Operations Lab](../../README.md)
 
 This directory is where claims become concrete. **A lesson is only "Complete" when
-its report here holds real, captured output.** No evidence directory, no completion —
+its report here holds real, captured output.** No evidence directory, no completion -
 that rule is what separates "I read about it" from "I ran it and watched it happen."
 
 ## How to use it
@@ -20,15 +20,15 @@ Each time you finish a runnable lesson:
 
 | Report | Lesson | Mode | Fill in after… |
 |---|---|---|---|
-| [local-simulation-report.md](./local-simulation-report.md) | [1 — K8s GPU scheduling](../01-k8s-gpu-platform/README.md) | 🟦 Sim | `make phase1-up/-demo/-evidence` |
-| [real-gpu-validation-report.md](./real-gpu-validation-report.md) | [2 — Real GPU validation](../01-k8s-gpu-platform/gpu-operator-real/README.md) | 🟥 Real | A real GPU hardware run |
-| [slurm-gres-validation.md](./slurm-gres-validation.md) | [3 — Slurm](../02-slurm-gpu-platform/README.md) | 🟦 Sim (+opt real) | *Phase 3* |
-| [inference-benchmark-report.md](./inference-benchmark-report.md) | [5 — Inference serving](../04-inference-serving/README.md) | 🟥 Real | *Phase 5* |
+| [local-simulation-report.md](./local-simulation-report.md) | [1 - K8s GPU scheduling](../01-k8s-gpu-platform/README.md) | 🟦 Sim | `make phase1-up/-demo/-evidence` |
+| [real-gpu-validation-report.md](./real-gpu-validation-report.md) | [2 - Real GPU validation](../01-k8s-gpu-platform/gpu-operator-real/README.md) | 🟥 Real | A real GPU hardware run |
+| [slurm-gres-validation.md](./slurm-gres-validation.md) | [3 - Slurm](../02-slurm-gpu-platform/README.md) | 🟦 Sim (+opt real) | *Phase 3* |
+| [inference-benchmark-report.md](./inference-benchmark-report.md) | [5 - Inference serving](../04-inference-serving/README.md) | 🟥 Real | *Phase 5* |
 
-## The limitations ledger — read this to grade your own claims
+## The limitations ledger - read this to grade your own claims
 
 [**fake-vs-real-limitations.md**](./fake-vs-real-limitations.md) is the single source
 of truth for what each lab *mode* can and cannot prove. Before you write any claim in
-a report — or on a résumé — check it against that ledger.
+a report - or on a résumé - check it against that ledger.
 
 ➡️ **Back to:** [the Learning Path](../../README.md#the-learning-path).

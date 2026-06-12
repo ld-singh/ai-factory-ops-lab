@@ -1,4 +1,4 @@
-# ILLUSTRATIVE — Lesson 1B Exercises A–C. A Deployment of single-GPU pods pointed
+# ILLUSTRATIVE - Lesson 1B Exercises A–C. A Deployment of single-GPU pods pointed
 # at KAI and tagged with a queue. Duplicate this per team (change name + queue
 # value + replicas) to drive quota / borrowing / reclaim. CONFIRM the queue label
 # KEY and schedulerName against the KAI version you installed.

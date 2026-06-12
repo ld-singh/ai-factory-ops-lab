@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# entrypoint.sh — one image, many Slurm roles, selected by $SLURM_ROLE.
+# entrypoint.sh - one image, many Slurm roles, selected by $SLURM_ROLE.
 #
 # Roles: slurmdbd | slurmctld | slurmd | login
 # Shared state across containers:
-#   - /etc/munge/munge.key   (named volume) — the auth key, created once by the
+#   - /etc/munge/munge.key   (named volume) - the auth key, created once by the
 #                              first container to reach the munge step.
-#   - /etc/slurm/*           (bind mount, read-only) — the four config files.
+#   - /etc/slurm/*           (bind mount, read-only) - the four config files.
 set -euo pipefail
 
 ROLE="${SLURM_ROLE:?set SLURM_ROLE to slurmdbd|slurmctld|slurmd|login}"
@@ -13,7 +13,7 @@ ROLE="${SLURM_ROLE:?set SLURM_ROLE to slurmdbd|slurmctld|slurmd|login}"
 log() { echo "[entrypoint:${ROLE}] $*"; }
 
 # ---------------------------------------------------------------------------
-# 0. config — copy the read-only bind-mounted /config into /etc/slurm with the
+# 0. config - copy the read-only bind-mounted /config into /etc/slurm with the
 #    perms/ownership Slurm insists on. slurmdbd.conf MUST be 0600 owned by the
 #    SlurmUser or slurmdbd refuses to start; the host bind mount can't provide
 #    that, so we stage a copy instead. slurm.conf expects gres.conf/cgroup.conf
@@ -36,7 +36,7 @@ setup_config() {
 }
 
 # ---------------------------------------------------------------------------
-# 1. munge — shared-key authentication for the whole cluster
+# 1. munge - shared-key authentication for the whole cluster
 # ---------------------------------------------------------------------------
 setup_munge() {
   # The munge.key lives on a shared named volume so every container trusts the
@@ -98,7 +98,7 @@ case "$ROLE" in
     wait_for_tcp "${CTLD_HOST:-slurmctld}" 6817 "slurmctld"
     # Create 8 FAKE GPU device nodes so slurmd registers gpu:8 (gres.conf points
     # File= here). major 195 = NVIDIA's real major; these are empty char devices
-    # with no driver behind them — the fake/real boundary, made of mknod calls.
+    # with no driver behind them - the fake/real boundary, made of mknod calls.
     log "creating 8 fake GPU device nodes (/dev/nvidia0..7)"
     for i in 0 1 2 3 4 5 6 7; do
       [[ -e "/dev/nvidia${i}" ]] || mknod "/dev/nvidia${i}" c 195 "${i}" || \
@@ -113,7 +113,7 @@ case "$ROLE" in
     # An interactive submit host: just keep munge running and idle so users can
     # `docker compose exec login bash` and run sbatch/squeue/sacct.
     wait_for_tcp "${CTLD_HOST:-slurmctld}" 6817 "slurmctld"
-    log "login/submit host ready — exec into me with: docker compose exec login bash"
+    log "login/submit host ready - exec into me with: docker compose exec login bash"
     exec sleep infinity
     ;;
 

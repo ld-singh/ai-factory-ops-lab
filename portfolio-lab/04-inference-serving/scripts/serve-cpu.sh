@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# serve-cpu.sh — start a tiny OpenAI-compatible model server on CPU, purely to
+# serve-cpu.sh - start a tiny OpenAI-compatible model server on CPU, purely to
 # validate that the load harness works end to end. $0, no GPU.
 #
-# HONESTY MARKER: numbers from this server are NOT a benchmark — CPU inference of
+# HONESTY MARKER: numbers from this server are NOT a benchmark - CPU inference of
 # a tiny model tells you nothing about GPU serving. This tier exists so you can
 # build and debug the harness for free, then point it at a real GPU server
 # (Lesson 2) where the numbers actually mean something.
@@ -30,7 +30,7 @@ for _ in $(seq 1 30); do
   sleep 2
 done
 
-echo "==> Pulling a tiny model (${MODEL}) — first run downloads it..."
+echo "==> Pulling a tiny model (${MODEL}) - first run downloads it..."
 docker exec "$NAME" ollama pull "$MODEL"
 
 cat <<EOF

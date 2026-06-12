@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# down.sh — remove the observability stack. Leaves the kind cluster and any
+# down.sh - remove the observability stack. Leaves the kind cluster and any
 # captured evidence intact.
 set -euo pipefail
 

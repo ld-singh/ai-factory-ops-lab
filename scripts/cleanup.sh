@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# cleanup.sh — remove lab clusters and generated artifacts.
+# cleanup.sh - remove lab clusters and generated artifacts.
 # Asks for confirmation before deleting anything.
 
 set -euo pipefail
@@ -23,4 +23,4 @@ else
 fi
 
 echo "Evidence directories under portfolio-lab/06-validation-reports/evidence/ were NOT"
-echo "deleted — they are the portfolio artifact. Remove manually if desired."
+echo "deleted - they are the portfolio artifact. Remove manually if desired."

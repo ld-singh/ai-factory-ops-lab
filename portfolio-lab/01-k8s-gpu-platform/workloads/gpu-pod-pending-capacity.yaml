@@ -1,4 +1,4 @@
-# SCENARIO 2 — deliberately Pending: capacity mismatch.
+# SCENARIO 2 - deliberately Pending: capacity mismatch.
 # Requests 16 GPUs in one pod; the largest simulated node exposes 8.
 # Expected: Pending forever with events showing "Insufficient nvidia.com/gpu".
 # This is the canonical "someone asked for a node that doesn't exist" triage drill.

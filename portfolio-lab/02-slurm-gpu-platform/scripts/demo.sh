@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# demo.sh — submit the four GPU scheduling scenarios and show the queue with
+# demo.sh - submit the four GPU scheduling scenarios and show the queue with
 # pending reasons, the Slurm analogue of Lesson 1's run-scheduling-demo.sh.
 set -euo pipefail
 
@@ -16,7 +16,7 @@ in_login sbatch /jobs/01-schedulable.sbatch
 
 echo
 echo "==> Scenario 2 (impossible request, gpu:16 on 8-GPU nodes):"
-echo "    Slurm REJECTS this AT SUBMIT — a key difference from Kubernetes, which"
+echo "    Slurm REJECTS this AT SUBMIT - a key difference from Kubernetes, which"
 echo "    would accept it and leave the pod Pending forever. The rejection IS the"
 echo "    lesson; the error below is expected:"
 in_login sbatch /jobs/02-capacity-mismatch.sbatch || true

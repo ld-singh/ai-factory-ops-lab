@@ -1,4 +1,4 @@
-# Local Simulation Validation Report — Lesson 1 (Kubernetes GPU Scheduling)
+# Local Simulation Validation Report - Lesson 1 (Kubernetes GPU Scheduling)
 
 > Your [lab notebook](./README.md) entry for [Lesson 1](../01-k8s-gpu-platform/README.md).
 > Fill this in after running `make phase1-up`, `make phase1-demo`, `make phase1-evidence`.
@@ -43,4 +43,4 @@ no real GPU memory behaviour, no real DCGM telemetry. See
 
 ## Notes / surprises
 
-_TODO — anything unexpected is the most interesting part of the report._
+_TODO - anything unexpected is the most interesting part of the report._

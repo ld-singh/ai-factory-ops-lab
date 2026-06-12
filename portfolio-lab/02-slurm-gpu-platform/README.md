@@ -1,11 +1,11 @@
-# Lesson 3 — Slurm GPU Workload Management
+# Lesson 3 - Slurm GPU Workload Management
 
 > Course home: [AI Factory Operations Lab](../../README.md) · Previous:
-> [Lesson 2 — Real GPU validation](../01-k8s-gpu-platform/gpu-operator-real/README.md) ·
-> Next: [Lesson 4 — Observability](../03-observability/README.md)
+> [Lesson 2 - Real GPU validation](../01-k8s-gpu-platform/gpu-operator-real/README.md) ·
+> Next: [Lesson 4 - Observability](../03-observability/README.md)
 
 > ✅ **STATUS: RUNNABLE (Phase 3).** This lesson stands up a real Slurm cluster in
-> Docker with fake GRES and runs the four scheduling scenarios — validated, with
+> Docker with fake GRES and runs the four scheduling scenarios - validated, with
 > captured output in
 > [`../06-validation-reports/slurm-gres-validation.md`](../06-validation-reports/slurm-gres-validation.md).
 > The config files here are the *actual* ones the cluster uses. The Slurm reference
@@ -13,11 +13,11 @@
 
 Kubernetes isn't the only scheduler in AI/HPC. Slurm runs most of the world's GPU
 training clusters. This lesson is the Slurm counterpart to Lesson 1: same goal
-(schedule GPU work, diagnose why it's stuck), different scheduler — and the same
+(schedule GPU work, diagnose why it's stuck), different scheduler - and the same
 cheap-learning trick applies, because **fake GRES is to Slurm what KWOK fake nodes
 are to Kubernetes**.
 
-🎯 **Learning objectives** — when this lesson is runnable you'll be able to:
+🎯 **Learning objectives** - when this lesson is runnable you'll be able to:
 
 1. Stand up a Slurm-in-Docker cluster and schedule GPU jobs with **fake GRES** (no
    GPU needed), keeping fake vs real `--gres=gpu` strictly separated.
@@ -32,7 +32,7 @@ are to Kubernetes**.
 `--gres=gpu` validation on the Lesson 2 hardware.
 
 💡 **Why fake GRES is legitimate (same idea as Lesson 1):** `slurmctld` scheduling
-does not require the device to exist — GRES scheduling is control-plane logic. So
+does not require the device to exist - GRES scheduling is control-plane logic. So
 fake GRES proves Slurm's *scheduling* behaviour, and nothing about CUDA. The same
 sim-vs-real boundary you learned in Lesson 1 applies here.
 
@@ -55,17 +55,17 @@ docker compose -f portfolio-lab/02-slurm-gpu-platform/docker/docker-compose.yml 
 # then: sinfo -N -l   squeue -l   scontrol show job <id>   sacct -X
 ```
 
-✅ **Checkpoint — the four scenarios.** After `make phase3-demo` you should see, via
+✅ **Checkpoint - the four scenarios.** After `make phase3-demo` you should see, via
 `squeue`:
 
 1. `gpu-small` → **RUNNING** (1 GPU fits).
 2. `gpu-toobig` → **REJECTED at submit** ("Requested node configuration is not
-   available") — the impossible 16-GPU request. *This is the Slurm-vs-Kubernetes
+   available") - the impossible 16-GPU request. *This is the Slurm-vs-Kubernetes
    contrast:* K8s would accept it and leave it Pending forever; Slurm refuses up
    front because no node could ever satisfy it.
-3. `gpu-qoscap` → **PENDING `QOSMaxGRESPerUser`** — the QoS cap (4 GPUs/user) in
+3. `gpu-qoscap` → **PENDING `QOSMaxGRESPerUser`** - the QoS cap (4 GPUs/user) in
    action; quota enforcement as an accounting decision, exactly like Lesson 1B.
-4. `qp` array → **16 RUNNING, the rest PENDING `Resources`** — both nodes fully
+4. `qp` array → **16 RUNNING, the rest PENDING `Resources`** - both nodes fully
    allocated (`gres/gpu=8` each), GPUs the binding constraint.
 
 A lesson is only "done" when your own run's output is captured. `make phase3-evidence`
@@ -73,13 +73,13 @@ writes it; reference it from the validation report.
 
 > **VERSION NOTE:** the cluster uses the Slurm 21.08 that Ubuntu 22.04 packages. The
 > fake GPUs are 8 empty char-device nodes per compute node (`mknod`, major 195) that
-> `gres.conf` points `File=` at — that's what makes slurmd register `gpu:8` with no
+> `gres.conf` points `File=` at - that's what makes slurmd register `gpu:8` with no
 > driver behind it. `cgroup.conf` is shipped to read but intentionally not loaded
 > (21.08 predates its modern `CgroupPlugin` syntax, and the lab uses `task/none`).
 
 ---
 
-## Concept 1 — The moving parts
+## Concept 1 - The moving parts
 
 ```
             ┌────────────┐   accounting    ┌────────────┐      ┌─────────┐
@@ -92,7 +92,7 @@ writes it; reference it from the validation report.
         ┌─────────┼─────────┐
         ▼         ▼         ▼
    ┌────────┐┌────────┐┌────────┐
-   │ slurmd ││ slurmd ││ slurmd │   one per compute node — launches and
+   │ slurmd ││ slurmd ││ slurmd │   one per compute node - launches and
    │ node 1 ││ node 2 ││ node 3 │   supervises the actual processes
    └────────┘└────────┘└────────┘
 ```
@@ -107,22 +107,22 @@ The mapping to what you already know from Lessons 1–2:
 | `nvidia.com/gpu` resource | **GRES** `gpu` (`--gres=gpu:2`) | Both are scheduler-side counts |
 | ResourceQuota / KAI queue quota | **QoS** + associations + **TRES** limits | Richer, account-hierarchy-based |
 | KAI fair-share between queues | Fair-share (usage-decay priority) | Built into Slurm's priority plugin |
-| Gang scheduling (KAI) | Native — a job's allocation is all-or-nothing | Slurm allocates the whole job atomically |
+| Gang scheduling (KAI) | Native - a job's allocation is all-or-nothing | Slurm allocates the whole job atomically |
 | Pod Pending + Events | Job `PD` + **Reason** column | Same triage skill, different spelling |
 | `kubectl describe pod` | `scontrol show job <id>` | Your main triage tool |
 | Prometheus metrics | `sacct` / `sreport` accounting | Slurm's history lives in slurmdbd |
 
 💡 Notice what Slurm gives you *for free* that Lesson 1B needed KAI for: atomic
 whole-job allocation (gang), fair-share, and per-account quotas. This is why
-training shops love Slurm — and why learning both schedulers makes each one's design
+training shops love Slurm - and why learning both schedulers makes each one's design
 choices legible.
 
-## Concept 2 — GRES vs TRES (the two acronyms that matter)
+## Concept 2 - GRES vs TRES (the two acronyms that matter)
 
-- **GRES** (Generic RESource): a per-node consumable device — `gpu` is the canonical
+- **GRES** (Generic RESource): a per-node consumable device - `gpu` is the canonical
   one. Declared on nodes, requested by jobs (`--gres=gpu:2`,
   or per-task forms like `--gpus-per-task`).
-- **TRES** (Trackable RESource): the *accounting and limits* view — CPU, memory,
+- **TRES** (Trackable RESource): the *accounting and limits* view - CPU, memory,
   nodes, and GRES all become TRES so that QoS limits and fair-share can say things
   like "this account may hold at most 16 GPUs at once."
 
@@ -132,17 +132,17 @@ Lesson 1B's quota policy, unified in one system.
 The fake-GRES idea, in config shape:
 
 ```ini
-# ILLUSTRATIVE slurm.conf fragment — exact directives confirmed when Phase 3 lands.
+# ILLUSTRATIVE slurm.conf fragment - exact directives confirmed when Phase 3 lands.
 GresTypes=gpu
 NodeName=node[1-2] Gres=gpu:8 CPUs=8 RealMemory=16000   # 8 "GPUs" per fake node
 ```
 
 The controller schedules against that declaration. Whether `/dev/nvidia0` exists
 only matters to enforcement on the compute node (cgroup device constraint), which is
-exactly the part fake GRES does **not** prove — same decision/enforcement split as
+exactly the part fake GRES does **not** prove - same decision/enforcement split as
 [Lesson 1C](../01-k8s-gpu-platform/hami/README.md).
 
-## Concept 3 — The job script you'll write
+## Concept 3 - The job script you'll write
 
 ```bash
 # ILLUSTRATIVE job script shape
@@ -158,17 +158,17 @@ echo "Allocated GPUs: ${CUDA_VISIBLE_DEVICES:-<none>}"
 srun ./work.sh
 ```
 
-💡 On a real GPU node, Slurm sets `CUDA_VISIBLE_DEVICES` to the allocated devices —
+💡 On a real GPU node, Slurm sets `CUDA_VISIBLE_DEVICES` to the allocated devices -
 the same environment-variable contract the
 [cuda-visible-devices runbook](../../runbooks/cuda-visible-devices-debugging.md)
 debugs. On the fake-GRES cluster the variable is the tell-tale: scheduling succeeded,
 but there's no real device behind it. That contrast will be captured explicitly in
 the validation report.
 
-## Concept 4 — Pending-reason triage (the skill, previewed)
+## Concept 4 - Pending-reason triage (the skill, previewed)
 
 Lesson 1 taught you that "Pending" has distinguishable root causes. Slurm prints the
-cause directly in the queue — the `REASON` column of `squeue` / `scontrol show job`:
+cause directly in the queue - the `REASON` column of `squeue` / `scontrol show job`:
 
 | Reason (examples) | Meaning | Lesson 1 analogue |
 |---|---|---|
@@ -183,11 +183,11 @@ The triage loop you'll drill: `squeue` → read the reason → `scontrol show jo
 for the request → `sinfo` / `scontrol show node` for the supply side → fix or
 escalate. Identical *shape* to the kubectl loop in Lesson 1, Step 3.
 
-## Concept 5 — Drain/resume, the operational drill
+## Concept 5 - Drain/resume, the operational drill
 
 `scontrol update nodename=<n> state=drain reason="lab drill"` takes a node out of
-scheduling without killing running work; `state=resume` brings it back. The drill —
-drain, observe jobs route around it, resume, observe backfill — is the Slurm
+scheduling without killing running work; `state=resume` brings it back. The drill -
+drain, observe jobs route around it, resume, observe backfill - is the Slurm
 counterpart of cordon/uncordon, and feeds the
 [slurm-node-drained runbook](../../runbooks/slurm-node-drained.md).
 
@@ -195,15 +195,15 @@ counterpart of cordon/uncordon, and feeds the
 
 ## What's in this directory
 
-- [`docker/`](./docker/) — the Slurm-in-Docker definition: one `Dockerfile`
+- [`docker/`](./docker/) - the Slurm-in-Docker definition: one `Dockerfile`
   (Ubuntu + `slurm-wlm`), `docker-compose.yml` (controller, slurmdbd, MariaDB, 2×
   compute, login), and `entrypoint.sh` (role dispatch, munge, fake GPU device nodes).
-- [`config/`](./config/) — the four config files, annotated line-by-line:
+- [`config/`](./config/) - the four config files, annotated line-by-line:
   [`slurm.conf`](./config/slurm.conf), [`gres.conf`](./config/gres.conf) (the
   fake/real boundary), [`cgroup.conf`](./config/cgroup.conf) (read-only artifact),
   [`slurmdbd.conf`](./config/slurmdbd.conf).
-- [`jobs/`](./jobs/) — the four sbatch scenarios.
-- [`scripts/`](./scripts/) — `up` / `demo` / `setup-qos` / `drain-drill` / `down`.
+- [`jobs/`](./jobs/) - the four sbatch scenarios.
+- [`scripts/`](./scripts/) - `up` / `demo` / `setup-qos` / `drain-drill` / `down`.
 
 **Optional 🟥 extension:** run a real `--gres=gpu:1` + `nvidia-smi` job on the
 Lesson 2 machine to close the loop the way Lesson 2 did for Kubernetes. Keep its
@@ -220,8 +220,8 @@ This lesson is only "Complete" once that report holds captured output.
 🔬 **What the sim will and won't prove:** fake GRES proves slurmctld's scheduling,
 QoS/TRES limit enforcement (an accounting decision), fair-share ordering, and the
 triage workflow. It proves nothing about device binding, cgroup device isolation,
-`CUDA_VISIBLE_DEVICES` correctness against real devices, or CUDA execution — those
+`CUDA_VISIBLE_DEVICES` correctness against real devices, or CUDA execution - those
 require the 🟥 extension. Ledger:
 [`fake-vs-real-limitations.md`](../06-validation-reports/fake-vs-real-limitations.md).
 
-➡️ **Next:** [Lesson 4 — Observability](../03-observability/README.md).
+➡️ **Next:** [Lesson 4 - Observability](../03-observability/README.md).

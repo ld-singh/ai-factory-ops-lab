@@ -1,6 +1,6 @@
 # Project rules for Claude Code
 
-- NEVER stage, commit, or read aloud anything under private/ — it is the personal
+- NEVER stage, commit, or read aloud anything under private/ - it is the personal
   career toolkit and is gitignored. Verify `git status` excludes it before any commit.
 - Maintain the simulation vs real-GPU honesty boundary. Do not let any README or
   report imply fake-GPU simulation proves CUDA, NCCL, NVLink, MIG, GPUDirect RDMA,

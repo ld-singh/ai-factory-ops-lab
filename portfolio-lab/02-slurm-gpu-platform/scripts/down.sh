@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# down.sh — tear down the Slurm-in-Docker cluster. Removes containers and the
+# down.sh - tear down the Slurm-in-Docker cluster. Removes containers and the
 # named volumes (munge key + accounting DB). Evidence on the host is untouched.
 set -euo pipefail
 

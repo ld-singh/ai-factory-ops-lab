@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# break-it.sh — trip the control-plane + DCGM alerts on purpose, so you watch the
+# break-it.sh - trip the control-plane + DCGM alerts on purpose, so you watch the
 # alert->runbook wiring fire end to end. This is the Phase 4 drill: an alert you've
 # never seen fire is an alert you don't trust.
 set -euo pipefail

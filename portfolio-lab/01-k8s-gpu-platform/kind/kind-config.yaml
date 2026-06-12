@@ -1,7 +1,7 @@
 # kind cluster for the AI Factory Operations Lab (simulation mode).
 # One control-plane node and one real worker. The real worker hosts system pods
 # (KWOK controller, CoreDNS, etc). All "GPU nodes" are KWOK fake nodes created
-# afterwards — they exist only as API objects, which is exactly the point:
+# afterwards - they exist only as API objects, which is exactly the point:
 # the scheduler treats nvidia.com/gpu as an opaque integer either way.
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4

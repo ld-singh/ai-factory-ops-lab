@@ -1,8 +1,8 @@
-# ILLUSTRATIVE — Lesson 1B Exercise D (gang scheduling). The concept: a group of
+# ILLUSTRATIVE - Lesson 1B Exercise D (gang scheduling). The concept: a group of
 # pods that must ALL bind together or none do (min-member), so a distributed job
 # never half-allocates and deadlocks the fleet. KAI expresses this via a pod-group
 # (the pod-grouper reads it, or you create the object directly). The exact kind,
-# apiVersion, and annotation keys CHANGE BY RELEASE — confirm in the KAI docs.
+# apiVersion, and annotation keys CHANGE BY RELEASE - confirm in the KAI docs.
 #
 # Shown as the two pieces you'd typically have:
 #   1) a pod-group-like object declaring minMember

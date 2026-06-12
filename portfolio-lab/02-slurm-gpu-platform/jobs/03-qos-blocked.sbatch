@@ -1,8 +1,8 @@
 #!/bin/bash
-# SCENARIO 3 — QoS limit. Asks for 6 GPUs while running under the 'capped' QoS,
+# SCENARIO 3 - QoS limit. Asks for 6 GPUs while running under the 'capped' QoS,
 # which setup-qos.sh limits to MaxTRESPerUser=gres/gpu=4. Expected: PENDING with
 # a Reason in the QOSMax...PerUser family. Slurm analogue of Lesson 1B's quota
-# enforcement — the limit is an accounting decision, fully valid on fake GRES.
+# enforcement - the limit is an accounting decision, fully valid on fake GRES.
 #
 # Requires: scripts/setup-qos.sh has been run (creates the 'capped' QoS + grants
 # it to the lab account). Submit with:  sbatch --qos=capped 03-qos-blocked.sbatch

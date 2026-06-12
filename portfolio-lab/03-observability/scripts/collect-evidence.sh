@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# collect-evidence.sh — snapshot Prometheus targets, rules, and alert state into
+# collect-evidence.sh - snapshot Prometheus targets, rules, and alert state into
 # the validation-reports evidence tree. Read-only. Uses a temporary port-forward.
 set -euo pipefail
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# up.sh — deploy the observability stack onto the existing Phase 1 kind cluster:
+# up.sh - deploy the observability stack onto the existing Phase 1 kind cluster:
 #   - kube-prometheus-stack (Prometheus + Grafana + Alertmanager + kube-state-metrics)
 #   - the fake-dcgm-exporter (SYNTHETIC GPU metrics, no GPU)
 #   - ServiceMonitor, alert rules, and two Grafana dashboards

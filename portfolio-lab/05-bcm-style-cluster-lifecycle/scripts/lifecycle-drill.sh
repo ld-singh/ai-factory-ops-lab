@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# lifecycle-drill.sh — a runnable, honest BCM-STYLE node lifecycle on the KWOK
+# lifecycle-drill.sh - a runnable, honest BCM-STYLE node lifecycle on the KWOK
 # fake fleet. It does NOT use NVIDIA Base Command Manager (no invented BCM
 # commands); it implements the *generic* lifecycle BCM automates, so you can
 # watch each stage as real Kubernetes state transitions:
@@ -82,14 +82,14 @@ echo "=== BCM-style lifecycle drill (generic mechanisms, no real BCM) ==="
 kubectl create namespace "$NS" --dry-run=client -o yaml | kubectl apply -f - >/dev/null
 
 echo
-echo "STAGE 1 — PROVISION (BCM: image + node category)"
+echo "STAGE 1 - PROVISION (BCM: image + node category)"
 echo "  A new node appears running image-version v1, labelled lifecycle=provisioning,"
 echo "  and HEALTH-GATED with a NoSchedule taint so no workload lands prematurely."
 apply_node provisioning v1 gate
 kubectl get node "$NODE" -L node.lab/lifecycle,node.lab/image-version -o wide
 pause
 
-echo "STAGE 2 — HEALTH-GATE (BCM: provisioning health checks)"
+echo "STAGE 2 - HEALTH-GATE (BCM: provisioning health checks)"
 echo "  Run scripted checks; on pass, flip lifecycle=in-service and remove the gate"
 echo "  taint. This is the gate that keeps unhealthy nodes out of the pool."
 gpu_count=$(kubectl get node "$NODE" -o jsonpath='{.status.allocatable.nvidia\.com/gpu}')
@@ -99,14 +99,14 @@ kubectl taint node "$NODE" node.lab/health-gate- >/dev/null 2>&1 || true
 echo "  gate opened."
 pause
 
-echo "STAGE 3 — IN-SERVICE (BCM: workload-manager integration)"
+echo "STAGE 3 - IN-SERVICE (BCM: workload-manager integration)"
 echo "  A workload now schedules onto the node (selector lifecycle=in-service)."
 probe_pod
 sleep 3
 kubectl -n "$NS" get pod workload-probe -o wide
 pause
 
-echo "STAGE 4 — PATCH (BCM: patching lifecycle = drain -> reimage -> resume)"
+echo "STAGE 4 - PATCH (BCM: patching lifecycle = drain -> reimage -> resume)"
 echo "  Cordon + drain the node, recreate it at image-version v2, re-gate, re-check,"
 echo "  reopen. The workload is evicted during the roll, then reschedules."
 kubectl cordon "$NODE" >/dev/null
@@ -123,7 +123,7 @@ kubectl get node "$NODE" -L node.lab/lifecycle,node.lab/image-version
 kubectl -n "$NS" get pod workload-probe -o wide
 pause
 
-echo "STAGE 5 — RETIRE (BCM: decommission)"
+echo "STAGE 5 - RETIRE (BCM: decommission)"
 echo "  Drain and remove the node from the cluster's source of truth."
 kubectl cordon "$NODE" >/dev/null
 kubectl -n "$NS" delete pod workload-probe --grace-period=0 --force >/dev/null 2>&1 || true

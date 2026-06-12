@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# run-scheduling-demo.sh — deploy the four demo scenarios and show their state.
+# run-scheduling-demo.sh - deploy the four demo scenarios and show their state.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

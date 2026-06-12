@@ -1,6 +1,6 @@
 # Slurm GRES Validation Report
 
-> Phase 3 — fake-GRES scheduling simulation (Slurm-in-Docker). This report records
+> Phase 3 - fake-GRES scheduling simulation (Slurm-in-Docker). This report records
 > the control-plane scheduling validation. Real `--gres=gpu` enforcement on hardware
 > (the optional Lesson 2 extension) is tracked separately and kept strictly apart.
 
@@ -8,7 +8,7 @@
 
 | Field | Value |
 |---|---|
-| Mode | 🟦 Simulation — fake GRES (8 char-device nodes per compute node, no driver) |
+| Mode | 🟦 Simulation - fake GRES (8 char-device nodes per compute node, no driver) |
 | Slurm version | slurm-wlm 21.08.5 (Ubuntu package) |
 | Topology | `slurmctld` + `slurmdbd` + MariaDB + 2× `slurmd` (c1, c2) + login, via docker compose |
 | Fleet | 2 nodes × `gpu:8` = **16 fake GPUs**; CPUs=16, RealMem=2000M per node |
@@ -36,12 +36,12 @@ char devices created by the entrypoint via `mknod`). No driver, no CUDA.
 
 | Scenario | Submit | Outcome | Evidence |
 |---|---|---|---|
-| 1 — schedulable (`--gres=gpu:1`) | accepted | **RUNNING** on c1 | `squeue.txt` |
-| 2 — impossible (`--gres=gpu:16`) | **rejected at submit** | "Requested node configuration is not available" | demo output |
-| 3 — QoS cap (`--qos=capped`, gpu:6) | accepted | **PENDING `QOSMaxGRESPerUser`** | `pending.txt` |
-| 4 — queue pressure (array 1–24 × gpu:1) | accepted | **16 RUNNING, rest PENDING `Resources`** | `squeue.txt` |
+| 1 - schedulable (`--gres=gpu:1`) | accepted | **RUNNING** on c1 | `squeue.txt` |
+| 2 - impossible (`--gres=gpu:16`) | **rejected at submit** | "Requested node configuration is not available" | demo output |
+| 3 - QoS cap (`--qos=capped`, gpu:6) | accepted | **PENDING `QOSMaxGRESPerUser`** | `pending.txt` |
+| 4 - queue pressure (array 1–24 × gpu:1) | accepted | **16 RUNNING, rest PENDING `Resources`** | `squeue.txt` |
 
-Both nodes fully allocated under queue pressure: `AllocTRES=cpu=8,gres/gpu=8` each —
+Both nodes fully allocated under queue pressure: `AllocTRES=cpu=8,gres/gpu=8` each -
 the fleet's 16 GPUs are the binding constraint, exactly as intended.
 
 ### Drain/resume drill
@@ -51,7 +51,7 @@ c2  →  state=drain  →  STATE=drng  (running jobs continue, no new work lands
 c2  →  state=resume →  STATE=mix   (back in service)
 ```
 
-## 🔬 What this proved — and did NOT
+## 🔬 What this proved - and did NOT
 
 **Proved (control-plane):** GRES registration; `--gres=gpu` scheduling; the
 Slurm-vs-Kubernetes difference on impossible requests (submit-time rejection vs

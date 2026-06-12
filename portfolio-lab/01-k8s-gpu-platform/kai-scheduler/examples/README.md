@@ -1,4 +1,4 @@
-# KAI Scheduler — example manifests
+# KAI Scheduler - example manifests
 
 > **ILLUSTRATIVE, not copy-paste.** These show the *shape* of the objects Lesson 1B
 > walks through. KAI Scheduler's CRD `apiVersion`s, field names, and the queue/
@@ -9,7 +9,7 @@
 > When you run the lesson for real, **replace these with the manifests you actually
 > applied** (version-stamped) and capture their output into
 > [`../../../06-validation-reports/`](../../../06-validation-reports/). That captured
-> set — not these scaffolds — is what makes a claim like "I demonstrated reclaim"
+> set - not these scaffolds - is what makes a claim like "I demonstrated reclaim"
 > real.
 
 ## Files
@@ -22,7 +22,7 @@
 
 ## How to use them
 
-1. Install KAI per its official docs (the chart/values drift — don't trust a pinned
+1. Install KAI per its official docs (the chart/values drift - don't trust a pinned
    command here).
 2. Open each file, and fix every value tagged `# CONFIRM` against the KAI version
    you installed: the `apiVersion`, the queue label **key**, and `schedulerName`.

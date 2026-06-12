@@ -1,6 +1,6 @@
-# Runbook — Node Not Advertising nvidia.com/gpu
+# Runbook - Node Not Advertising nvidia.com/gpu
 
-**Severity:** High — GPU capacity silently missing from the fleet; workloads Pending.
+**Severity:** High - GPU capacity silently missing from the fleet; workloads Pending.
 **Applies to:** real GPU clusters with NVIDIA GPU Operator. (In the simulation,
 the analogue is a fake node missing its `status.allocatable` entry.)
 

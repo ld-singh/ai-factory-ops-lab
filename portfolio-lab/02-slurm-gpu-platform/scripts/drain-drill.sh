@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# drain-drill.sh — the Slurm analogue of cordon/drain in Kubernetes. Drain a node,
+# drain-drill.sh - the Slurm analogue of cordon/drain in Kubernetes. Drain a node,
 # watch work route around it, then resume. Feeds the slurm-node-drained runbook.
 set -euo pipefail
 
@@ -18,7 +18,7 @@ in_login scontrol update nodename="${NODE}" state=drain reason="lab drain drill"
 in_login sinfo -N -l
 
 echo
-echo "==> Submitting a burst while ${NODE} is drained — watch it pack onto the"
+echo "==> Submitting a burst while ${NODE} is drained - watch it pack onto the"
 echo "    remaining node only:"
 in_login sbatch /jobs/04-queue-pressure.sbatch
 sleep 5

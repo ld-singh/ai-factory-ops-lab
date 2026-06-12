@@ -1,4 +1,4 @@
-# SCENARIO 3 — deliberately Pending: fleet mismatch.
+# SCENARIO 3 - deliberately Pending: fleet mismatch.
 # nodeSelector targets a GPU pool that doesn't exist in this fleet (b200).
 # Expected: Pending with "didn't match Pod's node affinity/selector" events.
 # Real-world analogue: a manifest written for a pool that was decommissioned,

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# collect-k8s-evidence.sh — capture Kubernetes scheduling evidence for validation reports.
+# collect-k8s-evidence.sh - capture Kubernetes scheduling evidence for validation reports.
 # Read-only against the cluster. Output goes to portfolio-lab/06-validation-reports/evidence/.
 
 set -euo pipefail
@@ -29,7 +29,7 @@ run pending-pods.txt         kubectl get pods -A --field-selector=status.phase=P
 run events.txt               kubectl get events -A --sort-by=.lastTimestamp
 run gpu-allocatable.txt      kubectl get nodes -o custom-columns='NAME:.metadata.name,GPU_ALLOC:.status.allocatable.nvidia\.com/gpu,GPU_CAP:.status.capacity.nvidia\.com/gpu'
 
-# Describe any Pending pods in the demo namespace — this is the triage evidence.
+# Describe any Pending pods in the demo namespace - this is the triage evidence.
 if kubectl get ns gpu-demo >/dev/null 2>&1; then
   for pod in $(kubectl get pods -n gpu-demo --field-selector=status.phase=Pending -o name 2>/dev/null); do
     safe_name=$(echo "$pod" | tr '/' '-')

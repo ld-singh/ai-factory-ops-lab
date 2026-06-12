@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# collect-slurm-evidence.sh — capture Slurm scheduling evidence (Phase 3).
+# collect-slurm-evidence.sh - capture Slurm scheduling evidence (Phase 3).
 # Read-only. Works two ways:
 #   - if `sinfo` is on PATH (real-GPU Slurm box), run directly on the host;
 #   - otherwise, run inside the Slurm-in-Docker `login` container.

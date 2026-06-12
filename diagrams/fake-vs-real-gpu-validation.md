@@ -2,13 +2,13 @@
 
 ```mermaid
 flowchart TB
-    subgraph SIM["Mode 1 — Local simulation (no GPU)"]
+    subgraph SIM["Mode 1 - Local simulation (no GPU)"]
         KIND[kind cluster] --> KWOK[KWOK fake GPU nodes\n5 nodes / 32 fake GPUs]
         KWOK --> S1[Scheduling & placement]
         KWOK --> S2[Pending-pod triage drills]
         KWOK --> S3[Queue pressure & KAI policy]
     end
-    subgraph REAL["Mode 2 — Real GPU validation (1 GPU machine)"]
+    subgraph REAL["Mode 2 - Real GPU validation (1 GPU machine)"]
         VM[GPU VM or local NVIDIA GPU] --> R1[Driver: nvidia-smi]
         R1 --> R2[Container Toolkit: docker --gpus all]
         R2 --> R3[GPU Operator + device plugin]

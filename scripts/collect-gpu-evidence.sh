@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# collect-gpu-evidence.sh — capture REAL GPU validation evidence.
+# collect-gpu-evidence.sh - capture REAL GPU validation evidence.
 # REQUIRES: a machine with an NVIDIA GPU, NVIDIA driver, and (optionally) a
 # Kubernetes cluster with the NVIDIA GPU Operator installed.
 # Read-only. Output goes to portfolio-lab/06-validation-reports/evidence/.
@@ -29,7 +29,7 @@ if command -v nvidia-smi >/dev/null 2>&1; then
   run nvidia-smi-L.txt      nvidia-smi -L
   run nvidia-smi-topo.txt   nvidia-smi topo -m
 else
-  echo "  [SKIP] nvidia-smi not found — driver evidence unavailable on this machine."
+  echo "  [SKIP] nvidia-smi not found - driver evidence unavailable on this machine."
 fi
 
 # --- Container runtime level --------------------------------------------------
@@ -45,7 +45,7 @@ if command -v kubectl >/dev/null 2>&1 && kubectl cluster-info >/dev/null 2>&1; t
   run k8s-gpu-operator.txt    kubectl get pods -n gpu-operator -o wide
   run k8s-nodes-describe.txt  kubectl describe nodes
 else
-  echo "  [SKIP] kubectl not available or no cluster — Kubernetes GPU evidence unavailable."
+  echo "  [SKIP] kubectl not available or no cluster - Kubernetes GPU evidence unavailable."
 fi
 
 echo

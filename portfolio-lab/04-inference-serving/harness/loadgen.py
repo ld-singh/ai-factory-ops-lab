@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""loadgen — a concurrency-sweeping load generator for OpenAI-compatible
+"""loadgen - a concurrency-sweeping load generator for OpenAI-compatible
 inference endpoints (vLLM, llama.cpp server, Ollama's /v1, etc.).
 
 It measures the SLOs that actually matter for LLM serving:
@@ -15,7 +15,7 @@ throughput at the cost of per-request latency.
 
 HONESTY MARKER: numbers are only a *benchmark* when produced against a real GPU
 server (Lesson 2 machine). Run against a CPU-served model first only to validate
-that this harness works end to end — those numbers are meaningless as a benchmark.
+that this harness works end to end - those numbers are meaningless as a benchmark.
 
 Stdlib only (urllib + threads) so it runs anywhere with no pip install.
 """
@@ -67,7 +67,7 @@ def stream_request(base_url, model, ttft_slo_s, max_tokens):
             "e2e": end - start, "tpot": tpot, "tokens": n_tokens,
             "met_slo": (ttft is not None and ttft <= ttft_slo_s),
         }
-    except Exception as e:  # noqa: BLE001 — record, don't crash the sweep
+    except Exception as e:  # noqa: BLE001 - record, don't crash the sweep
         return {"ok": False, "error": str(e), "e2e": time.perf_counter() - start}
 
 

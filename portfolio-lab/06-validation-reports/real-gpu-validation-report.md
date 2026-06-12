@@ -1,6 +1,6 @@
-# Real GPU Validation Report — Module 01 (Phase 2)
+# Real GPU Validation Report - Module 01 (Phase 2)
 
-> STATUS: TEMPLATE — no real-GPU run has been recorded yet. This file becomes a
+> STATUS: TEMPLATE - no real-GPU run has been recorded yet. This file becomes a
 > report only when filled with captured output from an actual NVIDIA GPU machine.
 
 ## Environment

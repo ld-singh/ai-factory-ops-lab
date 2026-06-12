@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# create-fake-gpu-nodes.sh — stamp out fake GPU node pools (idempotent: kubectl apply).
+# create-fake-gpu-nodes.sh - stamp out fake GPU node pools (idempotent: kubectl apply).
 #
 # Pools (see ../kwok/README.md):
 #   a100: 2 nodes x 8 GPU   (NVIDIA-A100-SXM4-80GB)
@@ -7,7 +7,7 @@
 #   l40s: 2 nodes x 4 GPU   (NVIDIA-L40S)
 #
 # SIMULATION HONESTY: these are KWOK fake nodes. They prove scheduler behaviour
-# only — no kubelet, no driver, no CUDA, no DCGM.
+# only - no kubelet, no driver, no CUDA, no DCGM.
 set -euo pipefail
 
 create_pool() {

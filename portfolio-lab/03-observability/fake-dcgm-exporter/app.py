@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""fake-dcgm-exporter — emit DCGM-shaped Prometheus metrics with NO GPU.
+"""fake-dcgm-exporter - emit DCGM-shaped Prometheus metrics with NO GPU.
 
 Why this exists
 ---------------
@@ -91,7 +91,7 @@ def render_metrics():
         temp_samples.append(f"DCGM_FI_DEV_GPU_TEMP{{{lbl}}} {round(temp, 1)}")
         xid_samples.append(f"DCGM_FI_DEV_XID_ERRORS{{{lbl}}} {xid}")
 
-    metric("DCGM_FI_DEV_GPU_UTIL", "GPU utilization (%) — the misleading one; see SM_ACTIVE.", "gauge", util_samples)
+    metric("DCGM_FI_DEV_GPU_UTIL", "GPU utilization (%) - the misleading one; see SM_ACTIVE.", "gauge", util_samples)
     metric("DCGM_FI_PROF_SM_ACTIVE", "Fraction of time SMs were active (the honest signal).", "gauge", sm_samples)
     metric("DCGM_FI_DEV_FB_USED", "Framebuffer memory used (MiB).", "gauge", fb_used_samples)
     metric("DCGM_FI_DEV_FB_FREE", "Framebuffer memory free (MiB).", "gauge", fb_free_samples)

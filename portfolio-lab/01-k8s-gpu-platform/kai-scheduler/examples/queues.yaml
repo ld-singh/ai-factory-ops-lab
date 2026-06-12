@@ -1,6 +1,6 @@
-# ILLUSTRATIVE — Lesson 1B Exercise A. Two queues whose quotas sum to the fake
+# ILLUSTRATIVE - Lesson 1B Exercise A. Two queues whose quotas sum to the fake
 # fleet (16 + 16 = 32 GPUs). CONFIRM apiVersion/kind/field names against the KAI
-# version you installed before applying — they change between releases.
+# version you installed before applying - they change between releases.
 apiVersion: scheduling.run.ai/v2        # CONFIRM: exact group/version in KAI docs
 kind: Queue
 metadata:

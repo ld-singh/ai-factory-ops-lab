@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# up.sh — build and start the Slurm-in-Docker cluster, then bootstrap accounting
+# up.sh - build and start the Slurm-in-Docker cluster, then bootstrap accounting
 # associations so jobs can be submitted. Idempotent-ish: safe to re-run.
 set -euo pipefail
 
@@ -31,7 +31,7 @@ fi
 echo "==> Bootstrapping accounting (cluster/account/user associations)..."
 # The cluster auto-registers in slurmdbd when slurmctld starts; retry briefly in
 # case we got here first. AccountingStorageEnforce=associations means a user with
-# no association cannot submit — so this step is what makes the demo work.
+# no association cannot submit - so this step is what makes the demo work.
 for _ in $(seq 1 15); do
   if in_login sacctmgr -i add account lab Description="lab account" Organization=lab >/dev/null 2>&1; then
     break

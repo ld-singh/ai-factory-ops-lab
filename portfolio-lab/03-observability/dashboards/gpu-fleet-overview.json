@@ -15,7 +15,7 @@
       "gridPos": { "h": 3, "w": 24, "x": 0, "y": 0 },
       "options": {
         "mode": "markdown",
-        "content": "**DESIGN ARTIFACT** — built on SYNTHETIC fake-dcgm-exporter metrics. It proves dashboard/query design, not real GPU telemetry. Point it at real DCGM (Lesson 2) to validate."
+        "content": "**DESIGN ARTIFACT** - built on SYNTHETIC fake-dcgm-exporter metrics. It proves dashboard/query design, not real GPU telemetry. Point it at real DCGM (Lesson 2) to validate."
       }
     },
     {

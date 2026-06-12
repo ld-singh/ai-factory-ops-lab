@@ -1,11 +1,11 @@
-# Lesson 1 · Deep dive — How a fake GPU fleet works
+# Lesson 1 · Deep dive - How a fake GPU fleet works
 
-> Part of [Lesson 1 — Kubernetes GPU Scheduling](../README.md). Read this when
+> Part of [Lesson 1 - Kubernetes GPU Scheduling](../README.md). Read this when
 > Step 1 makes you ask "wait, how is this legitimate?"
 
 🎯 **Objective:** understand exactly what [KWOK](https://kwok.sigs.k8s.io/)
 (Kubernetes WithOut Kubelet) fakes, what it does *not* fake, and how the fake GPU
-nodes are constructed — so you can defend the simulation's validity and name its
+nodes are constructed - so you can defend the simulation's validity and name its
 limits precisely.
 
 KWOK lets us register **fake nodes** that the scheduler treats as real. We give
@@ -53,14 +53,14 @@ Total simulated fleet: 5 nodes, 32 "GPUs".
 Each fake node carries:
 
 - `kwok.x-k8s.io/node: fake` annotation (managed by KWOK)
-- Taint `kwok.x-k8s.io/node=fake:NoSchedule` — workloads must tolerate it, which
+- Taint `kwok.x-k8s.io/node=fake:NoSchedule` - workloads must tolerate it, which
   doubles as a safety net so nothing accidental lands on fake nodes
 - Labels mirroring what GPU Feature Discovery sets on real clusters:
   `nvidia.com/gpu.product`, `nvidia.com/gpu.count`, plus a lab-specific
   `gpu-pool` label for pool-level targeting
 
 See [`fake-gpu-node-template.yaml`](./fake-gpu-node-template.yaml) for the annotated
-template — read it top to bottom; every field is commented with why it's there.
+template - read it top to bottom; every field is commented with why it's there.
 
 ## Where these labels come from
 

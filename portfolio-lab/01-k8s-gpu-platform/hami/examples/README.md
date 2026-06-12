@@ -1,4 +1,4 @@
-# HAMi — example manifests
+# HAMi - example manifests
 
 > **ILLUSTRATIVE, not copy-paste.** HAMi's resource names (`nvidia.com/gpumem`,
 > `nvidia.com/gpucores`, …), units, and defaults can change between releases.
@@ -6,7 +6,7 @@
 > https://github.com/Project-HAMi/HAMi
 >
 > These run in [Lesson 1C Part 3](../README.md#part-3----share-one-real-gpu-between-pods-do-this-during-your-lesson-2-rental),
-> on the **real GPU** from Lesson 2 — that's where the memory-cap enforcement is
+> on the **real GPU** from Lesson 2 - that's where the memory-cap enforcement is
 > actually proven. Capture the in-pod `nvidia-smi` and any allocation-failure
 > output into [`../../../06-validation-reports/`](../../../06-validation-reports/).
 

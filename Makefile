@@ -1,4 +1,4 @@
-# AI Factory Operations Lab — Makefile
+# AI Factory Operations Lab - Makefile
 # Simple, idempotent-where-possible targets. Each target prints what it does.
 # Phases map to portfolio-lab/ modules. Targets for later phases are stubs that
 # explain what is coming, so `make help` is always an honest project map.
@@ -25,7 +25,7 @@ check: ## Verify local prerequisites (docker, kind, kubectl, helm, kwok, jq)
 	./scripts/check-prereqs.sh
 
 # ---------------------------------------------------------------------------
-# Phase 1 — Kubernetes fake-GPU control-plane simulation (no GPU required)
+# Phase 1 - Kubernetes fake-GPU control-plane simulation (no GPU required)
 # ---------------------------------------------------------------------------
 .PHONY: phase1-up phase1-demo phase1-evidence phase1-down
 phase1-up: ## Create kind cluster, install KWOK, create fake GPU node pools
@@ -43,7 +43,7 @@ phase1-down: ## Delete the kind cluster
 	kind delete cluster --name $(CLUSTER_NAME)
 
 # ---------------------------------------------------------------------------
-# Phase 2 — Real GPU validation (requires one NVIDIA GPU machine)
+# Phase 2 - Real GPU validation (requires one NVIDIA GPU machine)
 # ---------------------------------------------------------------------------
 .PHONY: phase2-guide
 phase2-guide: ## Print the real-GPU validation guide location
@@ -52,26 +52,26 @@ phase2-guide: ## Print the real-GPU validation guide location
 	@echo "Then capture evidence with: ./scripts/collect-gpu-evidence.sh"
 
 # ---------------------------------------------------------------------------
-# Lessons 1B / 1C — guided (install drifts; we ship example manifests, not an
+# Lessons 1B / 1C - guided (install drifts; we ship example manifests, not an
 # automated install, to respect the no-invented-commands rule).
 # ---------------------------------------------------------------------------
 .PHONY: kai-guide hami-guide
 kai-guide: ## Lesson 1B (KAI Scheduler): print example manifests + install check
-	@echo "Lesson 1B — Queue-based scheduling with KAI Scheduler."
+	@echo "Lesson 1B - Queue-based scheduling with KAI Scheduler."
 	@echo "Guide:    $(LAB1)/kai-scheduler/README.md"
-	@echo "Examples: $(LAB1)/kai-scheduler/examples/ (ILLUSTRATIVE — confirm vs KAI docs)"
+	@echo "Examples: $(LAB1)/kai-scheduler/examples/ (ILLUSTRATIVE - confirm vs KAI docs)"
 	@echo "Is KAI installed?"
-	@kubectl get crds 2>/dev/null | grep -i kai || echo "  (no KAI CRDs found — install per the official docs first)"
+	@kubectl get crds 2>/dev/null | grep -i kai || echo "  (no KAI CRDs found - install per the official docs first)"
 
 hami-guide: ## Lesson 1C (HAMi): print example manifests + install check
-	@echo "Lesson 1C — GPU sharing / fractional GPUs with HAMi."
+	@echo "Lesson 1C - GPU sharing / fractional GPUs with HAMi."
 	@echo "Guide:    $(LAB1)/hami/README.md"
-	@echo "Examples: $(LAB1)/hami/examples/ (ILLUSTRATIVE — run on the Lesson 2 GPU)"
+	@echo "Examples: $(LAB1)/hami/examples/ (ILLUSTRATIVE - run on the Lesson 2 GPU)"
 	@echo "Is HAMi installed?"
-	@kubectl get pods -A 2>/dev/null | grep -i hami || echo "  (no HAMi pods found — install per the official docs on the GPU machine)"
+	@kubectl get pods -A 2>/dev/null | grep -i hami || echo "  (no HAMi pods found - install per the official docs on the GPU machine)"
 
 # ---------------------------------------------------------------------------
-# Phase 3 — Slurm GPU workload management (Slurm-in-Docker, fake GRES, no GPU)
+# Phase 3 - Slurm GPU workload management (Slurm-in-Docker, fake GRES, no GPU)
 # ---------------------------------------------------------------------------
 .PHONY: phase3-up phase3-demo phase3-drain phase3-evidence phase3-down
 phase3-up: ## Build + start the Slurm-in-Docker cluster and bootstrap accounting
@@ -90,7 +90,7 @@ phase3-down: ## Stop and remove the Slurm cluster (containers + volumes)
 	$(LAB2)/scripts/down.sh
 
 # ---------------------------------------------------------------------------
-# Phase 4 — GPU observability (Prometheus/Grafana over synthetic DCGM metrics)
+# Phase 4 - GPU observability (Prometheus/Grafana over synthetic DCGM metrics)
 # Runs against the Phase 1 kind cluster. No GPU required.
 # ---------------------------------------------------------------------------
 .PHONY: phase4-up phase4-break phase4-evidence phase4-down
@@ -107,7 +107,7 @@ phase4-down: ## Remove the observability stack (keeps the kind cluster)
 	$(LAB3)/scripts/down.sh
 
 # ---------------------------------------------------------------------------
-# Phase 5 — Inference serving / benchmarking
+# Phase 5 - Inference serving / benchmarking
 # $0 harness tier runs against a CPU-served model; numbers are NOT a benchmark.
 # Real benchmark numbers require the Lesson 2 GPU machine.
 # ---------------------------------------------------------------------------
@@ -122,7 +122,7 @@ phase5-down: ## Stop the local CPU model server
 	$(LAB4)/scripts/down.sh
 
 # ---------------------------------------------------------------------------
-# Phase 6 — BCM-style cluster lifecycle drill (runs on the Phase 1 kind cluster)
+# Phase 6 - BCM-style cluster lifecycle drill (runs on the Phase 1 kind cluster)
 # ---------------------------------------------------------------------------
 .PHONY: phase6-drill
 phase6-drill: ## Run the node provision -> health-gate -> patch -> retire lifecycle drill

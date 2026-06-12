@@ -1,4 +1,4 @@
-# ServiceMonitor — tells the Prometheus Operator (from kube-prometheus-stack) to
+# ServiceMonitor - tells the Prometheus Operator (from kube-prometheus-stack) to
 # scrape the fake-dcgm-exporter Service. The `release: kube-prometheus-stack`
 # label is what the operator's default serviceMonitorSelector matches.
 apiVersion: monitoring.coreos.com/v1

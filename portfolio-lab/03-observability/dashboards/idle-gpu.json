@@ -15,7 +15,7 @@
       "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
       "options": {
         "mode": "markdown",
-        "content": "**The most expensive question in GPU ops:** which GPUs are *allocated* (holding memory) yet doing ~no work (low SM_ACTIVE)? Those are billed-for, idle silicon. A GPU can read 100% on `GPU_UTIL` and still be here — that's why this joins memory-occupancy with `SM_ACTIVE`, not `GPU_UTIL`. SYNTHETIC data: design artifact."
+        "content": "**The most expensive question in GPU ops:** which GPUs are *allocated* (holding memory) yet doing ~no work (low SM_ACTIVE)? Those are billed-for, idle silicon. A GPU can read 100% on `GPU_UTIL` and still be here - that's why this joins memory-occupancy with `SM_ACTIVE`, not `GPU_UTIL`. SYNTHETIC data: design artifact."
       }
     },
     {

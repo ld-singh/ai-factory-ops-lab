@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# setup-qos.sh — create the 'capped' QoS used by scenario 3, and grant it to the
+# setup-qos.sh - create the 'capped' QoS used by scenario 3, and grant it to the
 # lab account. Idempotent. The cap (4 GPUs/user) is an accounting decision, which
 # is exactly why it's fully demonstrable on fake GRES.
 set -euo pipefail
