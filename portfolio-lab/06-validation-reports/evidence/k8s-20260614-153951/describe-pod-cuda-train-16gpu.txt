@@ -24,12 +24,12 @@ Containers:
       nvidia.com/gpu:  16
     Environment:       <none>
     Mounts:
-      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-ww8mr (ro)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-pfklf (ro)
 Conditions:
   Type           Status
   PodScheduled   False 
 Volumes:
-  kube-api-access-ww8mr:
+  kube-api-access-pfklf:
     Type:                    Projected (a volume that contains injected data from multiple sources)
     TokenExpirationSeconds:  3607
     ConfigMapName:           kube-root-ca.crt
@@ -41,7 +41,6 @@ Tolerations:                 kwok.x-k8s.io/node=fake:NoSchedule
                              node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
                              node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
 Events:
-  Type     Reason            Age                  From               Message
-  ----     ------            ----                 ----               -------
-  Warning  FailedScheduling  174m (x34 over 21h)  default-scheduler  0/7 nodes are available: 1 node(s) had untolerated taint(s), 6 Insufficient nvidia.com/gpu. no new claims to deallocate, preemption: 0/7 nodes are available: 7 Preemption is not helpful for scheduling.
-  Warning  FailedScheduling  26m (x6 over 51m)    default-scheduler  0/7 nodes are available: 1 node(s) had untolerated taint(s), 6 Insufficient nvidia.com/gpu. no new claims to deallocate, preemption: 0/7 nodes are available: 7 Preemption is not helpful for scheduling.
+  Type     Reason            Age                 From               Message
+  ----     ------            ----                ----               -------
+  Warning  FailedScheduling  58s (x2 over 6m4s)  default-scheduler  0/7 nodes are available: 1 node(s) had untolerated taint(s), 6 Insufficient nvidia.com/gpu. no new claims to deallocate, preemption: 0/7 nodes are available: 7 Preemption is not helpful for scheduling.

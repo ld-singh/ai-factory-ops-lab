@@ -1,0 +1,14 @@
+$ kubectl get pods -A --field-selector=status.phase=Pending -o wide
+
+NAMESPACE   NAME                              READY   STATUS    RESTARTS   AGE    IP       NODE     NOMINATED NODE   READINESS GATES
+gpu-demo    cuda-needs-b200                   0/1     Pending   0          6m4s   <none>   <none>   <none>           <none>
+gpu-demo    cuda-train-16gpu                  0/1     Pending   0          6m4s   <none>   <none>   <none>           <none>
+gpu-demo    queue-pressure-6696ccff7b-2pqzw   0/1     Pending   0          6m3s   <none>   <none>   <none>           <none>
+gpu-demo    queue-pressure-6696ccff7b-5xngp   0/1     Pending   0          6m3s   <none>   <none>   <none>           <none>
+gpu-demo    queue-pressure-6696ccff7b-bm4rb   0/1     Pending   0          6m3s   <none>   <none>   <none>           <none>
+gpu-demo    queue-pressure-6696ccff7b-bwwdq   0/1     Pending   0          6m3s   <none>   <none>   <none>           <none>
+gpu-demo    queue-pressure-6696ccff7b-kwqm9   0/1     Pending   0          6m3s   <none>   <none>   <none>           <none>
+gpu-demo    queue-pressure-6696ccff7b-rk4hr   0/1     Pending   0          6m3s   <none>   <none>   <none>           <none>
+gpu-demo    queue-pressure-6696ccff7b-vqst9   0/1     Pending   0          6m3s   <none>   <none>   <none>           <none>
+gpu-demo    queue-pressure-6696ccff7b-xpnn6   0/1     Pending   0          6m3s   <none>   <none>   <none>           <none>
+gpu-demo    queue-pressure-6696ccff7b-xx9lz   0/1     Pending   0          6m3s   <none>   <none>   <none>           <none>

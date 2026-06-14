@@ -1,6 +1,6 @@
-$ kubectl describe -n gpu-demo pod/queue-pressure-6696ccff7b-s56dv
+$ kubectl describe -n gpu-demo pod/queue-pressure-6696ccff7b-xpnn6
 
-Name:             queue-pressure-6696ccff7b-s56dv
+Name:             queue-pressure-6696ccff7b-xpnn6
 Namespace:        gpu-demo
 Priority:         0
 Service Account:  default
@@ -27,12 +27,12 @@ Containers:
       nvidia.com/gpu:  1
     Environment:       <none>
     Mounts:
-      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-qhvtj (ro)
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-9nv57 (ro)
 Conditions:
   Type           Status
   PodScheduled   False 
 Volumes:
-  kube-api-access-qhvtj:
+  kube-api-access-9nv57:
     Type:                    Projected (a volume that contains injected data from multiple sources)
     TokenExpirationSeconds:  3607
     ConfigMapName:           kube-root-ca.crt
@@ -44,7 +44,6 @@ Tolerations:                 kwok.x-k8s.io/node=fake:NoSchedule
                              node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
                              node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
 Events:
-  Type     Reason            Age                  From               Message
-  ----     ------            ----                 ----               -------
-  Warning  FailedScheduling  173m (x34 over 21h)  default-scheduler  0/7 nodes are available: 1 node(s) had untolerated taint(s), 6 Insufficient nvidia.com/gpu. no new claims to deallocate, preemption: 0/7 nodes are available: 2 Preemption is not helpful for scheduling, 5 No preemption victims found for incoming pod.
-  Warning  FailedScheduling  25m (x6 over 50m)    default-scheduler  0/7 nodes are available: 1 node(s) had untolerated taint(s), 6 Insufficient nvidia.com/gpu. no new claims to deallocate, preemption: 0/7 nodes are available: 2 Preemption is not helpful for scheduling, 5 No preemption victims found for incoming pod.
+  Type     Reason            Age                 From               Message
+  ----     ------            ----                ----               -------
+  Warning  FailedScheduling  59s (x2 over 6m4s)  default-scheduler  0/7 nodes are available: 1 node(s) had untolerated taint(s), 6 Insufficient nvidia.com/gpu. no new claims to deallocate, preemption: 0/7 nodes are available: 2 Preemption is not helpful for scheduling, 5 No preemption victims found for incoming pod.

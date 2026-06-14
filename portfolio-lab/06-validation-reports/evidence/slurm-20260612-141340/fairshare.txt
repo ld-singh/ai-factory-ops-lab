@@ -1,8 +1,0 @@
-$ sshare -l
-
-Account                    User  RawShares  NormShares    RawUsage   NormUsage  EffectvUsage  FairShare    LevelFS                    GrpTRESMins                    TRESRunMins 
--------------------- ---------- ---------- ----------- ----------- ----------- ------------- ---------- ---------- ------------------------------ ------------------------------ 
-root                                          0.000000          19                  1.000000                                                      cpu=32,mem=0,energy=0,node=32+ 
- root                      root          1    0.500000           0    0.000000      0.000000   1.000000        inf                                cpu=0,mem=0,energy=0,node=0,b+ 
- lab                                     1    0.500000          19                  0.000000              0.000000                                cpu=32,mem=0,energy=0,node=32+ 
-  lab                      root          1    1.000000          19                  0.000000   0.000000   0.000000                                cpu=32,mem=0,energy=0,node=32+ 
