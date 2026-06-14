@@ -1,0 +1,5 @@
+# All exercise workloads live in this namespace so they are easy to inspect and clean.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kai-demo

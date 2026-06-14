@@ -46,5 +46,10 @@ while IFS= read -r f; do
     "$f" > "$f.tmp" && mv "$f.tmp" "$f"
 done < <(find "$DEST/portfolio-lab" -name 'README.md')
 
+# Point links to non-rendered repo files (scripts, manifests, Makefiles, configs) at
+# GitHub so they resolve on the site instead of 404ing. Markdown pages, images, and
+# rendered section dirs are left relative. Runs last, on the final synced content.
+python3 scripts/site-rewrite-links.py "$DEST"
+
 count=$(find "$DEST" -name '*.md' | wc -l | tr -d ' ')
-echo "Synced ${count} markdown pages into ${DEST}/ (root README published as course.md; repo note added to lessons)."
+echo "Synced ${count} markdown pages into ${DEST}/ (root README published as course.md; repo note added to lessons; code links pointed at GitHub)."

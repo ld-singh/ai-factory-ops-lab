@@ -1,0 +1,68 @@
+# Exercise A - quota enforcement.
+# Two teams, each submitting 8 single-GPU pods, each mapped to its own queue (quota 8).
+# Expect both to reach 8 Running: neither exceeds its quota while the other uses its share.
+#
+# The three things that make a pod "a KAI workload":
+#   schedulerName: kai-scheduler          -> KAI schedules it (not the default scheduler)
+#   labels[kai.scheduler/queue]: <queue>  -> which queue it draws from
+#   the kwok toleration                   -> lets it land on the fake GPU nodes
+# The container is `pause` (no GPU, no CUDA): this is a control-plane scheduling demo.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: research-quota
+  namespace: kai-demo
+spec:
+  replicas: 8
+  selector:
+    matchLabels:
+      app: research-quota
+  template:
+    metadata:
+      labels:
+        app: research-quota
+        kai.scheduler/queue: team-research
+    spec:
+      schedulerName: kai-scheduler
+      terminationGracePeriodSeconds: 0
+      tolerations:
+        - key: kwok.x-k8s.io/node
+          operator: Equal
+          value: fake
+          effect: NoSchedule
+      containers:
+        - name: app
+          image: registry.k8s.io/pause:3.9
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prod-quota
+  namespace: kai-demo
+spec:
+  replicas: 8
+  selector:
+    matchLabels:
+      app: prod-quota
+  template:
+    metadata:
+      labels:
+        app: prod-quota
+        kai.scheduler/queue: team-prod
+    spec:
+      schedulerName: kai-scheduler
+      terminationGracePeriodSeconds: 0
+      tolerations:
+        - key: kwok.x-k8s.io/node
+          operator: Equal
+          value: fake
+          effect: NoSchedule
+      containers:
+        - name: app
+          image: registry.k8s.io/pause:3.9
+          resources:
+            limits:
+              nvidia.com/gpu: 1

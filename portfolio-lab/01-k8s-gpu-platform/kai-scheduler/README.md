@@ -52,38 +52,124 @@ already up, then installs KAI.
 
 ---
 
-## Run it (copy-paste)
+## Set up once
 
 ```bash
 cd portfolio-lab/01-k8s-gpu-platform/kai-scheduler
-
-make up            # shared Lesson 1 fleet (kind+KWOK+fake-gpu-operator, 32 GPUs) + KAI + queues
-make demo-quota    # VALIDATED: two teams each fill their 8-GPU quota
-make evidence      # capture queues, pods, events
-make uninstall     # remove KAI, the operator, the GPU nodes, and the demo namespace
+make up        # shared Lesson 1 fleet (kind+KWOK+fake-gpu-operator, 32 GPUs) + install KAI
+make queues    # create the namespace + the queue hierarchy (see manifests/queues.yaml)
 ```
 
-✅ **Checkpoint (quota, validated):** after `make demo-quota`, `team-research` and
-`team-prod` each run **8 pods** (their quota), 0 pending. Confirm with
-`kubectl get pods -n kai-demo -L kai.scheduler/queue -o wide`. This proves the whole
-stack end to end: the fake-gpu-operator advertises GPUs, KAI's webhook routes the pods,
-the pod-grouper and scheduler place them, and quota is enforced per queue.
+`make queues` is a separate step on purpose: open
+[`manifests/queues.yaml`](manifests/queues.yaml) and read it first. It defines the
+hierarchy the exercises use - a parent queue (`ai-factory`) with two leaf queues
+(`team-research`, `team-prod`, quota 8 each) plus a separate `gang-demo` queue. The
+queue is the core KAI primitive, so it is worth seeing the YAML before running anything.
 
-> **Status of the other exercises on this fake fleet.** `make demo-borrow`,
-> `demo-reclaim`, and `demo-gang` are provided, but on this KWOK + fake-gpu-operator
-> simulation their headline behavior does **not** fully reproduce, and the scripts say
-> so when they run:
-> - **Borrow/reclaim:** with two equal-quota queues, KAI allocated each queue only up
->   to its *deserved* share (8) and did not lend a queue's *idle but guaranteed*
->   capacity to an over-quota sibling, even with `limit > quota` set. Over-quota
->   borrowing of idle reserved capacity did not occur in this setup.
-> - **Gang:** plain Deployments are scheduled as independent per-pod groups (not a
->   gang); batch Jobs are gang-grouped but KWOK simulates Job pods to `Completed`
->   instantly, so the "held until all fit" state can't be observed cleanly.
->
-> Treat borrow/reclaim/gang here as concept demonstrations with documented limits;
-> validating them properly needs a real multi-tenant GPU cluster (or deeper
-> KAI-version-specific tuning). Quota enforcement is the exercise this lesson proves.
+✅ **Checkpoint:** KAI's pods are Running and the queues exist:
+
+```bash
+kubectl -n kai-scheduler get pods
+kubectl get queues.scheduling.run.ai
+```
+
+Run `make up` and `make queues` **once**. Each exercise below applies its own manifest
+and re-prepares its workloads (it clears the `kai-demo` namespace first), so you can run
+them back to back. Capture evidence and uninstall **at the very end**, not between
+exercises.
+
+## The exercises (run in order)
+
+### Exercise A - quota enforcement (validated)
+
+```bash
+make demo-quota
+```
+
+Applies [`manifests/exercise-a-quota.yaml`](manifests/exercise-a-quota.yaml): 8
+single-GPU pods to `team-research` and 8 to `team-prod` (quota 8 each). Open the file
+to see how a pod joins a queue (`schedulerName: kai-scheduler` + the
+`kai.scheduler/queue` label).
+
+**Expect:** both queues reach **8 Running, 0 Pending** - neither exceeds its quota
+while the other is using its share. Confirm:
+
+```bash
+kubectl get pods -n kai-demo -L kai.scheduler/queue -o wide
+```
+
+This is the validated result end to end: the operator advertises GPUs, KAI's webhook
+routes the pods, and quota is enforced per queue.
+
+### Exercise B - borrowing idle capacity
+
+```bash
+make demo-borrow
+```
+
+Applies [`manifests/exercise-b-borrow.yaml`](manifests/exercise-b-borrow.yaml): leaves
+`team-research` idle and submits 16 pods to `team-prod` (double its quota).
+
+- **Concept:** `team-prod` should borrow the idle GPUs and run beyond its quota.
+- **Observed on this fake fleet:** it stays at ~8. KAI did not lend a sibling's
+  idle-but-guaranteed capacity even with `limit > quota`. The script prints this.
+  Treat it as a concept demo; the over-quota behavior needs a real multi-tenant
+  cluster (or deeper KAI tuning) to reproduce.
+
+### Exercise C - reclaim (run immediately after B)
+
+```bash
+make demo-reclaim
+```
+
+Applies [`manifests/exercise-c-reclaim.yaml`](manifests/exercise-c-reclaim.yaml).
+**Run this right after `make demo-borrow`**, with nothing in between - it adds
+`team-research`'s pods on top of the still-running borrow workload (and errors if
+`prod-borrow` is not present).
+
+- **Concept:** when the owner returns, KAI evicts borrowed pods so `team-research`
+  gets its guaranteed share.
+- **Observed:** because borrowing did not occur in B, there is nothing to reclaim;
+  `team-research` simply takes free GPUs. Inspect with
+  `kubectl get events -n kai-demo --sort-by=.lastTimestamp`.
+
+### Exercise D - gang scheduling (anti-deadlock)
+
+```bash
+make demo-gang
+```
+
+Applies [`manifests/exercise-d-filler.yaml`](manifests/exercise-d-filler.yaml) to fill
+the fleet down to ~8 free, then [`manifests/exercise-d-gang.yaml`](manifests/exercise-d-gang.yaml)
+(note the `kai.scheduler/batch-min-member: "10"` annotation - the all-or-none knob).
+
+- **Concept:** all-or-none - the gang should stay entirely Pending until 10 GPUs are
+  free, rather than grabbing 8 and deadlocking.
+- **Observed:** a plain Deployment schedules as independent per-pod groups (so ~8
+  run), and a batch Job is gang-grouped but KWOK marks its pods `Completed` instantly,
+  so the held state isn't observable here. The script explains this as it runs. Gang
+  is best validated on a real cluster.
+
+> Exercise E (priority & starvation) has no `make` target; follow
+> [Part 7](#part-7---exercise-e-priority--starvation) manually if you want to explore it.
+
+## Capture evidence, then tear down (at the end)
+
+```bash
+make evidence    # snapshot queues, pods, and events into evidence/<timestamp>/
+make uninstall   # delete the whole kind cluster (KAI + the shared fleet + all workloads)
+```
+
+`make evidence` captures whatever is deployed at that moment, so run it right after the
+exercise you want to document (for a clean record, capture **Exercise A**, the
+validated one).
+
+> **Run `make uninstall` last** - after you have worked through all the exercises **and
+> read the Parts below**. It deletes the entire kind cluster (KAI and the shared Lesson 1
+> fleet), so anything not captured with `make evidence` is gone. There is no need to
+> tear down between exercises.
+
+The Parts below explain the concepts and the manual manifests behind each exercise.
 
 ---
 

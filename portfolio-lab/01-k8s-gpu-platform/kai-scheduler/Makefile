@@ -20,8 +20,8 @@ help: ## Show targets
 	  awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
 
 .PHONY: up
-up: cluster kai queues ## Full setup: shared Lesson 1 fleet + KAI + queues
-	@echo "Ready. Try: make demo-quota / demo-borrow / demo-reclaim / demo-gang"
+up: cluster kai ## Full setup: shared Lesson 1 fleet + KAI (queues are a separate step)
+	@echo "Ready. Next: make queues, then make demo-quota / demo-borrow / demo-reclaim / demo-gang"
 
 .PHONY: cluster
 cluster: ## Ensure the shared Lesson 1 fleet exists (kind + KWOK + fake-gpu-operator + nodes)
@@ -32,7 +32,8 @@ kai: ## Install KAI Scheduler from its OCI Helm chart at KAI_VERSION
 	$(SCRIPTS)/install-kai.sh
 
 .PHONY: queues
-queues: ## Create the parent + leaf queues (research, prod, gang)
+queues: ## Create the demo namespace + the parent/leaf queues (research, prod, gang)
+	kubectl apply -f manifests/namespace.yaml
 	kubectl apply -f manifests/queues.yaml
 	kubectl get queues.scheduling.run.ai
 
@@ -62,10 +63,6 @@ clean: ## Delete the demo workloads and queues (keep the cluster, KAI, and fleet
 	-kubectl delete -f manifests/queues.yaml --ignore-not-found
 
 .PHONY: uninstall
-uninstall: ## Remove KAI, its queues, and the demo namespace (leaves the shared fleet)
-	-kubectl delete deploy -n kai-demo --all --ignore-not-found
-	-kubectl delete -f manifests/queues.yaml --ignore-not-found
-	-helm uninstall kai-scheduler -n kai-scheduler
-	-kubectl delete ns kai-demo kai-scheduler --ignore-not-found
-	@echo "Shared Lesson 1 fleet (kind + KWOK + fake-gpu-operator) left intact."
-	@echo "To delete the whole cluster: make -C ../../.. phase1-down  (or: kind delete cluster --name $(CLUSTER))"
+uninstall: ## Tear everything down: delete the whole kind cluster (KAI + the shared fleet)
+	kind delete cluster --name $(CLUSTER)
+	@echo "Deleted cluster '$(CLUSTER)' (KAI, the fake-gpu-operator fleet, and all workloads are gone)."

@@ -1,0 +1,40 @@
+# Exercise D, part 2 - the gang. A 10-pod job that must schedule all-or-none.
+# The annotation kai.scheduler/batch-min-member: "10" tells KAI's pod-grouper to treat
+# all 10 pods as one gang with a minimum of 10 members. Concept: into 8 free GPUs the
+# gang stays ENTIRELY Pending (it does not grab 8 and deadlock); free capacity (delete
+# the filler) and all 10 bind together.
+#
+# Observed limit on this fake fleet (see the lesson README): a plain Deployment is
+# scheduled as independent per-pod groups, so the gang behavior is not fully reproduced
+# here. It is shown for the concept; validate gang properly on a real cluster.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gang-job
+  namespace: kai-demo
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: gang-job
+  template:
+    metadata:
+      labels:
+        app: gang-job
+        kai.scheduler/queue: gang-demo
+      annotations:
+        kai.scheduler/batch-min-member: "10"   # bind all 10 or none
+    spec:
+      schedulerName: kai-scheduler
+      terminationGracePeriodSeconds: 0
+      tolerations:
+        - key: kwok.x-k8s.io/node
+          operator: Equal
+          value: fake
+          effect: NoSchedule
+      containers:
+        - name: app
+          image: registry.k8s.io/pause:3.9
+          resources:
+            limits:
+              nvidia.com/gpu: 1
