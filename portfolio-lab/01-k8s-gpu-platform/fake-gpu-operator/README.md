@@ -1,40 +1,74 @@
-# Lesson 1 · Optional - A richer simulation (fake-gpu-operator)
+# Lesson 1 · Deep dive - the GPU layer (fake-gpu-operator)
 
-> Part of [Lesson 1 - Kubernetes GPU Scheduling](../README.md). Optional. Most
-> valuable as a bridge to [Lesson 4 - Observability](../../03-observability/README.md).
+> Part of [Lesson 1 - Kubernetes GPU Scheduling](../README.md). Read this to
+> understand how the fake fleet advertises GPUs and emits DCGM metrics with no
+> hardware. Installed for you by `make phase1-up`.
 
-🎯 **Objective:** know when plain KWOK fake nodes are enough and when
-[run.ai's fake-gpu-operator](https://github.com/run-ai/fake-gpu-operator) earns its
-extra setup weight - specifically, when you need a metrics endpoint that *looks like*
-DCGM before any real GPU exists.
+🎯 **Objective:** understand the second half of the fake fleet. KWOK gives us the
+*nodes*; [run.ai's fake-gpu-operator](https://github.com/run-ai/fake-gpu-operator)
+gives us the *GPU layer* on those nodes - GPU advertisement, an operator-shaped
+device plugin, and a per-node DCGM exporter. They are complementary, not
+alternatives.
 
-## KWOK fake nodes vs fake-gpu-operator
+## Why an operator at all (vs hand-writing the integer)
 
-| | KWOK fake nodes (this lesson's default) | fake-gpu-operator |
-|---|---|---|
-| What is fake | The entire node | GPUs on real (CPU) nodes |
-| Pods actually run | No (lifecycle simulated) | Yes (real containers, fake GPUs) |
-| GPU-Operator-shaped components | No | Yes (device-plugin-like, DCGM-exporter-like) |
-| Fake DCGM-style metrics | No | Yes - useful for Lesson 4 dashboards |
-| Setup weight | Very light | Heavier (Helm chart, node labelling) |
-| Best for | Pure scheduling/placement studies at any scale | Observability pipelines and operator-shaped topology without GPUs |
+You *could* hand-write `nvidia.com/gpu: 8` into a KWOK node's `status.allocatable`
+(earlier versions of this lesson did). The operator is better because it makes the
+fake fleet behave like a real one in two ways that matter later:
 
-💡 **Why the default is KWOK:** Lesson 1 is about scheduler behaviour, and KWOK
-scales to large fake fleets trivially. fake-gpu-operator becomes attractive in
-[Lesson 4 (observability)](../../03-observability/README.md), where having a metrics
-endpoint that *looks like* DCGM Exporter lets you build dashboards and alerts before
-any real GPU exists.
+- **Operator-shaped advertisement.** A device plugin advertises the GPUs, exactly as
+  the real NVIDIA GPU Operator does in production - not a hand-edited status field.
+- **A DCGM metrics stream.** It stands up a DCGM exporter per node emitting real
+  `DCGM_FI_*` metric names/labels (with per-pod attribution), so
+  [Lesson 4](../../03-observability/README.md) can build dashboards and alerts against
+  the same fleet. The *values* are synthetic; the *shape* is real.
 
-> **HONESTY MARKER:** install steps are not reproduced here - follow the project's
-> README directly to avoid drift: https://github.com/run-ai/fake-gpu-operator
-> Any metrics produced this way are synthetic. Dashboards built on them prove
-> dashboard/alert *design*, not real GPU telemetry. Real DCGM evidence belongs in
-> [`../gpu-operator-real/`](../gpu-operator-real/README.md) and Lesson 2's validation
-> report.
+It is also the mechanism [Lesson 1B (KAI)](../kai-scheduler/README.md) and
+[Lesson 1C (HAMi)](../hami/README.md) require, so the whole course uses one fake-GPU
+layer instead of several.
 
-✅ **Checkpoint:** you can state, in one sentence each, the one thing fake-gpu-operator
-gives you that KWOK doesn't (synthetic DCGM-shaped metrics + real container
-execution) and the one thing neither gives you (real GPU telemetry).
+## How it works on KWOK nodes
+
+fake-gpu-operator is designed to sit on top of KWOK. KWOK provides kubelet-less nodes
+at any scale; the operator's components advertise GPUs on the nodes carrying the
+`run.ai/simulated-gpu-node-pool=<pool>` label:
+
+- **status-updater / topology-server** - hold the per-pool topology (count, product,
+  memory) and patch node status.
+- **kwok-gpu-device-plugin** - the KWOK-aware device plugin that advertises
+  `nvidia.com/gpu` (a normal DaemonSet device plugin can't run on a kubelet-less
+  node, so the operator ships a KWOK-specific one).
+- **nvidia-dcgm-exporter (per node)** - emits `DCGM_FI_*` metrics for each simulated
+  GPU, with `pod=`/`namespace=` attribution for scheduled workloads.
+
+`make phase1-up` installs it with three pools matching the node labels:
+
+| Pool | label `run.ai/simulated-gpu-node-pool` | GPUs/node | Product |
+|---|---|---|---|
+| a100 | `a100` | 8 | `NVIDIA-A100-SXM4-80GB` |
+| h100 | `h100` | 8 | `NVIDIA-H100-80GB-HBM3` |
+| l40s | `l40s` | 4 | `NVIDIA-L40S` |
+
+Install detail is in [`../scripts/install-fake-gpu-operator.sh`](../scripts/install-fake-gpu-operator.sh)
+(JFrog `prod` chart; the ghcr.io OCI build is DRA-oriented and does not populate
+`nvidia.com/gpu`).
+
+## See the metrics
+
+```bash
+kubectl -n gpu-operator port-forward svc/nvidia-dcgm-exporter 9400:9400 &
+curl -s localhost:9400/metrics | grep -E '^DCGM_FI_' | head
+```
+
+> **SCOPE NOTE:** everything here is synthetic. The advertised GPUs, the device
+> plugin, and the DCGM metrics are fabricated, and pods on KWOK nodes are simulated
+> (no real container, so no real `nvidia-smi` or CUDA). Dashboards built on these
+> metrics prove dashboard/alert *design*, not real telemetry. Real DCGM evidence
+> belongs to [Lesson 2](../gpu-operator-real/README.md).
+
+✅ **Checkpoint:** state which component advertises `nvidia.com/gpu` on a KWOK node,
+and the one thing this layer still cannot give you (real GPU telemetry / a real
+`nvidia-smi`).
 
 ➡️ **Back to:** [Lesson 1](../README.md) · **Leads to:**
 [Lesson 4 - Observability](../../03-observability/README.md).

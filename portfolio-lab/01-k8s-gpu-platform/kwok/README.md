@@ -8,14 +8,18 @@
 nodes are constructed - so you can defend the simulation's validity and name its
 limits precisely.
 
-KWOK lets us register **fake nodes** that the scheduler treats as real. We give
-those nodes `nvidia.com/gpu` in `status.allocatable`, plus the same labels NVIDIA's
-GPU Feature Discovery would apply on a real cluster, and the control plane behaves
-exactly as it would against a real GPU fleet.
+KWOK lets us register **fake nodes** that the scheduler treats as real: pure API
+objects with no kubelet. KWOK provides the *nodes*; the **fake-gpu-operator** then
+advertises `nvidia.com/gpu` onto them (see
+[fake-gpu-operator/README.md](../fake-gpu-operator/README.md)). We also give the
+nodes the same `gpu-pool` / product labels GPU Feature Discovery would apply on a
+real cluster, and the control plane behaves exactly as it would against a real GPU
+fleet. KWOK and the operator are complementary: KWOK = nodes, operator = the GPU
+layer on those nodes.
 
 ## Why this is legitimate (and where it stops)
 
-💡 The Kubernetes scheduler never talks to a GPU. It compares integer resource
+💡 The default Kubernetes scheduler never talks to a GPU. It compares integer resource
 requests against integer node allocatable values. A fake node with
 `nvidia.com/gpu: 8` exercises the identical scheduling code path as a DGX with 8
 real GPUs. What it does NOT exercise: kubelet device allocation, the NVIDIA
@@ -55,23 +59,26 @@ Each fake node carries:
 - `kwok.x-k8s.io/node: fake` annotation (managed by KWOK)
 - Taint `kwok.x-k8s.io/node=fake:NoSchedule` - workloads must tolerate it, which
   doubles as a safety net so nothing accidental lands on fake nodes
-- Labels mirroring what GPU Feature Discovery sets on real clusters:
-  `nvidia.com/gpu.product`, `nvidia.com/gpu.count`, plus a lab-specific
-  `gpu-pool` label for pool-level targeting
+- `run.ai/simulated-gpu-node-pool: <pool>` - the label the fake-gpu-operator keys
+  off to advertise that pool's GPUs onto the node
+- `gpu-pool` and `nvidia.com/gpu.product` labels for pool targeting/display, matching
+  what GPU Feature Discovery sets on real clusters
 
-See [`fake-gpu-node-template.yaml`](./fake-gpu-node-template.yaml) for the annotated
-template - read it top to bottom; every field is commented with why it's there.
+Note the node script no longer hand-writes `nvidia.com/gpu` into `status.allocatable`
+- the operator does that, so the advertisement is operator-shaped (a device plugin,
+like production). See [`fake-gpu-node-template.yaml`](./fake-gpu-node-template.yaml)
+for the annotated node template.
 
-## Where these labels come from
+## Where the GPU count comes from
 
-The `nvidia.com/gpu.product` values here are written by our script, not discovered by
-GFD. On a real cluster, GFD discovers them from the driver. The label *names* are
-kept identical to real GFD output so that workload manifests written against this
-simulation work unchanged on real clusters.
+The `nvidia.com/gpu` integer is advertised by the fake-gpu-operator from its per-pool
+topology, not hand-written and not discovered from a driver (there is none). The
+`nvidia.com/gpu.product` label is a display/targeting convenience whose *name* matches
+real GFD output, so workload manifests written here work unchanged on real clusters.
 
-✅ **Checkpoint:** open the template and find the single field the scheduler actually
-uses to make GPU placement decisions (hint: it's an integer under
-`status.allocatable`). If you can point to it, you understand why this simulation is
-both legitimate *and* limited.
+✅ **Checkpoint:** name the single field the scheduler uses for GPU placement (an
+integer under `status.allocatable`, now advertised by the operator) and say which
+component puts it there. If you can, you understand why this simulation is both
+legitimate *and* limited.
 
-➡️ **Back to:** [Lesson 1, Step 1](../README.md#step-1--stand-up-the-simulated-fleet).
+➡️ **Back to:** [Lesson 1, Step 1](../README.md#step-1---stand-up-the-simulated-fleet).

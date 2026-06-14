@@ -3,7 +3,7 @@
 > Part of [★ Your Lab Notebook](./README.md) · Course home:
 > [AI Factory Operations Lab](../../README.md). Every lesson's "🔬 What you proved /
 > did NOT prove" box traces back to this table - it is the course's source of truth
-> for honest claims.
+> for accurate claims.
 
 The credibility of this project rests on this file. It states exactly which
 claims each lab mode can support.
@@ -12,12 +12,13 @@ claims each lab mode can support.
 
 | Claim | Why it holds |
 |---|---|
-| Kubernetes GPU scheduling and placement behaviour | Scheduler compares integers; fake `nvidia.com/gpu` exercises the identical code path |
+| Kubernetes GPU scheduling and placement behaviour | The default scheduler compares integers; fake `nvidia.com/gpu` exercises the identical code path |
 | Pending-pod triage workflow | Events and describe output are produced by the real control plane |
 | Heterogeneous fleet modelling (pools, labels, taints) | Pure API-level design |
 | Queue pressure and contention dynamics | Real scheduler, real contention, fake capacity |
 | Queue/quota policy behaviour (with KAI Scheduler) | Scheduling policy is control-plane logic |
 | Fractional-GPU *scheduling arithmetic* (HAMi/KAI concepts, Lesson 1C Parts 1–2) | Deciding whether a memory/core slice fits a device is bookkeeping over integers |
+| Observability *pipeline design* on synthetic DCGM metrics (fake-gpu-operator) | The metric names/labels (`DCGM_FI_*`) and per-pod attribution are real; the values are fabricated, so dashboards/alerts prove design not telemetry |
 | Slurm GRES *scheduling* logic (Phase 3, fake GRES) | slurmctld scheduling does not require the device to exist |
 
 ## Claims ONLY the REAL mode supports

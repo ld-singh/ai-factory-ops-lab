@@ -187,24 +187,28 @@ co-residency, and the in-pod `nvidia-smi` / allocation-failure output.
 
 ---
 
-## Part 4 - 🟦 Optional: the scheduling half on the fake fleet
+## Two paired runnable lessons
 
-HAMi's scheduler learns each node's device inventory from annotations its device
-plugin registers. On a KWOK node there is no device plugin, so out of the box the
-fake fleet is invisible to HAMi. It is *possible* to hand-write the registration
-annotations on fake nodes to exercise HAMi's fractional bin-packing the way Lesson 1
-hand-writes GFD labels - but the annotation format is an internal contract that
-changes between releases, so this course doesn't ship manifests for it.
+The concepts above are split into two self-contained sub-lessons that sit on opposite
+sides of the scope boundary. Each has its own Makefile and pinned versions.
 
-If you attempt it, treat it as a research exercise: read the annotation format from
-the HAMi source for the exact version you installed, and document what you find. The
-*claim* it would support is narrow - "HAMi's placement arithmetic over fractional
-requests" - and the enforcement half still belongs to Part 3 only.
+- [`hami-scheduling-sim/`](./hami-scheduling-sim/README.md) - control plane, **no GPU**.
+  Based on the official [HAMi local-fake-gpu tutorial](https://project-hami.io/tutorials/labs/local-fake-gpu):
+  a kind cluster with real workers, the run.ai fake-gpu-operator advertising
+  `nvidia.com/gpu`, HAMi with its device plugin disabled, and a node-registration
+  annotation that lets the scheduler place fractional requests. Validated: a fractional
+  pod (`gpu:1, gpumem:3000, gpucores:30`) schedules, and an over-large `gpumem` request
+  stays Pending (`CardInsufficientMemory`). Scheduling only, not isolation.
+- [`hami-isolation-realgpu/`](./hami-isolation-realgpu/README.md) - data plane, **one
+  cheap real GPU**. Two pods share a single consumer 24 GB card; you observe the
+  virtualized `nvidia-smi` and a CUDA allocation refused at the slice limit. Validates
+  runtime isolation, which the simulation cannot.
 
-💡 **The honest default:** for fractional scheduling *concepts*, Parts 1–2 plus
-Lesson 1B's quota arithmetic already give you the control-plane story; Part 3 on a
-$5 rental gives you the enforcement story. The hand-faked-annotation path is only
-worth it if you enjoy spelunking.
+The official tutorial notes `gpumem`/`gpucores` "require a real GPU"; that is about
+runtime **isolation**. Fractional **scheduling** works on fakes once HAMi's scheduler
+has the per-GPU memory/core figures, which the sim lesson supplies via the
+`hami.io/node-nvidia-register` annotation. The split keeps the boundary clear: the sim
+proves the placement decision, the real-GPU lesson proves enforcement.
 
 ---
 

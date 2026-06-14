@@ -1,0 +1,60 @@
+name: Deploy docs site
+
+on:
+  push:
+    branches: [main]
+    # Rebuild when content or site config changes.
+    paths:
+      - "portfolio-lab/**/*.md"
+      - "runbooks/**/*.md"
+      - "diagrams/**/*.md"
+      - "control-plane/**/*.md"
+      - "docs/**"
+      - "mkdocs.yml"
+      - "scripts/sync-docs.sh"
+      - "requirements-docs.txt"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One concurrent deploy; let an in-progress run finish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Silence Material for MkDocs' advocacy banner about a future MkDocs 2.0.
+    env:
+      NO_MKDOCS_2_WARNING: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-docs.txt
+      - name: Sync lesson markdown into docs/
+        run: bash scripts/sync-docs.sh
+      - name: Build site
+        # Not --strict: lesson pages intentionally link to code files (.sh/.yaml) that
+        # live in the repo but are not part of the rendered site, which strict rejects.
+        run: mkdocs build
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

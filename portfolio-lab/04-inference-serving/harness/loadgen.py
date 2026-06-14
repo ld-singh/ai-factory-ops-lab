@@ -13,7 +13,7 @@ It sweeps a list of concurrency levels and prints a table plus the
 throughput-vs-latency trade-off, which is the whole point: bigger batches buy
 throughput at the cost of per-request latency.
 
-HONESTY MARKER: numbers are only a *benchmark* when produced against a real GPU
+SCOPE NOTE: numbers are only a *benchmark* when produced against a real GPU
 server (Lesson 2 machine). Run against a CPU-served model first only to validate
 that this harness works end to end - those numbers are meaningless as a benchmark.
 

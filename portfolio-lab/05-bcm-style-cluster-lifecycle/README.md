@@ -6,7 +6,7 @@
 
 > 🟡 **STATUS: RUNNABLE DRILL (Phase 6), conceptual mapping.**
 >
-> **HONESTY MARKER:** this lesson does **not** use NVIDIA Base Command Manager and
+> **SCOPE NOTE:** this lesson does **not** use NVIDIA Base Command Manager and
 > invents **no BCM commands**. Instead it ships a runnable drill that implements the
 > *generic* node lifecycle BCM automates - provision → health-gate → in-service →
 > patch → retire - as real Kubernetes state transitions on the KWOK fake fleet, then
@@ -91,7 +91,7 @@ It will:
 as real `kubectl` state, with a workload correctly evicted and rescheduled across the
 patch. Each stage maps to a BCM concept in the table above.
 
-💡 **Why this is honest:** it never claims to be BCM. It demonstrates the *mechanism*
+💡 **Why this is defensible:** it never claims to be BCM. It demonstrates the *mechanism*
 BCM automates (image-based, health-gated, drain-before-reimage lifecycle) using tools
 you can actually run, which is a defensible "I understand what BCM does" - stronger
 than reciting commands you've never executed.

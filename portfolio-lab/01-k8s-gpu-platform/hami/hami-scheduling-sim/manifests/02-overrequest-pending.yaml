@@ -1,0 +1,23 @@
+# Scenario 2: request more GPU memory than any node advertises, so the pod cannot
+# fit anywhere and stays Pending. This proves HAMi's capacity accounting at the
+# control-plane level.
+#
+# The real threshold depends on the memory the mock device plugin advertises per
+# GPU. Read it first:
+#   kubectl describe node | grep nvidia.com
+# then make sure the value below is comfortably ABOVE that number. 999999 MiB
+# (about 976 GiB) is far beyond any single simulated GPU; lower it only if your
+# mock advertises something unusually large.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hami-overrequest
+spec:
+  restartPolicy: Never
+  containers:
+    - name: app
+      image: registry.k8s.io/pause:3.9
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+          nvidia.com/gpumem: 999999

@@ -27,4 +27,4 @@ scheduler-development workflows assume it. Swap freely if you prefer k3d.
 ✅ **Checkpoint:** `kubectl get nodes` shows a control-plane node and one worker
 (the `kwok-gpu-*` nodes appear only after Step 1's later scripts run).
 
-➡️ **Back to:** [Lesson 1, Step 1](../README.md#step-1--stand-up-the-simulated-fleet).
+➡️ **Back to:** [Lesson 1, Step 1](../README.md#step-1---stand-up-the-simulated-fleet).

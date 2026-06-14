@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# lifecycle-drill.sh - a runnable, honest BCM-STYLE node lifecycle on the KWOK
+# lifecycle-drill.sh - a runnable BCM-STYLE node lifecycle on the KWOK
 # fake fleet. It does NOT use NVIDIA Base Command Manager (no invented BCM
 # commands); it implements the *generic* lifecycle BCM automates, so you can
 # watch each stage as real Kubernetes state transitions:

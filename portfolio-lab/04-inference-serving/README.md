@@ -75,7 +75,7 @@ paying for a GPU. Validate the harness for free here, then spend the rented GPU 
 | **p95/p99 latency** | Tail of end-to-end request latency | SLOs are tail-based; averages hide the pain |
 | **Tokens/sec** | Aggregate output throughput | The capacity number; what you provision against |
 | **Requests/sec** | Request-level throughput | Only meaningful alongside token lengths |
-| **Goodput** | Throughput counting *only* requests that met their SLO | The honest number - high tokens/sec with blown p99 is failure |
+| **Goodput** | Throughput counting *only* requests that met their SLO | The true number - high tokens/sec with blown p99 is failure |
 | **Error rate** | Non-2xx / timeouts / OOM-rejected | The thing batching pushes on when KV cache fills |
 
 💡 **The core tension to demonstrate:** throughput and latency trade off through
@@ -126,7 +126,7 @@ measuring what sharing costs in p99.
 ✅ **Evidence (when implemented):** lands in
 [`../06-validation-reports/inference-benchmark-report.md`](../06-validation-reports/inference-benchmark-report.md).
 
-🔬 **Sim vs real:** there is no honest simulation tier for benchmark *numbers* -
+🔬 **Sim vs real:** there is no meaningful simulation tier for benchmark *numbers* -
 this lesson is 🟥 by nature. What you can do for free now: the concepts above, the
 harness code, and the dashboard panels (Lesson 4) that will receive the metrics.
 

@@ -1,0 +1,24 @@
+# Scenario 1: a single fractional GPU request the HAMi scheduler can place.
+#   nvidia.com/gpu: 1        one physical GPU
+#   nvidia.com/gpumem: 3000  per-pod GPU memory in MiB (1 unit = 1 MiB).
+#                            TODO: HAMi docs phrase this as "MB"; confirm vs the chart.
+#   nvidia.com/gpucores: 30  share of GPU compute, in percent
+#
+# The HAMi mutating webhook routes pods that request these resources to the HAMi
+# scheduler automatically, so schedulerName is intentionally NOT set here. The
+# container is pause: it never touches a GPU, which is the whole point of a
+# control-plane-only test.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hami-fractional
+spec:
+  restartPolicy: Never
+  containers:
+    - name: app
+      image: registry.k8s.io/pause:3.9
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+          nvidia.com/gpumem: 3000
+          nvidia.com/gpucores: 30

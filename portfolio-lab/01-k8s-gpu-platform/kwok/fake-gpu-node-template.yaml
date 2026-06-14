@@ -3,8 +3,9 @@
 # The generator script (../scripts/create-fake-gpu-nodes.sh) stamps out concrete
 # nodes from this shape with pool-specific values substituted.
 #
-# SIMULATION HONESTY: this Node object is pure API state. There is no kubelet,
-# no driver, no GPU. It proves scheduler behaviour only.
+# SIMULATION SCOPE: this Node object is pure API state. There is no kubelet,
+# no driver, no GPU. KWOK provides the node; the fake-gpu-operator advertises the
+# GPUs onto it. It proves scheduler behaviour (and observability-pipeline shape) only.
 apiVersion: v1
 kind: Node
 metadata:
@@ -18,11 +19,12 @@ metadata:
     kubernetes.io/hostname: kwok-gpu-a100-0
     node-role.kubernetes.io/gpu-worker: ""
     type: kwok                           # easy bulk selection: kubectl get nodes -l type=kwok
-    # --- Lab-specific pool label -------------------------------------------
+    # --- Lab-specific pool label (workload nodeSelectors target this) -------
     gpu-pool: a100
-    # --- GFD-style labels (script-written here; GFD-discovered on real HW) --
+    # --- The label the fake-gpu-operator keys off to advertise this pool's GPUs ---
+    run.ai/simulated-gpu-node-pool: a100
+    # --- GFD-style product label (name matches real GFD; for targeting/display) --
     nvidia.com/gpu.product: NVIDIA-A100-SXM4-80GB
-    nvidia.com/gpu.count: "8"
 spec:
   taints:
     # Standard KWOK taint. Demo workloads tolerate it explicitly; anything that
@@ -31,16 +33,17 @@ spec:
       value: fake
       effect: NoSchedule
 status:
+  # NOTE: no nvidia.com/gpu here. The fake-gpu-operator advertises it onto the node
+  # from the pool's topology (operator-shaped, like a real device plugin). The
+  # scheduler then reads that integer from status.allocatable to place GPU pods.
   allocatable:
     cpu: "96"
     memory: 1024Gi
     pods: "110"
-    nvidia.com/gpu: "8"                  # the integer the scheduler actually uses
   capacity:
     cpu: "96"
     memory: 1024Gi
     pods: "110"
-    nvidia.com/gpu: "8"
   nodeInfo:
     architecture: amd64
     operatingSystem: linux

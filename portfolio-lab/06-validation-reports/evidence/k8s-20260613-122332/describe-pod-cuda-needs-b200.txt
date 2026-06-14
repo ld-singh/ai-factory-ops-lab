@@ -1,0 +1,47 @@
+$ kubectl describe -n gpu-demo pod/cuda-needs-b200
+
+Name:             cuda-needs-b200
+Namespace:        gpu-demo
+Priority:         0
+Service Account:  default
+Node:             <none>
+Labels:           scenario=pending-selector
+Annotations:      <none>
+Status:           Pending
+IP:               
+IPs:              <none>
+Containers:
+  app:
+    Image:      nvidia/cuda:12.4.1-base-ubuntu22.04
+    Port:       <none>
+    Host Port:  <none>
+    Command:
+      sleep
+      infinity
+    Limits:
+      nvidia.com/gpu:  1
+    Requests:
+      nvidia.com/gpu:  1
+    Environment:       <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-x677w (ro)
+Conditions:
+  Type           Status
+  PodScheduled   False 
+Volumes:
+  kube-api-access-x677w:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    Optional:                false
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              gpu-pool=b200
+Tolerations:                 kwok.x-k8s.io/node=fake:NoSchedule
+                             node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason            Age                  From               Message
+  ----     ------            ----                 ----               -------
+  Warning  FailedScheduling  174m (x34 over 21h)  default-scheduler  0/7 nodes are available: 1 node(s) had untolerated taint(s), 6 node(s) didn't match Pod's node affinity/selector. no new claims to deallocate, preemption: 0/7 nodes are available: 7 Preemption is not helpful for scheduling.
+  Warning  FailedScheduling  26m (x6 over 51m)    default-scheduler  0/7 nodes are available: 1 node(s) had untolerated taint(s), 6 node(s) didn't match Pod's node affinity/selector. no new claims to deallocate, preemption: 0/7 nodes are available: 7 Preemption is not helpful for scheduling.

@@ -1,0 +1,548 @@
+$ kubectl describe nodes
+
+Name:               ai-factory-lab-control-plane
+Roles:              control-plane
+Labels:             beta.kubernetes.io/arch=amd64
+                    beta.kubernetes.io/os=linux
+                    kubernetes.io/arch=amd64
+                    kubernetes.io/hostname=ai-factory-lab-control-plane
+                    kubernetes.io/os=linux
+                    node-role.kubernetes.io/control-plane=
+                    node.kubernetes.io/exclude-from-external-load-balancers=
+Annotations:        node.alpha.kubernetes.io/ttl: 0
+                    volumes.kubernetes.io/controller-managed-attach-detach: true
+CreationTimestamp:  Wed, 10 Jun 2026 11:05:36 +1000
+Taints:             node-role.kubernetes.io/control-plane:NoSchedule
+Unschedulable:      false
+Lease:
+  HolderIdentity:  ai-factory-lab-control-plane
+  AcquireTime:     <unset>
+  RenewTime:       Sat, 13 Jun 2026 12:23:23 +1000
+Conditions:
+  Type             Status  LastHeartbeatTime                 LastTransitionTime                Reason                       Message
+  ----             ------  -----------------                 ------------------                ------                       -------
+  MemoryPressure   False   Sat, 13 Jun 2026 12:18:29 +1000   Wed, 10 Jun 2026 11:05:35 +1000   KubeletHasSufficientMemory   kubelet has sufficient memory available
+  DiskPressure     False   Sat, 13 Jun 2026 12:18:29 +1000   Wed, 10 Jun 2026 11:05:35 +1000   KubeletHasNoDiskPressure     kubelet has no disk pressure
+  PIDPressure      False   Sat, 13 Jun 2026 12:18:29 +1000   Wed, 10 Jun 2026 11:05:35 +1000   KubeletHasSufficientPID      kubelet has sufficient PID available
+  Ready            True    Sat, 13 Jun 2026 12:18:29 +1000   Wed, 10 Jun 2026 11:05:57 +1000   KubeletReady                 kubelet is posting ready status
+Addresses:
+  InternalIP:  172.18.0.2
+  Hostname:    ai-factory-lab-control-plane
+Capacity:
+  cpu:                20
+  ephemeral-storage:  263112772Ki
+  hugepages-1Gi:      0
+  hugepages-2Mi:      0
+  memory:             16157348Ki
+  pods:               110
+Allocatable:
+  cpu:                20
+  ephemeral-storage:  263112772Ki
+  hugepages-1Gi:      0
+  hugepages-2Mi:      0
+  memory:             16157348Ki
+  pods:               110
+System Info:
+  Machine ID:                 7f0a31fcee094f2a84e3d652c9f7eeb2
+  System UUID:                7f0a31fcee094f2a84e3d652c9f7eeb2
+  Boot ID:                    0a8a42d3-53e5-4df2-bb2f-bba5b5dba4a8
+  Kernel Version:             6.18.33.1-microsoft-standard-WSL2
+  OS Image:                   Debian GNU/Linux 13 (trixie)
+  Operating System:           linux
+  Architecture:               amd64
+  Container Runtime Version:  containerd://2.3.1
+  Kubelet Version:            v1.36.1
+  Kube-Proxy Version:         
+PodCIDR:                      10.244.0.0/24
+PodCIDRs:                     10.244.0.0/24
+ProviderID:                   kind://docker/ai-factory-lab/ai-factory-lab-control-plane
+Non-terminated Pods:          (10 in total)
+  Namespace                   Name                                                    CPU Requests  CPU Limits  Memory Requests  Memory Limits  Age
+  ---------                   ----                                                    ------------  ----------  ---------------  -------------  ---
+  kube-system                 coredns-589f44dc88-mjqdm                                100m (0%)     0 (0%)      70Mi (0%)        170Mi (1%)     3d1h
+  kube-system                 coredns-589f44dc88-nvwh2                                100m (0%)     0 (0%)      70Mi (0%)        170Mi (1%)     3d1h
+  kube-system                 etcd-ai-factory-lab-control-plane                       100m (0%)     0 (0%)      100Mi (0%)       0 (0%)         22h
+  kube-system                 kindnet-bcwnz                                           100m (0%)     100m (0%)   50Mi (0%)        50Mi (0%)      3d1h
+  kube-system                 kube-apiserver-ai-factory-lab-control-plane             250m (1%)     0 (0%)      0 (0%)           0 (0%)         22h
+  kube-system                 kube-controller-manager-ai-factory-lab-control-plane    200m (1%)     0 (0%)      0 (0%)           0 (0%)         3d1h
+  kube-system                 kube-proxy-5vthd                                        0 (0%)        0 (0%)      0 (0%)           0 (0%)         3d1h
+  kube-system                 kube-scheduler-ai-factory-lab-control-plane             100m (0%)     0 (0%)      0 (0%)           0 (0%)         3d1h
+  local-path-storage          local-path-provisioner-855c7b7774-hp8ws                 0 (0%)        0 (0%)      0 (0%)           0 (0%)         3d1h
+  monitoring                  kube-prometheus-stack-prometheus-node-exporter-v4s9x    0 (0%)        0 (0%)      0 (0%)           0 (0%)         22h
+Allocated resources:
+  (Total limits may be over 100 percent, i.e., overcommitted.)
+  Resource           Requests    Limits
+  --------           --------    ------
+  cpu                950m (4%)   100m (0%)
+  memory             290Mi (1%)  390Mi (2%)
+  ephemeral-storage  0 (0%)      0 (0%)
+  hugepages-1Gi      0 (0%)      0 (0%)
+  hugepages-2Mi      0 (0%)      0 (0%)
+Events:              <none>
+
+
+Name:               ai-factory-lab-worker
+Roles:              <none>
+Labels:             beta.kubernetes.io/arch=amd64
+                    beta.kubernetes.io/os=linux
+                    kubernetes.io/arch=amd64
+                    kubernetes.io/hostname=ai-factory-lab-worker
+                    kubernetes.io/os=linux
+                    node-purpose=system
+Annotations:        node.alpha.kubernetes.io/ttl: 0
+                    volumes.kubernetes.io/controller-managed-attach-detach: true
+CreationTimestamp:  Wed, 10 Jun 2026 11:05:46 +1000
+Taints:             <none>
+Unschedulable:      false
+Lease:
+  HolderIdentity:  ai-factory-lab-worker
+  AcquireTime:     <unset>
+  RenewTime:       Sat, 13 Jun 2026 12:23:32 +1000
+Conditions:
+  Type             Status  LastHeartbeatTime                 LastTransitionTime                Reason                       Message
+  ----             ------  -----------------                 ------------------                ------                       -------
+  MemoryPressure   False   Sat, 13 Jun 2026 12:21:27 +1000   Wed, 10 Jun 2026 11:05:46 +1000   KubeletHasSufficientMemory   kubelet has sufficient memory available
+  DiskPressure     False   Sat, 13 Jun 2026 12:21:27 +1000   Wed, 10 Jun 2026 11:05:46 +1000   KubeletHasNoDiskPressure     kubelet has no disk pressure
+  PIDPressure      False   Sat, 13 Jun 2026 12:21:27 +1000   Wed, 10 Jun 2026 11:05:46 +1000   KubeletHasSufficientPID      kubelet has sufficient PID available
+  Ready            True    Sat, 13 Jun 2026 12:21:27 +1000   Wed, 10 Jun 2026 11:05:59 +1000   KubeletReady                 kubelet is posting ready status
+Addresses:
+  InternalIP:  172.18.0.3
+  Hostname:    ai-factory-lab-worker
+Capacity:
+  cpu:                20
+  ephemeral-storage:  263112772Ki
+  hugepages-1Gi:      0
+  hugepages-2Mi:      0
+  memory:             16157348Ki
+  pods:               110
+Allocatable:
+  cpu:                20
+  ephemeral-storage:  263112772Ki
+  hugepages-1Gi:      0
+  hugepages-2Mi:      0
+  memory:             16157348Ki
+  pods:               110
+System Info:
+  Machine ID:                 399b272654734f3da93ae1ecf076988e
+  System UUID:                399b272654734f3da93ae1ecf076988e
+  Boot ID:                    0a8a42d3-53e5-4df2-bb2f-bba5b5dba4a8
+  Kernel Version:             6.18.33.1-microsoft-standard-WSL2
+  OS Image:                   Debian GNU/Linux 13 (trixie)
+  Operating System:           linux
+  Architecture:               amd64
+  Container Runtime Version:  containerd://2.3.1
+  Kubelet Version:            v1.36.1
+  Kube-Proxy Version:         
+PodCIDR:                      10.244.1.0/24
+PodCIDRs:                     10.244.1.0/24
+ProviderID:                   kind://docker/ai-factory-lab/ai-factory-lab-worker
+Non-terminated Pods:          (10 in total)
+  Namespace                   Name                                                        CPU Requests  CPU Limits  Memory Requests  Memory Limits  Age
+  ---------                   ----                                                        ------------  ----------  ---------------  -------------  ---
+  gpu-observability           fake-dcgm-exporter-74d977785-255fv                          0 (0%)        0 (0%)      0 (0%)           0 (0%)         22h
+  kube-system                 kindnet-9rrls                                               100m (0%)     100m (0%)   50Mi (0%)        50Mi (0%)      3d1h
+  kube-system                 kube-proxy-gb8n5                                            0 (0%)        0 (0%)      0 (0%)           0 (0%)         3d1h
+  kube-system                 kwok-controller-585d894967-g9qq6                            0 (0%)        0 (0%)      0 (0%)           0 (0%)         3d1h
+  monitoring                  alertmanager-kube-prometheus-stack-alertmanager-0           0 (0%)        0 (0%)      64Mi (0%)        0 (0%)         22h
+  monitoring                  kube-prometheus-stack-grafana-7d766dbbbd-76k66              0 (0%)        0 (0%)      0 (0%)           0 (0%)         22h
+  monitoring                  kube-prometheus-stack-kube-state-metrics-b889559b9-v6lg7    0 (0%)        0 (0%)      0 (0%)           0 (0%)         22h
+  monitoring                  kube-prometheus-stack-operator-79bc6f4d7f-qlh8j             0 (0%)        0 (0%)      0 (0%)           0 (0%)         22h
+  monitoring                  kube-prometheus-stack-prometheus-node-exporter-9wqfx        0 (0%)        0 (0%)      0 (0%)           0 (0%)         22h
+  monitoring                  prometheus-kube-prometheus-stack-prometheus-0               0 (0%)        0 (0%)      0 (0%)           0 (0%)         22h
+Allocated resources:
+  (Total limits may be over 100 percent, i.e., overcommitted.)
+  Resource           Requests    Limits
+  --------           --------    ------
+  cpu                100m (0%)   100m (0%)
+  memory             114Mi (0%)  50Mi (0%)
+  ephemeral-storage  0 (0%)      0 (0%)
+  hugepages-1Gi      0 (0%)      0 (0%)
+  hugepages-2Mi      0 (0%)      0 (0%)
+Events:              <none>
+
+
+Name:               kwok-gpu-a100-0
+Roles:              gpu-worker
+Labels:             beta.kubernetes.io/arch=amd64
+                    beta.kubernetes.io/os=linux
+                    gpu-pool=a100
+                    kubernetes.io/arch=amd64
+                    kubernetes.io/hostname=kwok-gpu-a100-0
+                    kubernetes.io/os=linux
+                    node-role.kubernetes.io/gpu-worker=
+                    nvidia.com/gpu.count=8
+                    nvidia.com/gpu.product=NVIDIA-A100-SXM4-80GB
+                    type=kwok
+Annotations:        kwok.x-k8s.io/node: fake
+                    node.alpha.kubernetes.io/ttl: 0
+CreationTimestamp:  Wed, 10 Jun 2026 11:06:16 +1000
+Taints:             kwok.x-k8s.io/node=fake:NoSchedule
+Unschedulable:      false
+Lease:
+  HolderIdentity:  kwok-controller-585d894967-g9qq6_003e44b1-2fdb-42a9-95fd-16ab4b62345c
+  AcquireTime:     <unset>
+  RenewTime:       Sat, 13 Jun 2026 12:23:32 +1000
+Conditions:
+  Type                 Status  LastHeartbeatTime                 LastTransitionTime                Reason                       Message
+  ----                 ------  -----------------                 ------------------                ------                       -------
+  Ready                True    Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:16 +1000   KubeletReady                 kubelet is posting ready status
+  MemoryPressure       False   Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:16 +1000   KubeletHasSufficientMemory   kubelet has sufficient memory available
+  DiskPressure         False   Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:16 +1000   KubeletHasNoDiskPressure     kubelet has no disk pressure
+  PIDPressure          False   Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:16 +1000   KubeletHasSufficientPID      kubelet has sufficient PID available
+  NetworkUnavailable   False   Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:16 +1000   RouteCreated                 RouteController created a route
+Addresses:
+  InternalIP:  10.244.1.2
+Capacity:
+  cpu:             96
+  memory:          1Ti
+  nvidia.com/gpu:  8
+  pods:            110
+Allocatable:
+  cpu:             96
+  memory:          1Ti
+  nvidia.com/gpu:  8
+  pods:            110
+System Info:
+  Machine ID:                 
+  System UUID:                
+  Boot ID:                    
+  Kernel Version:             kwok-v0.7.0
+  OS Image:                   
+  Operating System:           linux
+  Architecture:               amd64
+  Container Runtime Version:  fake
+  Kubelet Version:            fake
+  Kube-Proxy Version:         fake
+PodCIDR:                      10.244.2.0/24
+PodCIDRs:                     10.244.2.0/24
+Non-terminated Pods:          (11 in total)
+  Namespace                   Name                                                    CPU Requests  CPU Limits  Memory Requests  Memory Limits  Age
+  ---------                   ----                                                    ------------  ----------  ---------------  -------------  ---
+  gpu-demo                    cuda-batch-small                                        0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-7pf2j                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-cdh4g                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-ghlfw                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-q8cf4                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-w6trn                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-wc8dr                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-zb4bk                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  kube-system                 kindnet-rb4qj                                           100m (0%)     100m (0%)   50Mi (0%)        50Mi (0%)      3d1h
+  kube-system                 kube-proxy-bhr7j                                        0 (0%)        0 (0%)      0 (0%)           0 (0%)         3d1h
+  monitoring                  kube-prometheus-stack-prometheus-node-exporter-r8m7l    0 (0%)        0 (0%)      0 (0%)           0 (0%)         22h
+Allocated resources:
+  (Total limits may be over 100 percent, i.e., overcommitted.)
+  Resource           Requests   Limits
+  --------           --------   ------
+  cpu                100m (0%)  100m (0%)
+  memory             50Mi (0%)  50Mi (0%)
+  ephemeral-storage  0 (0%)     0 (0%)
+  nvidia.com/gpu     8          8
+Events:              <none>
+
+
+Name:               kwok-gpu-a100-1
+Roles:              gpu-worker
+Labels:             beta.kubernetes.io/arch=amd64
+                    beta.kubernetes.io/os=linux
+                    gpu-pool=a100
+                    kubernetes.io/arch=amd64
+                    kubernetes.io/hostname=kwok-gpu-a100-1
+                    kubernetes.io/os=linux
+                    node-role.kubernetes.io/gpu-worker=
+                    nvidia.com/gpu.count=8
+                    nvidia.com/gpu.product=NVIDIA-A100-SXM4-80GB
+                    type=kwok
+Annotations:        kwok.x-k8s.io/node: fake
+                    node.alpha.kubernetes.io/ttl: 0
+CreationTimestamp:  Wed, 10 Jun 2026 11:06:16 +1000
+Taints:             kwok.x-k8s.io/node=fake:NoSchedule
+Unschedulable:      false
+Lease:
+  HolderIdentity:  kwok-controller-585d894967-g9qq6_003e44b1-2fdb-42a9-95fd-16ab4b62345c
+  AcquireTime:     <unset>
+  RenewTime:       Sat, 13 Jun 2026 12:23:33 +1000
+Conditions:
+  Type                 Status  LastHeartbeatTime                 LastTransitionTime                Reason                       Message
+  ----                 ------  -----------------                 ------------------                ------                       -------
+  Ready                True    Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:16 +1000   KubeletReady                 kubelet is posting ready status
+  MemoryPressure       False   Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:16 +1000   KubeletHasSufficientMemory   kubelet has sufficient memory available
+  DiskPressure         False   Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:16 +1000   KubeletHasNoDiskPressure     kubelet has no disk pressure
+  PIDPressure          False   Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:16 +1000   KubeletHasSufficientPID      kubelet has sufficient PID available
+  NetworkUnavailable   False   Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:16 +1000   RouteCreated                 RouteController created a route
+Addresses:
+  InternalIP:  10.244.1.2
+Capacity:
+  cpu:             96
+  memory:          1Ti
+  nvidia.com/gpu:  8
+  pods:            110
+Allocatable:
+  cpu:             96
+  memory:          1Ti
+  nvidia.com/gpu:  8
+  pods:            110
+System Info:
+  Machine ID:                 
+  System UUID:                
+  Boot ID:                    
+  Kernel Version:             kwok-v0.7.0
+  OS Image:                   
+  Operating System:           linux
+  Architecture:               amd64
+  Container Runtime Version:  fake
+  Kubelet Version:            fake
+  Kube-Proxy Version:         fake
+PodCIDR:                      10.244.3.0/24
+PodCIDRs:                     10.244.3.0/24
+Non-terminated Pods:          (11 in total)
+  Namespace                   Name                                                    CPU Requests  CPU Limits  Memory Requests  Memory Limits  Age
+  ---------                   ----                                                    ------------  ----------  ---------------  -------------  ---
+  gpu-demo                    queue-pressure-6696ccff7b-78qgb                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-8cvm7                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-kt27v                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-m56gp                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-nppd2                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-rk7xd                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-tzws7                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-w5m25                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  kube-system                 kindnet-w8csn                                           100m (0%)     100m (0%)   50Mi (0%)        50Mi (0%)      3d1h
+  kube-system                 kube-proxy-87nr6                                        0 (0%)        0 (0%)      0 (0%)           0 (0%)         3d1h
+  monitoring                  kube-prometheus-stack-prometheus-node-exporter-tzqrq    0 (0%)        0 (0%)      0 (0%)           0 (0%)         22h
+Allocated resources:
+  (Total limits may be over 100 percent, i.e., overcommitted.)
+  Resource           Requests   Limits
+  --------           --------   ------
+  cpu                100m (0%)  100m (0%)
+  memory             50Mi (0%)  50Mi (0%)
+  ephemeral-storage  0 (0%)     0 (0%)
+  nvidia.com/gpu     8          8
+Events:              <none>
+
+
+Name:               kwok-gpu-h100-0
+Roles:              gpu-worker
+Labels:             beta.kubernetes.io/arch=amd64
+                    beta.kubernetes.io/os=linux
+                    gpu-pool=h100
+                    kubernetes.io/arch=amd64
+                    kubernetes.io/hostname=kwok-gpu-h100-0
+                    kubernetes.io/os=linux
+                    node-role.kubernetes.io/gpu-worker=
+                    nvidia.com/gpu.count=8
+                    nvidia.com/gpu.product=NVIDIA-H100-80GB-HBM3
+                    type=kwok
+Annotations:        kwok.x-k8s.io/node: fake
+                    node.alpha.kubernetes.io/ttl: 0
+CreationTimestamp:  Wed, 10 Jun 2026 11:06:17 +1000
+Taints:             kwok.x-k8s.io/node=fake:NoSchedule
+Unschedulable:      false
+Lease:
+  HolderIdentity:  kwok-controller-585d894967-g9qq6_003e44b1-2fdb-42a9-95fd-16ab4b62345c
+  AcquireTime:     <unset>
+  RenewTime:       Sat, 13 Jun 2026 12:23:33 +1000
+Conditions:
+  Type                 Status  LastHeartbeatTime                 LastTransitionTime                Reason                       Message
+  ----                 ------  -----------------                 ------------------                ------                       -------
+  Ready                True    Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:17 +1000   KubeletReady                 kubelet is posting ready status
+  MemoryPressure       False   Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:17 +1000   KubeletHasSufficientMemory   kubelet has sufficient memory available
+  DiskPressure         False   Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:17 +1000   KubeletHasNoDiskPressure     kubelet has no disk pressure
+  PIDPressure          False   Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:17 +1000   KubeletHasSufficientPID      kubelet has sufficient PID available
+  NetworkUnavailable   False   Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:17 +1000   RouteCreated                 RouteController created a route
+Addresses:
+  InternalIP:  10.244.1.2
+Capacity:
+  cpu:             112
+  memory:          2Ti
+  nvidia.com/gpu:  8
+  pods:            110
+Allocatable:
+  cpu:             112
+  memory:          2Ti
+  nvidia.com/gpu:  8
+  pods:            110
+System Info:
+  Machine ID:                 
+  System UUID:                
+  Boot ID:                    
+  Kernel Version:             kwok-v0.7.0
+  OS Image:                   
+  Operating System:           linux
+  Architecture:               amd64
+  Container Runtime Version:  fake
+  Kubelet Version:            fake
+  Kube-Proxy Version:         fake
+PodCIDR:                      10.244.4.0/24
+PodCIDRs:                     10.244.4.0/24
+Non-terminated Pods:          (11 in total)
+  Namespace                   Name                                                    CPU Requests  CPU Limits  Memory Requests  Memory Limits  Age
+  ---------                   ----                                                    ------------  ----------  ---------------  -------------  ---
+  gpu-demo                    queue-pressure-6696ccff7b-5ckzt                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-72xjs                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-l5wtv                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-m7lt8                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-mxwsj                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-pc4v5                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-pns4f                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-s6fc7                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  kube-system                 kindnet-hxlwp                                           100m (0%)     100m (0%)   50Mi (0%)        50Mi (0%)      3d1h
+  kube-system                 kube-proxy-t84tc                                        0 (0%)        0 (0%)      0 (0%)           0 (0%)         3d1h
+  monitoring                  kube-prometheus-stack-prometheus-node-exporter-6w2h5    0 (0%)        0 (0%)      0 (0%)           0 (0%)         22h
+Allocated resources:
+  (Total limits may be over 100 percent, i.e., overcommitted.)
+  Resource           Requests   Limits
+  --------           --------   ------
+  cpu                100m (0%)  100m (0%)
+  memory             50Mi (0%)  50Mi (0%)
+  ephemeral-storage  0 (0%)     0 (0%)
+  nvidia.com/gpu     8          8
+Events:              <none>
+
+
+Name:               kwok-gpu-l40s-0
+Roles:              gpu-worker
+Labels:             beta.kubernetes.io/arch=amd64
+                    beta.kubernetes.io/os=linux
+                    gpu-pool=l40s
+                    kubernetes.io/arch=amd64
+                    kubernetes.io/hostname=kwok-gpu-l40s-0
+                    kubernetes.io/os=linux
+                    node-role.kubernetes.io/gpu-worker=
+                    nvidia.com/gpu.count=4
+                    nvidia.com/gpu.product=NVIDIA-L40S
+                    type=kwok
+Annotations:        kwok.x-k8s.io/node: fake
+                    node.alpha.kubernetes.io/ttl: 0
+CreationTimestamp:  Wed, 10 Jun 2026 11:06:17 +1000
+Taints:             kwok.x-k8s.io/node=fake:NoSchedule
+Unschedulable:      false
+Lease:
+  HolderIdentity:  kwok-controller-585d894967-g9qq6_003e44b1-2fdb-42a9-95fd-16ab4b62345c
+  AcquireTime:     <unset>
+  RenewTime:       Sat, 13 Jun 2026 12:23:23 +1000
+Conditions:
+  Type                 Status  LastHeartbeatTime                 LastTransitionTime                Reason                       Message
+  ----                 ------  -----------------                 ------------------                ------                       -------
+  Ready                True    Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:17 +1000   KubeletReady                 kubelet is posting ready status
+  MemoryPressure       False   Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:17 +1000   KubeletHasSufficientMemory   kubelet has sufficient memory available
+  DiskPressure         False   Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:17 +1000   KubeletHasNoDiskPressure     kubelet has no disk pressure
+  PIDPressure          False   Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:17 +1000   KubeletHasSufficientPID      kubelet has sufficient PID available
+  NetworkUnavailable   False   Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:17 +1000   RouteCreated                 RouteController created a route
+Addresses:
+  InternalIP:  10.244.1.2
+Capacity:
+  cpu:             64
+  memory:          512Gi
+  nvidia.com/gpu:  4
+  pods:            110
+Allocatable:
+  cpu:             64
+  memory:          512Gi
+  nvidia.com/gpu:  4
+  pods:            110
+System Info:
+  Machine ID:                 
+  System UUID:                
+  Boot ID:                    
+  Kernel Version:             kwok-v0.7.0
+  OS Image:                   
+  Operating System:           linux
+  Architecture:               amd64
+  Container Runtime Version:  fake
+  Kubelet Version:            fake
+  Kube-Proxy Version:         fake
+PodCIDR:                      10.244.5.0/24
+PodCIDRs:                     10.244.5.0/24
+Non-terminated Pods:          (7 in total)
+  Namespace                   Name                                                    CPU Requests  CPU Limits  Memory Requests  Memory Limits  Age
+  ---------                   ----                                                    ------------  ----------  ---------------  -------------  ---
+  gpu-demo                    queue-pressure-6696ccff7b-4j4d9                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-bfh7g                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-gdj2q                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-lf84p                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  kube-system                 kindnet-pzfc7                                           100m (0%)     100m (0%)   50Mi (0%)        50Mi (0%)      3d1h
+  kube-system                 kube-proxy-t9c2z                                        0 (0%)        0 (0%)      0 (0%)           0 (0%)         3d1h
+  monitoring                  kube-prometheus-stack-prometheus-node-exporter-g49ps    0 (0%)        0 (0%)      0 (0%)           0 (0%)         22h
+Allocated resources:
+  (Total limits may be over 100 percent, i.e., overcommitted.)
+  Resource           Requests   Limits
+  --------           --------   ------
+  cpu                100m (0%)  100m (0%)
+  memory             50Mi (0%)  50Mi (0%)
+  ephemeral-storage  0 (0%)     0 (0%)
+  nvidia.com/gpu     4          4
+Events:              <none>
+
+
+Name:               kwok-gpu-l40s-1
+Roles:              gpu-worker
+Labels:             beta.kubernetes.io/arch=amd64
+                    beta.kubernetes.io/os=linux
+                    gpu-pool=l40s
+                    kubernetes.io/arch=amd64
+                    kubernetes.io/hostname=kwok-gpu-l40s-1
+                    kubernetes.io/os=linux
+                    node-role.kubernetes.io/gpu-worker=
+                    nvidia.com/gpu.count=4
+                    nvidia.com/gpu.product=NVIDIA-L40S
+                    type=kwok
+Annotations:        kwok.x-k8s.io/node: fake
+                    node.alpha.kubernetes.io/ttl: 0
+CreationTimestamp:  Wed, 10 Jun 2026 11:06:17 +1000
+Taints:             kwok.x-k8s.io/node=fake:NoSchedule
+Unschedulable:      false
+Lease:
+  HolderIdentity:  kwok-controller-585d894967-g9qq6_003e44b1-2fdb-42a9-95fd-16ab4b62345c
+  AcquireTime:     <unset>
+  RenewTime:       Sat, 13 Jun 2026 12:23:23 +1000
+Conditions:
+  Type                 Status  LastHeartbeatTime                 LastTransitionTime                Reason                       Message
+  ----                 ------  -----------------                 ------------------                ------                       -------
+  Ready                True    Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:17 +1000   KubeletReady                 kubelet is posting ready status
+  MemoryPressure       False   Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:17 +1000   KubeletHasSufficientMemory   kubelet has sufficient memory available
+  DiskPressure         False   Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:17 +1000   KubeletHasNoDiskPressure     kubelet has no disk pressure
+  PIDPressure          False   Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:17 +1000   KubeletHasSufficientPID      kubelet has sufficient PID available
+  NetworkUnavailable   False   Sat, 13 Jun 2026 12:17:25 +1000   Wed, 10 Jun 2026 11:06:17 +1000   RouteCreated                 RouteController created a route
+Addresses:
+  InternalIP:  10.244.1.2
+Capacity:
+  cpu:             64
+  memory:          512Gi
+  nvidia.com/gpu:  4
+  pods:            110
+Allocatable:
+  cpu:             64
+  memory:          512Gi
+  nvidia.com/gpu:  4
+  pods:            110
+System Info:
+  Machine ID:                 
+  System UUID:                
+  Boot ID:                    
+  Kernel Version:             kwok-v0.7.0
+  OS Image:                   
+  Operating System:           linux
+  Architecture:               amd64
+  Container Runtime Version:  fake
+  Kubelet Version:            fake
+  Kube-Proxy Version:         fake
+PodCIDR:                      10.244.6.0/24
+PodCIDRs:                     10.244.6.0/24
+Non-terminated Pods:          (7 in total)
+  Namespace                   Name                                                    CPU Requests  CPU Limits  Memory Requests  Memory Limits  Age
+  ---------                   ----                                                    ------------  ----------  ---------------  -------------  ---
+  gpu-demo                    queue-pressure-6696ccff7b-kj9q6                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-lw6k2                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-lw896                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  gpu-demo                    queue-pressure-6696ccff7b-tth54                         0 (0%)        0 (0%)      0 (0%)           0 (0%)         21h
+  kube-system                 kindnet-m29lm                                           100m (0%)     100m (0%)   50Mi (0%)        50Mi (0%)      3d1h
+  kube-system                 kube-proxy-5m2jr                                        0 (0%)        0 (0%)      0 (0%)           0 (0%)         3d1h
+  monitoring                  kube-prometheus-stack-prometheus-node-exporter-fv58s    0 (0%)        0 (0%)      0 (0%)           0 (0%)         22h
+Allocated resources:
+  (Total limits may be over 100 percent, i.e., overcommitted.)
+  Resource           Requests   Limits
+  --------           --------   ------
+  cpu                100m (0%)  100m (0%)
+  memory             50Mi (0%)  50Mi (0%)
+  ephemeral-storage  0 (0%)     0 (0%)
+  nvidia.com/gpu     4          4
+Events:              <none>

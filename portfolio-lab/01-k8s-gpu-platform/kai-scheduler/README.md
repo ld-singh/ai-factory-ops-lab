@@ -4,52 +4,86 @@
 > [Lesson 1 - Kubernetes GPU Scheduling](../README.md) · Next:
 > [Lesson 1C - GPU sharing with HAMi](../hami/README.md)
 >
-> Do [Lesson 1, Step 3 scenario 4 (queue pressure)](../README.md#step-3--triage-like-its-a-real-cluster)
+> Do [Lesson 1, Step 3 scenario 4 (queue pressure)](../README.md#step-3---triage-like-its-a-real-cluster)
 > first - this lesson picks up exactly where that wall is.
 
-## Why this lesson is the best argument for fake GPUs
+## What this lesson teaches
 
-Here's the thing worth internalising: **the hardest, most valuable GPU-platform
-skills to learn are queue policy and gang scheduling - and they cost nothing to learn,
-because they are pure control-plane decisions.**
+Queue policy is the most valuable, most expensive-to-learn GPU-platform skill: which
+team's pod binds, in what order, and whether a group binds at all. KAI Scheduler is
+NVIDIA's open-source scheduler for exactly that (hierarchical queues, quota, over-quota
+borrowing, reclaim, gang scheduling, fair-share).
 
-A queue scheduler never touches a GPU. It decides *which pod binds to which node, in
-what order, and whether a group of pods may bind at all*. Those are API operations
-over integers and labels. A KWOK fake node with `nvidia.com/gpu: 8` exercises the
-**identical** decision path as a real DGX. So on a laptop, with zero GPU spend, you
-can faithfully reproduce:
+You can run KAI with **no real GPU**, but there is an important catch you must know up
+front.
 
-- quota enforcement across teams,
-- over-quota **borrowing** of idle capacity,
-- **reclaim** (preempting borrowed capacity when the owner returns),
-- **fair-share** ordering between queues,
-- **gang scheduling** - the all-or-nothing placement that stops distributed training
-  from deadlocking a cluster,
-- priority and **starvation** dynamics.
-
-Every one of those is something companies normally only learn by burning real GPU
-hours. You can learn the *decision logic* here for free. What you **cannot** learn
-here is anything that needs the GPU to actually exist - runtime GPU sharing/memory
-isolation, MIG, CUDA. We mark that line explicitly in every exercise.
+> ### The cluster requirement (read before you run)
+>
+> KAI does **not** schedule against raw `nvidia.com/gpu` in a node's allocatable; its
+> GPU accounting comes from a GPU-operator topology. That is exactly why **Lesson 1's
+> fleet is KWOK + the fake-gpu-operator** (the operator advertises GPUs and provides
+> the topology). KAI simply **reuses that shared Lesson 1 fleet** - `make up` here
+> builds the same fleet as `make phase1-up` and then installs KAI on top. No separate
+> fleet, no duplicated setup.
+>
+> Two things that would otherwise waste your time (both handled by the Lesson 1
+> scripts this reuses):
+> - **Chart source.** The fleet uses the run.ai JFrog chart
+>   (`https://runai.jfrog.io/artifactory/api/helm/fake-gpu-operator-charts-prod`). The
+>   `ghcr.io/run-ai/...` OCI build is DRA-oriented and never populates `nvidia.com/gpu`.
+> - **`scheduler.kubeScheduler.imageTag`** is not used by KAI's chart; KAI versions
+>   itself. (That knob is HAMi's, [Lesson 1C](../hami/README.md).)
 
 🎯 **Learning objectives** - after this lesson you can:
 
-1. Explain, concretely, what the default kube-scheduler cannot do for a multi-team
-   GPU cluster, and why each gap costs money.
-2. Install KAI Scheduler into the simulation cluster and point workloads at it.
-3. Design a **hierarchical queue + quota** model and demonstrate enforcement.
-4. Reproduce **borrowing** and **reclaim** between two queues, and capture both
-   states as evidence.
-5. Demonstrate **gang scheduling** preventing a partial-allocation deadlock.
-6. Trigger and diagnose **queue starvation**, then resolve it with priority/fair-share.
-7. State precisely which of these you proved on fake GPUs vs which require real
-   hardware.
+1. Explain what the default kube-scheduler cannot do for a multi-team GPU cluster.
+2. Install KAI Scheduler on the shared Lesson 1 fleet and point workloads at a queue.
+3. Design a **hierarchical queue + quota** model and **demonstrate enforcement**
+   (the validated, runnable exercise here).
+4. Explain over-quota **borrowing**, **reclaim**, and **gang scheduling**, and read the
+   precise limits of demonstrating them on a fake-GPU simulation.
 
-🧭 **Mode:** 🟦 Simulation (no GPU). Queueing, quota, and gang decisions are
-control-plane logic, so the fake fleet is a *valid* environment for all of it.
+🧭 **Mode:** 🟦 Simulation (no GPU), via the fake-gpu-operator. Real runtime behavior
+(CUDA, memory isolation, MIG) is out of scope; see [Lesson 2](../gpu-operator-real/README.md).
 
-📋 **Prerequisites:** [Lesson 1](../README.md) complete and the fake fleet up
-(`make phase1-up`).
+📋 **Prerequisites:** docker, kind, kubectl, helm, jq. The lesson's `make up` builds
+the shared Lesson 1 fleet (kind + KWOK + fake-gpu-operator, 32 GPUs) if it is not
+already up, then installs KAI.
+
+---
+
+## Run it (copy-paste)
+
+```bash
+cd portfolio-lab/01-k8s-gpu-platform/kai-scheduler
+
+make up            # shared Lesson 1 fleet (kind+KWOK+fake-gpu-operator, 32 GPUs) + KAI + queues
+make demo-quota    # VALIDATED: two teams each fill their 8-GPU quota
+make evidence      # capture queues, pods, events
+make uninstall     # remove KAI, the operator, the GPU nodes, and the demo namespace
+```
+
+✅ **Checkpoint (quota, validated):** after `make demo-quota`, `team-research` and
+`team-prod` each run **8 pods** (their quota), 0 pending. Confirm with
+`kubectl get pods -n kai-demo -L kai.scheduler/queue -o wide`. This proves the whole
+stack end to end: the fake-gpu-operator advertises GPUs, KAI's webhook routes the pods,
+the pod-grouper and scheduler place them, and quota is enforced per queue.
+
+> **Status of the other exercises on this fake fleet.** `make demo-borrow`,
+> `demo-reclaim`, and `demo-gang` are provided, but on this KWOK + fake-gpu-operator
+> simulation their headline behavior does **not** fully reproduce, and the scripts say
+> so when they run:
+> - **Borrow/reclaim:** with two equal-quota queues, KAI allocated each queue only up
+>   to its *deserved* share (8) and did not lend a queue's *idle but guaranteed*
+>   capacity to an over-quota sibling, even with `limit > quota` set. Over-quota
+>   borrowing of idle reserved capacity did not occur in this setup.
+> - **Gang:** plain Deployments are scheduled as independent per-pod groups (not a
+>   gang); batch Jobs are gang-grouped but KWOK simulates Job pods to `Completed`
+>   instantly, so the "held until all fit" state can't be observed cleanly.
+>
+> Treat borrow/reclaim/gang here as concept demonstrations with documented limits;
+> validating them properly needs a real multi-tenant GPU cluster (or deeper
+> KAI-version-specific tuning). Quota enforcement is the exercise this lesson proves.
 
 ---
 

@@ -1,0 +1,82 @@
+# KAI Scheduler queues for Lesson 1B. One parent and two leaf queues.
+# Only leaf queues (no children) schedule jobs; the parent holds the shared pool.
+# Verified against KAI docs (scheduling.run.ai/v2): gpu quota is an integer count,
+# cpu is millicores, memory is MB. overQuotaWeight lets a queue borrow idle capacity
+# from siblings; reclaim takes it back when the owner returns.
+#
+# Fleet assumption: the KWOK fake fleet has 32 GPUs. Parent quota 16 keeps the
+# borrow/reclaim demo within a clean, observable range (research 8 + prod 8).
+apiVersion: scheduling.run.ai/v2
+kind: Queue
+metadata:
+  name: ai-factory
+spec:
+  displayName: "AI Factory (parent)"
+  resources:
+    cpu:
+      quota: -1            # -1 = unlimited; CPU is not the constraint in this lesson
+      overQuotaWeight: 1
+      limit: -1
+    memory:
+      quota: -1
+      overQuotaWeight: 1
+      limit: -1
+    gpu:
+      quota: 16            # shared pool the two teams draw from
+      overQuotaWeight: 1
+      limit: 24            # headroom above quota so children can borrow (limit > quota)
+---
+apiVersion: scheduling.run.ai/v2
+kind: Queue
+metadata:
+  name: team-research
+spec:
+  displayName: "Research team"
+  parentQueue: ai-factory
+  resources:
+    cpu:    { quota: -1, overQuotaWeight: 1, limit: -1 }
+    memory: { quota: -1, overQuotaWeight: 1, limit: -1 }
+    gpu:
+      quota: 8             # deserved/guaranteed share
+      overQuotaWeight: 1   # may borrow idle GPUs from the sibling
+      limit: 16            # may grow to 16 (its 8 + the sibling's idle 8); limit > quota enables borrowing
+---
+apiVersion: scheduling.run.ai/v2
+kind: Queue
+metadata:
+  name: team-prod
+spec:
+  displayName: "Prod team"
+  parentQueue: ai-factory
+  resources:
+    cpu:    { quota: -1, overQuotaWeight: 1, limit: -1 }
+    memory: { quota: -1, overQuotaWeight: 1, limit: -1 }
+    gpu:
+      quota: 8
+      overQuotaWeight: 1
+      limit: 16
+---
+# Separate hierarchy for the gang-scheduling demo, so its capacity math is
+# independent of the borrow/reclaim demo above.
+apiVersion: scheduling.run.ai/v2
+kind: Queue
+metadata:
+  name: gang-parent
+spec:
+  displayName: "Gang demo (parent)"
+  resources:
+    cpu:    { quota: -1, overQuotaWeight: 1, limit: -1 }
+    memory: { quota: -1, overQuotaWeight: 1, limit: -1 }
+    gpu:    { quota: 32, overQuotaWeight: 1, limit: 32 }
+---
+apiVersion: scheduling.run.ai/v2
+kind: Queue
+metadata:
+  name: gang-demo
+spec:
+  displayName: "Gang demo (leaf)"
+  parentQueue: gang-parent
+  resources:
+    cpu:    { quota: -1, overQuotaWeight: 1, limit: -1 }
+    memory: { quota: -1, overQuotaWeight: 1, limit: -1 }
+    gpu:    { quota: 32, overQuotaWeight: 1, limit: -1 }

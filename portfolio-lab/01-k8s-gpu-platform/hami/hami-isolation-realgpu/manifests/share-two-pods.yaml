@@ -1,0 +1,39 @@
+# Two pods, each asking for one physical GPU and a ~4000 MiB memory slice. On a
+# single 24 GB consumer card both fit with headroom, so both land on the one GPU.
+# This is the data-plane test: once Running, probe-memory.sh checks that each pod
+# sees only its slice and that an allocation past the slice is refused.
+#
+#   nvidia.com/gpumem: 4000   per-pod GPU memory in MiB (1 unit = 1 MiB).
+#                             TODO: HAMi docs phrase this as "MB"; confirm vs the chart.
+#
+# The image is the CUDA devel image because probe-memory.sh compiles a tiny CUDA
+# allocator with nvcc inside the pod. It is large to pull; that is expected.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hami-share-a
+spec:
+  restartPolicy: Never
+  containers:
+    - name: cuda
+      image: nvidia/cuda:12.4.1-devel-ubuntu22.04
+      command: ["bash", "-c", "nvidia-smi; sleep 3600"]
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+          nvidia.com/gpumem: 4000
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hami-share-b
+spec:
+  restartPolicy: Never
+  containers:
+    - name: cuda
+      image: nvidia/cuda:12.4.1-devel-ubuntu22.04
+      command: ["bash", "-c", "nvidia-smi; sleep 3600"]
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+          nvidia.com/gpumem: 4000

@@ -9,7 +9,7 @@ thresholds; they are correct or not regardless of whether the numbers are real. 
 we serve metrics with the EXACT field names and labels that NVIDIA's real DCGM
 Exporter uses (DCGM_FI_DEV_* / DCGM_FI_PROF_*), but with synthetic values.
 
-HONESTY MARKER: every value here is fabricated. A dashboard built on this proves
+SCOPE NOTE: every value here is fabricated. A dashboard built on this proves
 dashboard/alert DESIGN only. Real telemetry comes from the Lesson 2 hardware run.
 Field names follow DCGM Exporter's documented set:
 https://github.com/NVIDIA/dcgm-exporter
@@ -92,7 +92,7 @@ def render_metrics():
         xid_samples.append(f"DCGM_FI_DEV_XID_ERRORS{{{lbl}}} {xid}")
 
     metric("DCGM_FI_DEV_GPU_UTIL", "GPU utilization (%) - the misleading one; see SM_ACTIVE.", "gauge", util_samples)
-    metric("DCGM_FI_PROF_SM_ACTIVE", "Fraction of time SMs were active (the honest signal).", "gauge", sm_samples)
+    metric("DCGM_FI_PROF_SM_ACTIVE", "Fraction of time SMs were active (the true signal).", "gauge", sm_samples)
     metric("DCGM_FI_DEV_FB_USED", "Framebuffer memory used (MiB).", "gauge", fb_used_samples)
     metric("DCGM_FI_DEV_FB_FREE", "Framebuffer memory free (MiB).", "gauge", fb_free_samples)
     metric("DCGM_FI_DEV_POWER_USAGE", "Power draw (W).", "gauge", power_samples)

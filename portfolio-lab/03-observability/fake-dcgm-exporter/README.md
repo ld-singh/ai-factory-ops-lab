@@ -6,7 +6,7 @@ labels** of NVIDIA's real [DCGM Exporter](https://github.com/NVIDIA/dcgm-exporte
 Lesson 4 can build and validate the entire observability pipeline (scrape →
 dashboard → alert → runbook) before any real GPU exists.
 
-> **HONESTY MARKER:** synthetic values. A dashboard or alert built on this proves
+> **SCOPE NOTE:** synthetic values. A dashboard or alert built on this proves
 > **design**, not real telemetry. Real DCGM evidence comes only from the
 > [Lesson 2](../../01-k8s-gpu-platform/gpu-operator-real/README.md) hardware run.
 

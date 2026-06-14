@@ -2,7 +2,7 @@
 # Requests 1 nvidia.com/gpu and targets the a100 pool. Expected: schedules onto
 # kwok-gpu-a100-0 or -1 and reaches Running (KWOK simulates the lifecycle).
 #
-# SIMULATION HONESTY: the container never starts and no CUDA runs. This proves
+# SIMULATION SCOPE: the container never starts and no CUDA runs. This proves
 # the scheduler's placement decision only.
 apiVersion: v1
 kind: Pod

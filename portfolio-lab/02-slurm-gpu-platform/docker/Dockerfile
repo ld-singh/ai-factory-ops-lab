@@ -5,7 +5,7 @@
 # the Ubuntu archive (slurm-wlm) rather than building from source: it's a real,
 # supported package set and keeps the lab fast to stand up.
 #
-# SIMULATION HONESTY: the compute nodes declare GPU GRES with NO backing device
+# SIMULATION SCOPE: the compute nodes declare GPU GRES with NO backing device
 # (see ../config/gres.conf). That makes this a *scheduling* simulation - slurmctld
 # does real GRES/TRES/QoS math, but nothing below it touches a GPU. Same fake/real
 # boundary as the KWOK Kubernetes lab.

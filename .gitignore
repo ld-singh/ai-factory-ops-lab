@@ -9,3 +9,12 @@ kubeconfig*
 
 # Personal career toolkit - never push
 private/
+
+# MkDocs site build + content synced into docs/ by scripts/sync-docs.sh.
+# The authored site pages (docs/index.md, docs/about.md, docs/stylesheets/) ARE tracked.
+site/
+docs/portfolio-lab/
+docs/runbooks/
+docs/diagrams/
+docs/control-plane/
+docs/course.md

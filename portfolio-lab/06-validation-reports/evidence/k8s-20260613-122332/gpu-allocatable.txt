@@ -1,0 +1,10 @@
+$ kubectl get nodes -o custom-columns=NAME:.metadata.name,GPU_ALLOC:.status.allocatable.nvidia\.com/gpu,GPU_CAP:.status.capacity.nvidia\.com/gpu
+
+NAME                           GPU_ALLOC   GPU_CAP
+ai-factory-lab-control-plane   <none>      <none>
+ai-factory-lab-worker          <none>      <none>
+kwok-gpu-a100-0                8           8
+kwok-gpu-a100-1                8           8
+kwok-gpu-h100-0                8           8
+kwok-gpu-l40s-0                4           4
+kwok-gpu-l40s-1                4           4

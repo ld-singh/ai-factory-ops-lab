@@ -27,8 +27,16 @@ users do, and back every alert with a runbook.
 
 🧭 **Mode:** 🟦 Simulation - the whole pipeline runs against a **synthetic DCGM
 exporter** ([`fake-dcgm-exporter/`](./fake-dcgm-exporter/README.md)) shipped with
-this lesson; [run.ai's fake-gpu-operator](../01-k8s-gpu-platform/fake-gpu-operator/README.md)
-is an alternative source.
+this lesson.
+
+> **Already have a DCGM stream from Lesson 1.** Since Lesson 1 now runs the
+> [fake-gpu-operator](../01-k8s-gpu-platform/fake-gpu-operator/README.md), the
+> `make phase1-up` fleet already exposes a real per-node DCGM exporter
+> (`svc/nvidia-dcgm-exporter` in the `gpu-operator` namespace) with **per-pod GPU
+> attribution** - richer than this lesson's standalone exporter. You can point
+> Prometheus at that service instead; the standalone `fake-dcgm-exporter` here stays
+> as a self-contained option (and its `/scenario` switch drives the break-it drill).
+> Either way the values are synthetic; only the metric shape is real.
 
 💡 **Why you can build observability before owning a GPU:** dashboards and alert
 rules are queries and thresholds - they're correct or not regardless of whether the
@@ -84,7 +92,7 @@ DCGM Exporter publishes per-GPU Prometheus metrics. The working set:
 | Metric | What it tells you | Watch out |
 |---|---|---|
 | `DCGM_FI_DEV_GPU_UTIL` | % of time ≥1 kernel was executing | **The liar** - see below |
-| `DCGM_FI_PROF_SM_ACTIVE` | Fraction of time SMs actually had work | The honest utilization signal |
+| `DCGM_FI_PROF_SM_ACTIVE` | Fraction of time SMs actually had work | The true utilization signal |
 | `DCGM_FI_PROF_SM_OCCUPANCY` | How full the active SMs were | Distinguishes "busy" from "efficient" |
 | `DCGM_FI_DEV_FB_USED` / `FB_FREE` | Framebuffer (GPU memory) used/free | The capacity-planning input |
 | `DCGM_FI_DEV_GPU_TEMP` | Temperature | Sustained high → throttling |
@@ -150,7 +158,7 @@ cluster on purpose and watch the right alert fire.
 ## What's in this directory
 
 - [`fake-dcgm-exporter/`](./fake-dcgm-exporter/README.md) - the synthetic DCGM
-  metrics source (a ~150-line Python app + its honesty marker and `/scenario` switch).
+  metrics source (a ~150-line Python app + its scope note and `/scenario` switch).
 - [`manifests/`](./manifests/) - `exporter.yaml`, `servicemonitor.yaml`, and
   `alerts.yaml` (the six PrometheusRules above, each with a `runbook` annotation).
 - [`dashboards/`](./dashboards/) - `gpu-fleet-overview.json` and `idle-gpu.json`,

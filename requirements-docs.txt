@@ -1,0 +1,2 @@
+# Site build dependencies. Material pulls in mkdocs + pymdown-extensions.
+mkdocs-material>=9.5,<10

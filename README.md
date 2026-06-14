@@ -1,5 +1,8 @@
 # AI Factory Operations Lab - A Hands-On Course
 
+📖 **Read it as a website: https://ld-singh.github.io/ai-factory-ops-lab/**
+(built with MkDocs Material; the lesson markdown below is the source).
+
 A guided, learn-by-doing course in **AI/HPC infrastructure operations**: NVIDIA GPU
 infrastructure concepts, Kubernetes GPU scheduling, Slurm GPU workload management,
 GPU observability, inference serving, and BCM-style cluster lifecycle patterns.
@@ -52,7 +55,8 @@ Each lesson follows the same rhythm so you always know where you are:
 
 The two **modes** you'll see throughout:
 
-- **🟦 Simulation mode (no GPU).** kind + KWOK fake nodes, a fake GPU fleet, Slurm
+- **🟦 Simulation mode (no GPU).** kind + KWOK fake nodes with the fake-gpu-operator
+  GPU layer (advertises GPUs + synthetic DCGM metrics), Slurm
   with fake GRES. Proves *control-plane behaviour*: scheduling, queueing, placement,
   triage, operational workflow. Nothing below the kubelet.
 - **🟥 Real GPU mode (one NVIDIA GPU).** Real driver, container toolkit, GPU
@@ -71,9 +75,9 @@ the mental model you form there.
 
 | # | Lesson | Mode | GPU? | You'll be able to… |
 |---|---|---|---|---|
-| **0** | [Orientation & setup](#lesson-0--orientation--setup) | - | No | Install the toolchain and verify your machine is ready |
+| **0** | [Orientation & setup](#lesson-0---orientation--setup) | - | No | Install the toolchain and verify your machine is ready |
 | **1** | [Kubernetes GPU scheduling](./portfolio-lab/01-k8s-gpu-platform/README.md) | 🟦 Sim | No | Build a fake GPU fleet and diagnose why GPU pods stay Pending |
-| **1B** | [Queue-based scheduling - KAI Scheduler](./portfolio-lab/01-k8s-gpu-platform/kai-scheduler/README.md) | 🟦 Sim | No | Reproduce quota, **borrowing, reclaim, and gang scheduling** on the fake fleet |
+| **1B** | [Queue-based scheduling - KAI Scheduler](./portfolio-lab/01-k8s-gpu-platform/kai-scheduler/README.md) | 🟦 Sim | No | Install KAI on a fake GPU fleet (fake-gpu-operator) and **enforce queue quota**; understand borrowing/reclaim/gang and the limits of demoing them on fakes |
 | **1C** | [GPU sharing & fractional GPUs - HAMi](./portfolio-lab/01-k8s-gpu-platform/hami/README.md) | 🟦+🟥 Split | Optional (1) | Compare time-slicing/MPS/MIG/HAMi, then **split one real GPU between pods** with enforced memory slices |
 | **2** | [Real GPU validation](./portfolio-lab/01-k8s-gpu-platform/gpu-operator-real/README.md) | 🟥 Real | Yes (1) | Prove the full driver → toolkit → device plugin → pod path on real hardware |
 | **3** | [Slurm GPU workload management](./portfolio-lab/02-slurm-gpu-platform/README.md) | 🟦 Sim | No | Run a Slurm-in-Docker cluster with fake GRES; schedule GPU jobs, QoS caps, queue pressure, drain/resume |
@@ -92,7 +96,7 @@ the mental model you form there.
 
 ## What this course costs
 
-Designed to be as close to free as honesty allows. The cost ladder:
+Designed to be as close to free as is practical. The cost ladder:
 
 | Tier | Lessons | What you pay | What you get |
 |---|---|---|---|
@@ -173,12 +177,14 @@ message rather than pretending to work.
 `make help` is the full command index. The per-lesson loops:
 
 ```bash
-# Lesson 1 - Kubernetes fake-GPU scheduling (kind + KWOK)
+# Lesson 1 - Kubernetes fake-GPU scheduling (kind + KWOK + fake-gpu-operator)
 make phase1-up && make phase1-demo && make phase1-evidence && make phase1-down
 
-# Lesson 1B / 1C - queueing (KAI) and sharing (HAMi): guided
-make kai-guide        # example manifests + install check
-make hami-guide
+# Lesson 1B - queueing with KAI (own Makefile; reuses the Lesson 1 fleet + installs KAI)
+( cd portfolio-lab/01-k8s-gpu-platform/kai-scheduler && make up && make demo-quota )
+
+# Lesson 1C - GPU sharing with HAMi (sim + real-GPU; own Makefile)
+( cd portfolio-lab/01-k8s-gpu-platform/hami/hami-scheduling-sim && make up && make verify )
 
 # Lesson 3 - Slurm-in-Docker with fake GRES
 make phase3-up && make phase3-demo && make phase3-drain && make phase3-evidence && make phase3-down
@@ -250,7 +256,7 @@ contains real captured output.
 |---|---|---|
 | 0 | Repo foundation / Orientation | Complete |
 | 1 | Kubernetes fake-GPU scheduling (simulation) | Complete |
-| 1B | Queue-based scheduling with KAI Scheduler | Guide complete, evidence pending run |
+| 1B | Queue-based scheduling with KAI Scheduler | Runnable; quota enforcement validated. Needs the fake-gpu-operator (not bare KWOK); borrow/reclaim/gang documented with sim limits |
 | 1C | GPU sharing & fractional GPUs with HAMi | Guide complete, isolation evidence pending hardware run |
 | 2 | Real Kubernetes GPU validation | Guide complete, evidence pending hardware run |
 | 3 | Slurm GPU workload management | Complete (runnable; validated with captured output) |
@@ -258,8 +264,28 @@ contains real captured output.
 | 5 | Inference serving | Harness runnable + validated; real benchmark pending GPU run |
 | 6 | BCM-style cluster lifecycle (conceptual + drill) | Drill runnable + validated; BCM specifics conceptual |
 
+## Documentation site
+
+The lessons are published as a website at
+**https://ld-singh.github.io/ai-factory-ops-lab/** (MkDocs Material). The lesson
+markdown in this repo is the single source of truth; `scripts/sync-docs.sh` mirrors it
+into `docs/` for the build, and a GitHub Actions workflow
+([`.github/workflows/docs.yml`](.github/workflows/docs.yml)) publishes to GitHub Pages
+on every push to `main`.
+
+Preview locally:
+
+```bash
+pip install -r requirements-docs.txt   # use a venv if your Python is externally managed
+make docs-serve                        # http://localhost:8000
+```
+
+One-time setup to publish: in the GitHub repo, **Settings -> Pages -> Build and
+deployment -> Source: GitHub Actions**.
+
 ## License and attribution
 
-All third-party tools (kind, KWOK, NVIDIA GPU Operator, KAI Scheduler, HAMi, Slurm,
-Triton, vLLM, Prometheus, Grafana) belong to their respective projects; this repo
+All third-party tools (kind, KWOK, run.ai fake-gpu-operator, NVIDIA GPU Operator, KAI
+Scheduler, HAMi, Slurm, Triton, vLLM, Prometheus, Grafana) belong to their respective
+projects; this repo
 only contains configuration, automation and documentation written for this course.

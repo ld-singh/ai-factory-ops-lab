@@ -1,7 +1,7 @@
 # Lesson 1 - Kubernetes GPU Scheduling
 
 > Course home: [AI Factory Operations Lab](../../README.md) · Previous:
-> [Lesson 0 - Orientation](../../README.md#lesson-0--orientation--setup) ·
+> [Lesson 0 - Orientation](../../README.md#lesson-0---orientation--setup) ·
 > Next: [Lesson 1B - KAI Scheduler](./kai-scheduler/README.md)
 
 In this lesson you build a **heterogeneous GPU fleet that has no GPUs in it**, run
@@ -10,7 +10,7 @@ using the exact same `kubectl` workflow you'd use on a production cluster.
 
 🎯 **Learning objectives** - after this lesson you can:
 
-1. Explain why `nvidia.com/gpu` is just an integer to the Kubernetes scheduler, and
+1. Explain why `nvidia.com/gpu` is just an integer to the default Kubernetes scheduler, and
    why that makes fake GPU nodes a *legitimate* way to study scheduling.
 2. Model a heterogeneous fleet (A100/H100/L40S pools) with node labels, taints, and
    GFD-style product labels.
@@ -25,7 +25,7 @@ using the exact same `kubectl` workflow you'd use on a production cluster.
 🧭 **Mode:** 🟦 Simulation (no GPU). The real-hardware half of this module is
 [Lesson 2](./gpu-operator-real/README.md).
 
-📋 **Prerequisites:** [Lesson 0](../../README.md#lesson-0--orientation--setup)
+📋 **Prerequisites:** [Lesson 0](../../README.md#lesson-0---orientation--setup)
 complete (`make check` passes).
 
 This module has two halves, and the line between them is the whole point:
@@ -40,15 +40,30 @@ This module has two halves, and the line between them is the whole point:
 
 ## The big idea (read before you run anything)
 
-💡 The Kubernetes scheduler **never talks to a GPU.** It compares integer resource
+💡 The default Kubernetes scheduler **never talks to a GPU.** It compares integer resource
 requests against integer node `allocatable` values. A node advertising
 `nvidia.com/gpu: 8` exercises the *identical* scheduling code path whether those 8
-GPUs are real silicon or a number we wrote into a fake node object. That's why this
+GPUs are real silicon or a number advertised onto a fake node. That's why this
 entire lesson works on a laptop - and exactly why it can't tell you anything about
 CUDA, NVLink, or GPU memory. Hold onto that distinction; it comes back in every
 "what you proved" box.
 
-Deep-dive page: [kwok/README.md - why fake nodes are legitimate](./kwok/README.md).
+**Two complementary pieces build the fake fleet:**
+
+- **KWOK** creates the *nodes* - pure API objects with no kubelet, so you can stamp
+  out a heterogeneous fleet (or thousands of nodes) for free.
+- **run.ai's fake-gpu-operator** provides the *GPU layer* on those KWOK nodes: it
+  advertises `nvidia.com/gpu` from a per-pool topology via a device plugin (operator-
+  shaped, like production), and stands up a per-node DCGM exporter emitting synthetic
+  `DCGM_FI_*` metrics with per-pod attribution. They are complementary, not
+  alternatives: KWOK = nodes, fake-gpu-operator = GPUs on those nodes. The same
+  fake-GPU mechanism carries through Lessons 1B, 1C, and 4.
+
+Everything is still synthetic: no kubelet, driver, or CUDA, and the DCGM metrics are
+fabricated. It proves the control plane and the observability *pipeline shape*.
+
+Deep-dive pages: [kwok/README.md](./kwok/README.md) (why fake nodes are legitimate)
+and [fake-gpu-operator/README.md](./fake-gpu-operator/README.md) (the GPU layer).
 
 ---
 
@@ -59,15 +74,18 @@ Deep-dive page: [kwok/README.md - why fake nodes are legitimate](./kwok/README.m
 make phase1-up
 ```
 
-This runs three scripts in order: create the kind cluster, install KWOK, then stamp
-out the fake GPU node pools.
+This runs four scripts in order: create the kind cluster, install KWOK, install the
+fake-gpu-operator (3 pools), then stamp out the fake GPU node pools.
 
 💡 **Why:** [`setup-kind.sh`](./scripts/setup-kind.sh) gives you a *real*
-Kubernetes control plane (so the scheduler logic is real); [`install-kwok.sh`](./scripts/install-kwok.sh)
-adds KWOK, which lets fake nodes join and have their pod lifecycle simulated; and
-[`create-fake-gpu-nodes.sh`](./scripts/create-fake-gpu-nodes.sh) creates the fleet
-below. See [kind/README.md](./kind/README.md) and [kwok/README.md](./kwok/README.md)
-for the details of each.
+Kubernetes control plane (so the default scheduler logic is real); [`install-kwok.sh`](./scripts/install-kwok.sh)
+adds KWOK, which lets fake nodes join and have their pod lifecycle simulated;
+[`install-fake-gpu-operator.sh`](./scripts/install-fake-gpu-operator.sh) installs the
+GPU layer with the a100/h100/l40s topology; and
+[`create-fake-gpu-nodes.sh`](./scripts/create-fake-gpu-nodes.sh) stamps out the nodes
+(labeled into pools), which the operator then advertises GPUs onto. See
+[kind/README.md](./kind/README.md), [kwok/README.md](./kwok/README.md), and
+[fake-gpu-operator/README.md](./fake-gpu-operator/README.md) for the details of each.
 
 The simulated fleet you just built:
 
@@ -87,6 +105,15 @@ kubectl get nodes -L nvidia.com/gpu.product -L gpu-pool
 
 You should see five `kwok-gpu-*` nodes across the three pools, each reporting its
 product label. If they're missing, re-run `make phase1-up` (it's idempotent).
+
+💡 **Optional - peek at the synthetic GPU metrics.** The operator runs a DCGM
+exporter per node. These are fabricated values, but the metric *names and labels* are
+real (the foundation Lesson 4 builds dashboards on):
+
+```bash
+kubectl -n gpu-operator port-forward svc/nvidia-dcgm-exporter 9400:9400 &
+curl -s localhost:9400/metrics | grep -E 'DCGM_FI_DEV_GPU_UTIL' | head
+```
 
 ---
 
@@ -129,7 +156,7 @@ the same commands you'd use on production:
 kubectl get nodes -L nvidia.com/gpu.product -L gpu-pool   # fleet at a glance
 kubectl describe node kwok-gpu-a100-0                      # one node in detail
 kubectl get pods -n gpu-demo -o wide                       # who's Running vs Pending
-kubectl get events -n gpu-demo --sort-by=.lastTimestamp    # the scheduler's reasoning
+kubectl get events -n gpu-demo --sort-by=.lastTimestamp    # the default scheduler's reasoning
 ```
 
 Now diagnose each Pending pod yourself:
@@ -140,9 +167,9 @@ kubectl describe pod -n gpu-demo cuda-needs-b200    # scenario 3
 ```
 
 💡 **Why the events differ:** read the `Events:` section at the bottom of each
-`describe`. Scenario 2 fails on **`Insufficient nvidia.com/gpu`** - the scheduler
+`describe`. Scenario 2 fails on **`Insufficient nvidia.com/gpu`** - the default scheduler
 found candidate nodes but none had enough GPUs. Scenario 3 fails on
-**`node(s) didn't match Pod's node affinity/selector`** - the scheduler rejected
+**`node(s) didn't match Pod's node affinity/selector`** - the default scheduler rejected
 every node *before* even checking GPU counts, because the `gpu-pool: b200` selector
 matched nothing. Same symptom (Pending), completely different root cause and fix.
 
@@ -199,11 +226,14 @@ make phase1-down
 - Capacity contention / queue-pressure behaviour (more requests than GPUs)
 - Fleet modelling: labels, taints, pool design for A100/H100/L40S-class nodes
 - The Pending-pod triage workflow - identical to the one used on real clusters
+- Operator-shaped GPU advertisement (a device plugin, not a hand-written integer)
+- A **synthetic** DCGM metrics stream with per-pod attribution (the Lesson 4 bridge)
 
 **Did NOT prove:** no CUDA execution, no NCCL, no NVLink/NVSwitch, no MIG, no
-GPUDirect RDMA, no real GPU memory behaviour, no DCGM telemetry. The containers
-never actually run. Those belong to [Lesson 2](./gpu-operator-real/README.md) and
-only count once captured in
+GPUDirect RDMA, no real GPU memory behaviour. The DCGM metrics here are **fabricated**
+by the operator (useful for dashboard/alert *design*, not real telemetry), and the
+containers on KWOK nodes never actually run. Real telemetry and the runtime path
+belong to [Lesson 2](./gpu-operator-real/README.md) and only count once captured in
 [`../06-validation-reports/real-gpu-validation-report.md`](../06-validation-reports/real-gpu-validation-report.md).
 The full ledger: [`fake-vs-real-limitations.md`](../06-validation-reports/fake-vs-real-limitations.md).
 
@@ -226,8 +256,9 @@ curious:
 
 - [kind/](./kind/README.md) - the local cluster, and kind vs k3d.
 - [kwok/](./kwok/README.md) - how fake GPU nodes are built and why it's legitimate.
-- [fake-gpu-operator/](./fake-gpu-operator/README.md) - a richer simulation that runs
-  real containers with fake GPUs and emits DCGM-shaped metrics (sets up Lesson 4).
+- [fake-gpu-operator/](./fake-gpu-operator/README.md) - the GPU layer on the KWOK
+  nodes (installed by `phase1-up`): advertises `nvidia.com/gpu` and emits synthetic
+  DCGM metrics (the Lesson 4 bridge).
 - [hami/](./hami/README.md) - **Lesson 1C:** GPU sharing and fractional GPUs
   (time-slicing vs MPS vs MIG vs HAMi), with a real-hardware part that splits one
   GPU between pods.
@@ -238,7 +269,7 @@ curious:
 
 - `kind/` - kind cluster config (control plane + one real worker for system pods)
 - `kwok/` - KWOK installation notes and fake GPU node manifests/templates
-- `fake-gpu-operator/` - notes on run.ai's fake-gpu-operator as a richer alternative
+- `fake-gpu-operator/` - the GPU layer (advertises GPUs + DCGM metrics on KWOK nodes)
 - `kai-scheduler/` - Lesson 1B: queue/quota scheduling concepts and KAI Scheduler notes
 - `hami/` - Lesson 1C: GPU sharing / fractional GPUs with HAMi
 - `workloads/` - the four demo workloads (schedulable, two Pending, queue pressure)

@@ -10,7 +10,7 @@
 # The four /etc/slurm config files are bind-mounted read-only from ../config so
 # you can read and edit them on the host. The munge key is a shared named volume.
 #
-# SIMULATION HONESTY: c1/c2 advertise gpu:8 with no backing device (gres.conf has
+# SIMULATION SCOPE: c1/c2 advertise gpu:8 with no backing device (gres.conf has
 # no File=). Scheduling is real; nothing below slurmctld touches a GPU.
 name: ai-factory-slurm
 

@@ -1,7 +1,7 @@
 # AI Factory Operations Lab - Makefile
 # Simple, idempotent-where-possible targets. Each target prints what it does.
 # Phases map to portfolio-lab/ modules. Targets for later phases are stubs that
-# explain what is coming, so `make help` is always an honest project map.
+# explain what is coming, so `make help` is always an accurate project map.
 
 SHELL := /bin/bash
 CLUSTER_NAME ?= ai-factory-lab
@@ -28,9 +28,10 @@ check: ## Verify local prerequisites (docker, kind, kubectl, helm, kwok, jq)
 # Phase 1 - Kubernetes fake-GPU control-plane simulation (no GPU required)
 # ---------------------------------------------------------------------------
 .PHONY: phase1-up phase1-demo phase1-evidence phase1-down
-phase1-up: ## Create kind cluster, install KWOK, create fake GPU node pools
+phase1-up: ## Create kind cluster, install KWOK + fake-gpu-operator, create fake GPU node pools
 	$(LAB1)/scripts/setup-kind.sh $(CLUSTER_NAME)
 	$(LAB1)/scripts/install-kwok.sh
+	$(LAB1)/scripts/install-fake-gpu-operator.sh
 	$(LAB1)/scripts/create-fake-gpu-nodes.sh
 
 phase1-demo: ## Deploy schedulable + intentionally-pending GPU workloads
@@ -56,12 +57,13 @@ phase2-guide: ## Print the real-GPU validation guide location
 # automated install, to respect the no-invented-commands rule).
 # ---------------------------------------------------------------------------
 .PHONY: kai-guide hami-guide
-kai-guide: ## Lesson 1B (KAI Scheduler): print example manifests + install check
-	@echo "Lesson 1B - Queue-based scheduling with KAI Scheduler."
-	@echo "Guide:    $(LAB1)/kai-scheduler/README.md"
-	@echo "Examples: $(LAB1)/kai-scheduler/examples/ (ILLUSTRATIVE - confirm vs KAI docs)"
+kai-guide: ## Lesson 1B (KAI Scheduler): runnable lesson with its own Makefile
+	@echo "Lesson 1B - Queue-based scheduling with KAI Scheduler (runnable, no GPU)."
+	@echo "It has its own Makefile (own GPU fleet via the fake-gpu-operator):"
+	@echo "  cd $(LAB1)/kai-scheduler && make up && make demo-quota"
+	@echo "Guide: $(LAB1)/kai-scheduler/README.md"
 	@echo "Is KAI installed?"
-	@kubectl get crds 2>/dev/null | grep -i kai || echo "  (no KAI CRDs found - install per the official docs first)"
+	@kubectl get crds 2>/dev/null | grep -i kai || echo "  (not yet - run 'make up' in the lesson dir)"
 
 hami-guide: ## Lesson 1C (HAMi): print example manifests + install check
 	@echo "Lesson 1C - GPU sharing / fractional GPUs with HAMi."
@@ -127,6 +129,22 @@ phase5-down: ## Stop the local CPU model server
 .PHONY: phase6-drill
 phase6-drill: ## Run the node provision -> health-gate -> patch -> retire lifecycle drill
 	$(LAB5)/scripts/lifecycle-drill.sh
+
+# ---------------------------------------------------------------------------
+# Docs site (MkDocs Material) -> https://ld-singh.github.io/ai-factory-ops-lab/
+# Needs: pip install -r requirements-docs.txt   (use a venv if your Python is managed)
+# NO_MKDOCS_2_WARNING silences Material's advocacy banner about a future MkDocs 2.0.
+# ---------------------------------------------------------------------------
+export NO_MKDOCS_2_WARNING := true
+
+.PHONY: docs-serve docs-build
+docs-serve: ## Sync lesson markdown and serve the docs site locally at http://localhost:8000
+	./scripts/sync-docs.sh
+	mkdocs serve
+
+docs-build: ## Sync lesson markdown and build the static site into site/
+	./scripts/sync-docs.sh
+	mkdocs build
 
 # ---------------------------------------------------------------------------
 # Cleanup
