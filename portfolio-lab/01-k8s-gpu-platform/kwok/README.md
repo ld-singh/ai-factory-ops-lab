@@ -24,7 +24,7 @@ requests against integer node allocatable values. A fake node with
 `nvidia.com/gpu: 8` exercises the identical scheduling code path as a DGX with 8
 real GPUs. What it does NOT exercise: kubelet device allocation, the NVIDIA
 container runtime, CUDA, NVLink topology, MIG, or DCGM. Those are
-[Lesson 2](../gpu-operator-real/README.md).
+[Lesson 6](../gpu-operator-real/README.md).
 
 ## Install
 

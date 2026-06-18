@@ -22,7 +22,7 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    subgraph REAL_ONLY["Real GPU mode only (Phase 2)"]
+    subgraph REAL_ONLY["Real GPU mode only (Lesson 6)"]
         HW2[GPU] --> DRV2[Driver] --> CTK2[Container Toolkit] --> DP2[Device plugin]
     end
     subgraph SIMULATED["Simulated by KWOK fake nodes (Phase 1)"]

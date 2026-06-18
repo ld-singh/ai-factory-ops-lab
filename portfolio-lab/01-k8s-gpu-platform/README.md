@@ -23,7 +23,7 @@ using the exact same `kubectl` workflow you'd use on a production cluster.
    all on the fake fleet.
 
 🧭 **Mode:** 🟦 Simulation (no GPU). The real-hardware half of this module is
-[Lesson 2](./gpu-operator-real/README.md).
+[Lesson 6](./gpu-operator-real/README.md).
 
 📋 **Prerequisites:** [Lesson 0](../../README.md#lesson-0---orientation--setup)
 complete (`make check` passes).
@@ -33,8 +33,8 @@ This module has two halves, and the line between them is the whole point:
 | Half | Mode | GPU required | Lesson |
 |---|---|---|---|
 | `kind/`, `kwok/`, `workloads/`, `kai-scheduler/`, `fake-gpu-operator/` | 🟦 Control-plane simulation | No | This lesson + [1B](./kai-scheduler/README.md) |
-| `hami/` | 🟦+🟥 Split - sharing concepts free, isolation needs the Lesson 2 GPU | Optional | [Lesson 1C](./hami/README.md) |
-| `gpu-operator-real/` | 🟥 Real GPU runtime validation | Yes (one NVIDIA GPU) | [Lesson 2](./gpu-operator-real/README.md) |
+| `hami/` | 🟦+🟥 Split - sharing concepts free, isolation needs the Lesson 6 GPU | Optional | [Lesson 1C](./hami/README.md) |
+| `gpu-operator-real/` | 🟥 Real GPU runtime validation | Yes (one NVIDIA GPU) | [Lesson 6](./gpu-operator-real/README.md) |
 
 ---
 
@@ -57,7 +57,7 @@ CUDA, NVLink, or GPU memory. Hold onto that distinction; it comes back in every
   shaped, like production), and stands up a per-node DCGM exporter emitting synthetic
   `DCGM_FI_*` metrics with per-pod attribution. They are complementary, not
   alternatives: KWOK = nodes, fake-gpu-operator = GPUs on those nodes. The same
-  fake-GPU mechanism carries through Lessons 1B, 1C, and 4.
+  fake-GPU mechanism carries through Lessons 1B, 1C, and 3.
 
 Everything is still synthetic: no kubelet, driver, or CUDA, and the DCGM metrics are
 fabricated. It proves the control plane and the observability *pipeline shape*.
@@ -108,7 +108,7 @@ product label. If they're missing, re-run `make phase1-up` (it's idempotent).
 
 💡 **Optional - peek at the synthetic GPU metrics.** The operator runs a DCGM
 exporter per node. These are fabricated values, but the metric *names and labels* are
-real (the foundation Lesson 4 builds dashboards on):
+real (the foundation Lesson 3 builds dashboards on):
 
 ```bash
 kubectl -n gpu-operator port-forward svc/nvidia-dcgm-exporter 9400:9400 &
@@ -227,13 +227,13 @@ make phase1-down
 - Fleet modelling: labels, taints, pool design for A100/H100/L40S-class nodes
 - The Pending-pod triage workflow - identical to the one used on real clusters
 - Operator-shaped GPU advertisement (a device plugin, not a hand-written integer)
-- A **synthetic** DCGM metrics stream with per-pod attribution (the Lesson 4 bridge)
+- A **synthetic** DCGM metrics stream with per-pod attribution (the Lesson 3 bridge)
 
 **Did NOT prove:** no CUDA execution, no NCCL, no NVLink/NVSwitch, no MIG, no
 GPUDirect RDMA, no real GPU memory behaviour. The DCGM metrics here are **fabricated**
 by the operator (useful for dashboard/alert *design*, not real telemetry), and the
 containers on KWOK nodes never actually run. Real telemetry and the runtime path
-belong to [Lesson 2](./gpu-operator-real/README.md) and only count once captured in
+belong to [Lesson 6](./gpu-operator-real/README.md) and only count once captured in
 [`../06-validation-reports/real-gpu-validation-report.md`](../06-validation-reports/real-gpu-validation-report.md).
 The full ledger: [`fake-vs-real-limitations.md`](../06-validation-reports/fake-vs-real-limitations.md).
 
@@ -247,7 +247,7 @@ is where you fix it: hierarchical queues, quota, over-quota **borrowing**, **rec
 **gang scheduling**, and starvation control - and the headline is that *all of it is
 learnable on the fake fleet*, because queue policy and gang scheduling are pure
 control-plane decisions. It's the highest-value, lowest-cost thing in the whole
-course. Do it before moving to Lesson 2.
+course. Do it before moving to Lesson 6.
 
 ## Go deeper (optional sub-pages)
 
@@ -258,11 +258,11 @@ curious:
 - [kwok/](./kwok/README.md) - how fake GPU nodes are built and why it's legitimate.
 - [fake-gpu-operator/](./fake-gpu-operator/README.md) - the GPU layer on the KWOK
   nodes (installed by `phase1-up`): advertises `nvidia.com/gpu` and emits synthetic
-  DCGM metrics (the Lesson 4 bridge).
+  DCGM metrics (the Lesson 3 bridge).
 - [hami/](./hami/README.md) - **Lesson 1C:** GPU sharing and fractional GPUs
   (time-slicing vs MPS vs MIG vs HAMi), with a real-hardware part that splits one
   GPU between pods.
-- [gpu-operator-real/](./gpu-operator-real/README.md) - **Lesson 2:** prove the real
+- [gpu-operator-real/](./gpu-operator-real/README.md) - **Lesson 6:** prove the real
   GPU path on actual hardware.
 
 ## Directory guide
@@ -273,12 +273,12 @@ curious:
 - `kai-scheduler/` - Lesson 1B: queue/quota scheduling concepts and KAI Scheduler notes
 - `hami/` - Lesson 1C: GPU sharing / fractional GPUs with HAMi
 - `workloads/` - the four demo workloads (schedulable, two Pending, queue pressure)
-- `gpu-operator-real/` - Lesson 2: real GPU validation guide
+- `gpu-operator-real/` - Lesson 6: real GPU validation guide
 - `scripts/` - setup and demo automation
 
 ➡️ **Next:** [Lesson 1B - Queue-Based GPU Scheduling with KAI Scheduler](./kai-scheduler/README.md),
 where you turn the queue-pressure pile into policy - quota, borrowing, reclaim, and
 gang scheduling - all on this same fake fleet. Then
 [Lesson 1C - GPU sharing with HAMi](./hami/README.md) (concepts free; its hands-on
-part piggybacks on the Lesson 2 rental), and [Lesson 2](./gpu-operator-real/README.md)
+part piggybacks on the Lesson 6 rental), and [Lesson 6](./gpu-operator-real/README.md)
 runs the manifests on real hardware.

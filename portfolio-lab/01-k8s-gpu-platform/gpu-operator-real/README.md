@@ -1,12 +1,17 @@
-# Lesson 2 - Real GPU Validation
+# Lesson 6 (Part A) - Real GPU Validation: the runtime path
 
-> Course home: [AI Factory Operations Lab](../../../README.md) · Previous:
-> [Lesson 1C - GPU sharing with HAMi](../hami/README.md) · Next:
-> [Lesson 3 - Slurm GPU Platform](../../02-slurm-gpu-platform/README.md)
+> Part of [Lesson 6 - Real GPU](../../real-gpu-session/README.md) · Course home:
+> [AI Factory Operations Lab](../../../README.md)
+>
+> This page is the **GPU runtime-path** part of the one-rental
+> [Lesson 6 capstone](../../real-gpu-session/README.md). Start at the
+> [Lesson 6 hub](../../real-gpu-session/README.md) for the full session order (host
+> setup → this runtime path → HAMi sharing → Slurm GRES → inference benchmark → teardown).
 
-This is the **real hardware** half of Module 01. In Lesson 1 you deliberately could
-not prove anything below the kubelet. Here you prove all of it - the complete GPU
-path to a running pod - on actual silicon.
+This is the **real hardware** foundation of the course. In Lesson 1 you deliberately
+could not prove anything below the kubelet. Here you prove all of it - the complete GPU
+path to a running pod - on actual silicon. It is the first hands-on part of the
+[Lesson 6 real-GPU session](../../real-gpu-session/README.md).
 
 🎯 **Learning objectives** - after this lesson you can:
 
@@ -16,7 +21,7 @@ path to a running pod - on actual silicon.
    labels, and compare them to the script-written labels from Lesson 1.
 3. Run a CUDA pod that executes `nvidia-smi` on a real GPU - the single most
    important artifact in the course.
-4. Pull real DCGM telemetry, the foundation [Lesson 4](../../03-observability/README.md)
+4. Pull real DCGM telemetry, the foundation [Lesson 3](../../03-observability/README.md)
    builds on.
 
 🧭 **Mode:** 🟥 Real GPU. Everything here requires one machine with an NVIDIA GPU: a
@@ -29,7 +34,7 @@ simulation did and didn't prove). A budget of a few dollars if renting a GPU VM.
 ### Renting the GPU cheaply
 
 This lesson - plus [Lesson 1C Part 3 (HAMi sharing)](../hami/README.md) and later
-[Lesson 5 (inference)](../../04-inference-serving/README.md) - needs only **one**
+[Lesson 4 (inference)](../../04-inference-serving/README.md) - needs only **one**
 entry-level NVIDIA GPU for a few hours. To keep it to a few dollars:
 
 - **Pick the cheapest tier that has an NVIDIA GPU.** T4, L4, or A10G-class on a
@@ -48,6 +53,10 @@ entry-level NVIDIA GPU for a few hours. To keep it to a few dollars:
   evidence directory is the deliverable; the VM has no residual value, and a
   forgotten one is the only way this course gets expensive. Watch for storage:
   delete the boot volume too if your provider bills it separately.
+  > 📋 For the full one-rental sequence - host setup once, then this lesson +
+  > [Lesson 1C Part 3](../hami/hami-isolation-realgpu/README.md) +
+  > [Lesson 4](../../04-inference-serving/README.md), then teardown + evidence -
+  > follow the [**Real GPU Session playbook**](../../real-gpu-session/README.md).
 
 Each step below has a **Pass criteria** line - treat it as the step's checkpoint.
 
@@ -172,13 +181,18 @@ Capture the curl output - this is the telemetry evidence Phase 4 builds on.
 
 ## Step 7 - Optional extensions (same rental session)
 
-- **GPU sharing with HAMi ([Lesson 1C Part 3](../hami/README.md)):** ~30 extra
-  minutes turns this one GPU into several enforced slices and proves multi-pod
+These are the remaining parts of the [Lesson 6 session](../../real-gpu-session/README.md),
+run on this same GPU:
+
+- **GPU sharing with HAMi ([isolation lab](../hami/hami-isolation-realgpu/README.md)):**
+  ~30 extra minutes turns this one GPU into several enforced slices and proves multi-pod
   co-residency - the highest-value add-on to this session.
-- **Slurm `--gres=gpu` on the same machine:** see Module 02 once Phase 3 lands.
-- **Inference workload (Triton/vLLM):** see Module 04 once Phase 5 lands.
-  A small model on a single mid-range GPU is sufficient for meaningful
-  TTFT/latency/tokens-per-second benchmarking.
+- **Slurm `--gres=gpu` on the same machine:** the real-GRES section of
+  [Lesson 6](../../real-gpu-session/README.md), the real counterpart to the fake-GRES
+  [Slurm lesson](../../02-slurm-gpu-platform/README.md).
+- **Inference benchmark (vLLM):** the 🟥 real tier of
+  [Lesson 4](../../04-inference-serving/README.md), run here in the session - a small
+  model on one mid-range GPU is enough for meaningful TTFT/latency/tokens-per-second numbers.
 
 ## Recording the results
 
@@ -202,6 +216,6 @@ distributed training, and nothing about production-scale fleet operations. It pr
 the *path and telemetry*, not scale. Full ledger:
 [`fake-vs-real-limitations.md`](../../06-validation-reports/fake-vs-real-limitations.md).
 
-➡️ **Next:** [Lesson 3 - Slurm GPU Platform](../../02-slurm-gpu-platform/README.md).
-You've now seen GPU scheduling under Kubernetes both ways; next you schedule GPU
-*jobs* under Slurm, the other dominant AI/HPC scheduler.
+➡️ **Next in Lesson 6:** return to the [Lesson 6 hub](../../real-gpu-session/README.md)
+for the next part on this same rented GPU - [HAMi GPU sharing](../hami/hami-isolation-realgpu/README.md),
+then the Slurm GRES section and the inference benchmark - then tear the VM down.

@@ -52,7 +52,7 @@ The two Pending root causes are distinct and diagnosable from Events alone:
 Control-plane GPU scheduling with the **default scheduler**: placement across
 heterogeneous pools, capacity-mismatch and selector-mismatch Pending diagnosis,
 contention behaviour under queue pressure, operator-shaped GPU advertisement (a device
-plugin, not a hand-written integer), and a synthetic DCGM metrics stream (the Lesson 4
+plugin, not a hand-written integer), and a synthetic DCGM metrics stream (the Lesson 3
 bridge).
 
 ## What this run does NOT prove

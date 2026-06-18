@@ -2,7 +2,7 @@
 
 > Phase 3 - fake-GRES scheduling simulation (Slurm-in-Docker). This report records
 > the control-plane scheduling validation. Real `--gres=gpu` enforcement on hardware
-> (the optional Lesson 2 extension) is tracked separately and kept strictly apart.
+> (the optional Lesson 6 extension) is tracked separately and kept strictly apart.
 
 ## Environment
 

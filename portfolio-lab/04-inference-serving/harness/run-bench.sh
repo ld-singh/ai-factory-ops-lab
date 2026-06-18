@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # run-bench.sh - drive the load harness against an OpenAI-compatible endpoint.
 # Defaults to the local CPU server from serve-cpu.sh ($0 harness-validation tier).
-# For a REAL benchmark, point --url at vLLM on the Lesson 2 GPU machine.
+# For a REAL benchmark, point --url at vLLM on the Lesson 6 GPU machine.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

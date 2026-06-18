@@ -20,7 +20,7 @@ fake fleet behave like a real one in two ways that matter later:
   the real NVIDIA GPU Operator does in production - not a hand-edited status field.
 - **A DCGM metrics stream.** It stands up a DCGM exporter per node emitting real
   `DCGM_FI_*` metric names/labels (with per-pod attribution), so
-  [Lesson 4](../../03-observability/README.md) can build dashboards and alerts against
+  [Lesson 3](../../03-observability/README.md) can build dashboards and alerts against
   the same fleet. The *values* are synthetic; the *shape* is real.
 
 It is also the mechanism [Lesson 1B (KAI)](../kai-scheduler/README.md) and
@@ -64,11 +64,11 @@ curl -s localhost:9400/metrics | grep -E '^DCGM_FI_' | head
 > plugin, and the DCGM metrics are fabricated, and pods on KWOK nodes are simulated
 > (no real container, so no real `nvidia-smi` or CUDA). Dashboards built on these
 > metrics prove dashboard/alert *design*, not real telemetry. Real DCGM evidence
-> belongs to [Lesson 2](../gpu-operator-real/README.md).
+> belongs to [Lesson 6](../gpu-operator-real/README.md).
 
 ✅ **Checkpoint:** state which component advertises `nvidia.com/gpu` on a KWOK node,
 and the one thing this layer still cannot give you (real GPU telemetry / a real
 `nvidia-smi`).
 
 ➡️ **Back to:** [Lesson 1](../README.md) · **Leads to:**
-[Lesson 4 - Observability](../../03-observability/README.md).
+[Lesson 3 - Observability](../../03-observability/README.md).

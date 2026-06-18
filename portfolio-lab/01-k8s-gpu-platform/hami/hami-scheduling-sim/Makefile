@@ -97,15 +97,36 @@ demo-placement: ## Scenario 3: small slices; show HAMi's per-pod placement DECIS
 	@echo "Pods (binding onto fake nodes is slow/serialized; see the manifest note):"
 	kubectl get pods -l app=hami-placement -o wide
 
+.PHONY: demo-binpack
+demo-binpack: ## Scenario 4: 12 pods share one 8-GPU node (multiple pods per device)
+	$(SCRIPTS)/demo-binpack.sh
+
+.PHONY: demo-mem-exhaustion
+demo-mem-exhaustion: ## Scenario 5: per-device gpumem budget exhausts; last pod Pending
+	$(SCRIPTS)/demo-mem-exhaustion.sh
+
+.PHONY: demo-gpucores
+demo-gpucores: ## Scenario 6: gpucores (compute %) exhausts independently of memory
+	$(SCRIPTS)/demo-gpucores.sh
+
+.PHONY: demo-gpumem-percentage
+demo-gpumem-percentage: ## Scenario 7: percentage memory form (gpumem-percentage) binds
+	$(SCRIPTS)/demo-gpumem-percentage.sh
+
 .PHONY: evidence
 evidence: ## Capture control-plane evidence into evidence/<timestamp>/
 	$(SCRIPTS)/collect-evidence.sh
 
 .PHONY: clean
 clean: ## Delete the demo workloads (keep the cluster)
+	-kubectl delete -f manifests/07-gpumem-percentage.yaml --ignore-not-found
+	-kubectl delete -f manifests/06-gpucores.yaml --ignore-not-found
+	-kubectl delete -f manifests/05-mem-exhaustion.yaml --ignore-not-found
+	-kubectl delete -f manifests/04-binpack.yaml --ignore-not-found
 	-kubectl delete -f manifests/03-placement-spread.yaml --ignore-not-found
 	-kubectl delete -f manifests/02-overrequest-pending.yaml --ignore-not-found
 	-kubectl delete -f manifests/01-fractional-pod.yaml --ignore-not-found
+	-$(SCRIPTS)/pin-node.sh --clear
 
 .PHONY: down
 down: ## Delete the kind cluster

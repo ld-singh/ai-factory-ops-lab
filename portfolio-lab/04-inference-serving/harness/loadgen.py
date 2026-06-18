@@ -14,7 +14,7 @@ throughput-vs-latency trade-off, which is the whole point: bigger batches buy
 throughput at the cost of per-request latency.
 
 SCOPE NOTE: numbers are only a *benchmark* when produced against a real GPU
-server (Lesson 2 machine). Run against a CPU-served model first only to validate
+server (Lesson 6 machine). Run against a CPU-served model first only to validate
 that this harness works end to end - those numbers are meaningless as a benchmark.
 
 Stdlib only (urllib + threads) so it runs anywhere with no pip install.
@@ -119,7 +119,7 @@ def main():
 
     levels = [int(x) for x in args.concurrency.split(",") if x.strip()]
     print(f"Target: {args.url}  model={args.model}  TTFT-SLO={args.ttft_slo}s")
-    print("!! Numbers are a real benchmark ONLY against a real-GPU server (Lesson 2). !!\n")
+    print("!! Numbers are a real benchmark ONLY against a real-GPU server (Lesson 6). !!\n")
     hdr = ("conc", "reqs", "err", "ttft_p50", "ttft_p95", "e2e_p95", "e2e_p99",
            "tok/s", "req/s", "goodput%")
     print("{:>4} {:>5} {:>4} {:>9} {:>9} {:>8} {:>8} {:>8} {:>7} {:>9}".format(*hdr))

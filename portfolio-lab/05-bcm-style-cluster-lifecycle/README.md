@@ -1,8 +1,8 @@
-# Lesson 6 - BCM-Style Cluster Lifecycle (Conceptual)
+# Lesson 5 - BCM-Style Cluster Lifecycle (Conceptual)
 
 > Course home: [AI Factory Operations Lab](../../README.md) · Previous:
-> [Lesson 5 - Inference Serving](../04-inference-serving/README.md) · Next:
-> [★ Your lab notebook](../06-validation-reports/)
+> [Lesson 4 - Inference Serving](../04-inference-serving/README.md) · Next:
+> [Lesson 6 - Real GPU](../real-gpu-session/README.md)
 
 > 🟡 **STATUS: RUNNABLE DRILL (Phase 6), conceptual mapping.**
 >
@@ -16,7 +16,7 @@
 
 The final lesson zooms out from "schedule and observe workloads" to "operate the
 cluster itself over its lifetime" - the layer a tool like NVIDIA Base Command Manager
-(BCM) manages. Everything in Lessons 1–5 assumed nodes exist, run an OS, have
+(BCM) manages. Everything in Lessons 1–4 assumed nodes exist, run an OS, have
 drivers, and joined a scheduler. This lesson is about the machinery that makes that
 true for hundreds of nodes at once, repeatably.
 
@@ -43,13 +43,13 @@ this course (or common production practice) already touches it:
 
 | Lifecycle concern | The generic mechanism | Where you've seen the idea |
 |---|---|---|
-| Head node | A management plane holding cluster state and serving provisioning | The kind control-plane node in Lesson 1; `slurmctld` in Lesson 3 |
+| Head node | A management plane holding cluster state and serving provisioning | The kind control-plane node in Lesson 1; `slurmctld` in Lesson 2 |
 | Software image | A golden OS image nodes boot from; change the image, not the node | Cloud machine images / immutable infrastructure |
 | Node category | A group of nodes sharing one image + config (e.g. "gpu-compute") | Lesson 1's node pools (`gpu-pool=a100`) - same idea, lower in the stack |
 | Provisioning | Network boot → image → node-specific finalization | Cloud-init / PXE pipelines |
-| Health checks | Scripted checks gating whether a node accepts work | K8s readiness + the drain drills of Lessons 1/3 |
-| WLM integration | The lifecycle layer installs/configures Slurm or K8s on nodes | Lesson 3's config files - here, generated rather than handwritten |
-| Patching lifecycle | Update the image, roll node-by-node, drain → reimage → resume | Rolling updates; cordon/drain (Lesson 1), `scontrol drain` (Lesson 3) |
+| Health checks | Scripted checks gating whether a node accepts work | K8s readiness + the drain drills of Lessons 1/2 |
+| WLM integration | The lifecycle layer installs/configures Slurm or K8s on nodes | Lesson 2's config files - here, generated rather than handwritten |
+| Patching lifecycle | Update the image, roll node-by-node, drain → reimage → resume | Rolling updates; cordon/drain (Lesson 1), `scontrol drain` (Lesson 2) |
 | Users & roles | Central identity + per-team access to partitions/queues | Lesson 1B's queues and quotas, one layer down |
 
 💡 **The transferable insight:** cluster managers are *fleet-level immutability
@@ -98,5 +98,8 @@ than reciting commands you've never executed.
 
 See also: [bcm-style-cluster-lifecycle.md](../../diagrams/bcm-style-cluster-lifecycle.md).
 
-➡️ **Next:** [★ Your lab notebook](../06-validation-reports/) - close the loop by
-making sure every lesson you ran has captured evidence.
+➡️ **Next:** [Lesson 6 - Real GPU](../real-gpu-session/README.md) - the optional
+one-rental capstone that runs every real-hardware piece (GPU runtime path, HAMi
+sharing, Slurm GRES, inference benchmark) back to back. Then close the loop in your
+[★ lab notebook](../06-validation-reports/), making sure every lesson you ran has
+captured evidence.

@@ -33,7 +33,10 @@ theme:
   features:
     - navigation.tabs
     - navigation.sections
-    - navigation.indexes
+    # navigation.indexes is intentionally OFF: it promotes a section's first page to be
+    # the section's landing page, which silently absorbed "Lesson 1" into the "Lessons"
+    # group (it stopped appearing as its own item). Without it, every lesson - including
+    # the "Overview" pages of 1C and 4 - shows as an explicit, predictable nav item.
     - navigation.top
     - navigation.footer
     - toc.follow
@@ -93,17 +96,21 @@ nav:
   - Lessons:
       - "1 - Kubernetes GPU scheduling": portfolio-lab/01-k8s-gpu-platform/README.md
       - "1B - Queue scheduling (KAI)": portfolio-lab/01-k8s-gpu-platform/kai-scheduler/README.md
-      - "1C - GPU sharing (HAMi)":
+      - "1C - GPU sharing (HAMi, sim)":
           - Overview: portfolio-lab/01-k8s-gpu-platform/hami/README.md
           - "Scheduling sim (no GPU)": portfolio-lab/01-k8s-gpu-platform/hami/hami-scheduling-sim/README.md
-          - "Isolation (real GPU)": portfolio-lab/01-k8s-gpu-platform/hami/hami-isolation-realgpu/README.md
-      - "2 - Real GPU validation": portfolio-lab/01-k8s-gpu-platform/gpu-operator-real/README.md
-      - "3 - Slurm workload management": portfolio-lab/02-slurm-gpu-platform/README.md
-      - "4 - GPU observability":
+      - "2 - Slurm workload management": portfolio-lab/02-slurm-gpu-platform/README.md
+      - "3 - GPU observability":
           - Overview: portfolio-lab/03-observability/README.md
           - Fake DCGM exporter: portfolio-lab/03-observability/fake-dcgm-exporter/README.md
-      - "5 - Inference serving": portfolio-lab/04-inference-serving/README.md
-      - "6 - Cluster lifecycle (BCM-style)": portfolio-lab/05-bcm-style-cluster-lifecycle/README.md
+      - "4 - Inference serving": portfolio-lab/04-inference-serving/README.md
+      - "5 - Cluster lifecycle (BCM-style)": portfolio-lab/05-bcm-style-cluster-lifecycle/README.md
+      - "6 - Real GPU (one-rental capstone)":
+          - Overview: portfolio-lab/real-gpu-session/README.md
+          - "Setup scripts (TensorDock → k3s)": portfolio-lab/real-gpu-session/scripts/README.md
+          - "Part A - GPU runtime path": portfolio-lab/01-k8s-gpu-platform/gpu-operator-real/README.md
+          - "Part B - HAMi isolation (real GPU)": portfolio-lab/01-k8s-gpu-platform/hami/hami-isolation-realgpu/README.md
+          - "Part C - Slurm real GRES": portfolio-lab/02-slurm-gpu-platform/slurm-realgpu/README.md
   - Deep dives:
       - kind (local cluster): portfolio-lab/01-k8s-gpu-platform/kind/README.md
       - KWOK (fake nodes): portfolio-lab/01-k8s-gpu-platform/kwok/README.md

@@ -3,14 +3,14 @@
 
 Why this exists
 ---------------
-Lesson 4 teaches you to build the *observability pipeline* (scrape -> dashboard ->
+Lesson 3 teaches you to build the *observability pipeline* (scrape -> dashboard ->
 alert -> runbook) before owning a GPU. Dashboards and alert rules are queries and
 thresholds; they are correct or not regardless of whether the numbers are real. So
 we serve metrics with the EXACT field names and labels that NVIDIA's real DCGM
 Exporter uses (DCGM_FI_DEV_* / DCGM_FI_PROF_*), but with synthetic values.
 
 SCOPE NOTE: every value here is fabricated. A dashboard built on this proves
-dashboard/alert DESIGN only. Real telemetry comes from the Lesson 2 hardware run.
+dashboard/alert DESIGN only. Real telemetry comes from the Lesson 6 hardware run.
 Field names follow DCGM Exporter's documented set:
 https://github.com/NVIDIA/dcgm-exporter
 

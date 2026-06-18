@@ -1,7 +1,7 @@
 # ILLUSTRATIVE - Lesson 1C Part 3. Two pods that each take a ~2 GiB slice of ONE
 # physical GPU and run concurrently - something stock Kubernetes cannot do, since
 # it would hand the whole device to the first pod. CONFIRM resource names/units
-# against your HAMi version. Run on the Lesson 2 real-GPU machine.
+# against your HAMi version. Run on the Lesson 6 real-GPU machine.
 apiVersion: v1
 kind: Pod
 metadata:

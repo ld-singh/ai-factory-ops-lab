@@ -3,7 +3,7 @@
 # three GPU pools. The operator advertises nvidia.com/gpu on the KWOK fake nodes
 # (no hardware), runs a KWOK-aware device plugin, and stands up a per-node DCGM
 # exporter that emits DCGM_FI_* metrics with per-pod GPU attribution. That metrics
-# stream is the bridge to Lesson 4 (observability).
+# stream is the bridge to Lesson 3 (observability).
 #
 # fake-gpu-operator is DESIGNED to sit on top of KWOK: KWOK provides the kubelet-less
 # nodes at scale, the operator provides the GPU simulation layer. They are

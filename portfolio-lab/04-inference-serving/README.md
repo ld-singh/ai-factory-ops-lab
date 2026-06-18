@@ -1,14 +1,14 @@
-# Lesson 5 - Inference Serving
+# Lesson 4 - Inference Serving
 
 > Course home: [AI Factory Operations Lab](../../README.md) · Previous:
-> [Lesson 4 - Observability](../03-observability/README.md) · Next:
-> [Lesson 6 - BCM-Style Cluster Lifecycle](../05-bcm-style-cluster-lifecycle/README.md)
+> [Lesson 3 - Observability](../03-observability/README.md) · Next:
+> [Lesson 5 - BCM-Style Cluster Lifecycle](../05-bcm-style-cluster-lifecycle/README.md)
 
 > 🟡 **STATUS: HARNESS RUNNABLE (Phase 5).** The load-test harness is built and
 > validated - you can run a full concurrency sweep ($0) against a CPU-served model
 > *today* to learn the harness and the SLOs. The harness emits TTFT / TPOT /
 > p95-p99 / tokens-per-sec / goodput. **Benchmark *numbers* are only meaningful from
-> a real-GPU server** (Lesson 2 machine) - the CPU tier validates the harness, not
+> a real-GPU server** (Lesson 6 machine) - the CPU tier validates the harness, not
 > the hardware.
 
 The point of all that scheduling and observability is to *serve something*. This
@@ -26,9 +26,11 @@ SLOs that actually matter.
 4. Contrast inference vs training vs batch workload characteristics, and reason about
    which scheduler (Kubernetes vs Slurm) fits each.
 
-🧭 **Mode:** 🟥 Real GPU. A small model on a single mid-range GPU is enough for
-meaningful benchmarking - reuse the Lesson 2 machine (and the
-[cheap-rental playbook](../01-k8s-gpu-platform/gpu-operator-real/README.md#renting-the-gpu-cheaply)).
+🧭 **Mode:** 🟦 Simulation/harness for the lesson body - the **$0 CPU tier** runs the
+full concurrency sweep on your laptop, no GPU. The 🟥 **real benchmark numbers** come
+from one mid-range GPU and are produced **as part of
+[Lesson 6 - Real GPU](../real-gpu-session/README.md)**, in the same rental session
+(cheap-rental tactics: [the renting guide](../01-k8s-gpu-platform/gpu-operator-real/README.md#renting-the-gpu-cheaply)).
 
 > **Note:** benchmark numbers are only ever published from real GPU runs. Anything
 > else in the report is an unloaded template - a number you can't reproduce on
@@ -46,8 +48,8 @@ make phase5-bench       # sweep concurrency; print TTFT/TPOT/p95-p99/tokens-per-
 make phase5-down        # stop the CPU server
 ```
 
-**Real benchmark tier** (🟥, Lesson 2 GPU machine): serve a model with vLLM, then
-point the same harness at it:
+**Real benchmark tier** (🟥, run in [Lesson 6 - Real GPU](../real-gpu-session/README.md)):
+serve a model with vLLM on the rented GPU, then point the same harness at it:
 
 ```bash
 ENDPOINT=http://<gpu-host>:8000 MODEL=<served-model> make phase5-bench
@@ -92,7 +94,7 @@ Phase 5's harness sweeps concurrency and plots both curves.
    biggest reason vLLM-class servers beat naive serving by an order of magnitude.
 3. **KV cache is the real capacity limit:** each in-flight sequence holds GPU memory
    proportional to its context length. "How many concurrent requests fit" is a
-   memory question, not a compute one - which connects straight back to Lesson 4's
+   memory question, not a compute one - which connects straight back to Lesson 3's
    FB_USED panel and the [gpu-memory-pressure runbook](../../runbooks/gpu-memory-pressure.md).
 
 ## Concept 3 - Workload shapes, and which scheduler fits
@@ -105,7 +107,7 @@ Phase 5's harness sweeps concurrency and plots both curves.
 | Gang requirement | No (per-replica) | Yes (all ranks or none) | Rarely |
 | Natural scheduler | Kubernetes (+ sharing, Lesson 1C) | Slurm or K8s+KAI gang (1B/3) | Either, queue-policy driven |
 
-This table is the course's capstone argument: Lessons 1–3 weren't scheduler
+This table is the course's capstone argument: Lessons 1–2 weren't scheduler
 trivia - they were the decision framework for *placing* these three shapes.
 
 ## What's in this directory
@@ -128,6 +130,6 @@ measuring what sharing costs in p99.
 
 🔬 **Sim vs real:** there is no meaningful simulation tier for benchmark *numbers* -
 this lesson is 🟥 by nature. What you can do for free now: the concepts above, the
-harness code, and the dashboard panels (Lesson 4) that will receive the metrics.
+harness code, and the dashboard panels (Lesson 3) that will receive the metrics.
 
-➡️ **Next:** [Lesson 6 - BCM-Style Cluster Lifecycle](../05-bcm-style-cluster-lifecycle/README.md).
+➡️ **Next:** [Lesson 5 - BCM-Style Cluster Lifecycle](../05-bcm-style-cluster-lifecycle/README.md).

@@ -6,7 +6,7 @@
 > https://github.com/Project-HAMi/HAMi
 >
 > These run in [Lesson 1C Part 3](../README.md#part-3----share-one-real-gpu-between-pods-do-this-during-your-lesson-2-rental),
-> on the **real GPU** from Lesson 2 - that's where the memory-cap enforcement is
+> on the **real GPU** from Lesson 6 - that's where the memory-cap enforcement is
 > actually proven. Capture the in-pod `nvidia-smi` and any allocation-failure
 > output into [`../../../06-validation-reports/`](../../../06-validation-reports/).
 
@@ -18,7 +18,7 @@
 
 ## Use
 
-1. Install HAMi on the Lesson 2 machine (confirm chart/values in the docs).
+1. Install HAMi on the Lesson 6 machine (confirm chart/values in the docs).
 2. Confirm the resource names in `shared-pods.yaml` match your HAMi version.
 3. Apply, then verify co-residency and the per-pod memory cap:
 

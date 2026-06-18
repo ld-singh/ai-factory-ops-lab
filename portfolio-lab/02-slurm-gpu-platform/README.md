@@ -1,8 +1,8 @@
-# Lesson 3 - Slurm GPU Workload Management
+# Lesson 2 - Slurm GPU Workload Management
 
 > Course home: [AI Factory Operations Lab](../../README.md) · Previous:
-> [Lesson 2 - Real GPU validation](../01-k8s-gpu-platform/gpu-operator-real/README.md) ·
-> Next: [Lesson 4 - Observability](../03-observability/README.md)
+> [Lesson 1C - GPU sharing with HAMi](../01-k8s-gpu-platform/hami/README.md) ·
+> Next: [Lesson 3 - Observability](../03-observability/README.md)
 
 > ✅ **STATUS: RUNNABLE (Phase 3).** This lesson stands up a real Slurm cluster in
 > Docker with fake GRES and runs the four scheduling scenarios - validated, with
@@ -29,7 +29,7 @@ are to Kubernetes**.
    Lesson 1's Pending-pod triage).
 
 🧭 **Mode:** 🟦 Simulation (fake GRES, no GPU) for scheduling logic; optional 🟥 real
-`--gres=gpu` validation on the Lesson 2 hardware.
+`--gres=gpu` validation on the Lesson 6 hardware.
 
 💡 **Why fake GRES is legitimate (same idea as Lesson 1):** `slurmctld` scheduling
 does not require the device to exist - GRES scheduling is control-plane logic. So
@@ -97,7 +97,7 @@ writes it; reference it from the validation report.
    └────────┘└────────┘└────────┘
 ```
 
-The mapping to what you already know from Lessons 1–2:
+The mapping to what you already know from Lesson 1:
 
 | Kubernetes concept | Slurm counterpart | Note |
 |---|---|---|
@@ -206,7 +206,7 @@ counterpart of cordon/uncordon, and feeds the
 - [`scripts/`](./scripts/) - `up` / `demo` / `setup-qos` / `drain-drill` / `down`.
 
 **Optional 🟥 extension:** run a real `--gres=gpu:1` + `nvidia-smi` job on the
-Lesson 2 machine to close the loop the way Lesson 2 did for Kubernetes. Keep its
+Lesson 6 machine to close the loop the way Lesson 6 did for Kubernetes. Keep its
 evidence strictly separate from the fake-GRES section of the report.
 
 📎 **Related runbooks:**
@@ -224,4 +224,4 @@ triage workflow. It proves nothing about device binding, cgroup device isolation
 require the 🟥 extension. Ledger:
 [`fake-vs-real-limitations.md`](../06-validation-reports/fake-vs-real-limitations.md).
 
-➡️ **Next:** [Lesson 4 - Observability](../03-observability/README.md).
+➡️ **Next:** [Lesson 3 - Observability](../03-observability/README.md).

@@ -1,0 +1,28 @@
+# Exercise 7 (percentage memory form): request GPU memory as a FRACTION of the device
+# instead of an absolute MiB figure. HAMi accepts either nvidia.com/gpumem (absolute)
+# or nvidia.com/gpumem-percentage (relative) - a pod sets one, not both. This proves
+# the alternate request form schedules; the scheduler resolves 50% against each GPU's
+# registered devmem (81920 MiB here, so the slice is ~40960 MiB).
+#
+# Expected: Running (the alternate form is accepted and placed). Two such pods would
+# fill one device's memory; a third 50% request would not fit - the same per-device
+# accounting as Exercise 5, expressed as a percentage.
+#
+#   TODO: confirm nvidia.com/gpumem-percentage is the exact key and that it is mutually
+#   exclusive with nvidia.com/gpumem for your HAMi version:
+#   https://github.com/Project-HAMi/HAMi (resource names can change across releases).
+#
+# Not pinned: a single pod lands anywhere in the pool. The container is pause.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hami-gpumem-percentage
+spec:
+  restartPolicy: Never
+  containers:
+    - name: app
+      image: registry.k8s.io/pause:3.9
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+          nvidia.com/gpumem-percentage: 50
