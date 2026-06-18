@@ -44,7 +44,7 @@ front.
    precise limits of demonstrating them on a fake-GPU simulation.
 
 🧭 **Mode:** 🟦 Simulation (no GPU), via the fake-gpu-operator. Real runtime behavior
-(CUDA, memory isolation, MIG) is out of scope; see [Lesson 2](../gpu-operator-real/README.md).
+(CUDA, memory isolation, MIG) is out of scope; see [Lesson 6](../gpu-operator-real/README.md).
 
 📋 **Prerequisites:** docker, kind, kubectl, helm, jq. The lesson's `make up` builds
 the shared Lesson 1 fleet (kind + KWOK + fake-gpu-operator, 32 GPUs) if it is not
@@ -372,7 +372,7 @@ see the all-or-nothing logic directly, on fake nodes, in seconds.
 🔬 **Proved on fake GPUs:** the gang admission decision (bind-all-or-none) and the
 anti-deadlock behaviour - fully control-plane. **Not proved:** the actual NCCL
 all-reduce the gang would run once placed (that needs real GPUs + NVLink/network -
-[Lesson 2](../gpu-operator-real/README.md) territory, and even there, single-node).
+[Lesson 6](../gpu-operator-real/README.md) territory, and even there, single-node).
 
 ---
 
@@ -448,6 +448,6 @@ backed once those captures exist. See
 
 ➡️ **Back to:** [Lesson 1](../README.md) · **Next:**
 [Lesson 1C - GPU sharing & fractional GPUs with HAMi](../hami/README.md) (the
-sharing concepts are free; its hands-on part shares the Lesson 2 rental), then
-[Lesson 2 - Real GPU validation](../gpu-operator-real/README.md), where you finally
-run something below the kubelet on real hardware.
+sharing concepts are free; its hands-on isolation half runs in the Lesson 6 rental),
+and eventually [Lesson 6 - Real GPU](../../real-gpu-session/README.md), where you
+finally run something below the kubelet on real hardware.
