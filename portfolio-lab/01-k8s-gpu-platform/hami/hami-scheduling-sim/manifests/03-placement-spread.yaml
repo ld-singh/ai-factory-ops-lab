@@ -1,16 +1,11 @@
-# Scenario 3: small fractional slices. The point is the SCHEDULER DECISION - watch
-# the hami-scheduler "FilteringSucceed" events choose a node and score it for each
-# fractional pod (the demo prints them). Whether slices binpack onto one worker or
-# spread is a HAMi scheduler policy.
+# Scenario 3: small fractional slices. The point is the SCHEDULER DECISION - watch the
+# hami-scheduler "FilteringSucceed" events choose a node and score it for each fractional
+# pod (the demo prints them). With the mock device plugin the pods also reach Running.
 #
-# TODO: confirm the exact Helm value that selects binpack vs spread for the chart
-# version you installed (HAMI_VERSION). The scheduler-policy value name has changed
-# across releases, so it is not hardcoded here.
-#
-# NOTE on this fake fleet: HAMi's binder serializes binds and briefly locks a node
-# per bind, so several concurrent fractional pods reach Running slowly (a quirk of
-# binding onto simulated nodes, not a scheduling error). The placement DECISION is
-# what this scenario demonstrates; full binding throughput needs a real cluster.
+# Memory as a percentage (see 00-share.yaml for why). Whether slices binpack onto one
+# worker or spread is a HAMi scheduler policy.
+#   TODO: confirm the exact Helm value that selects binpack vs spread for HAMI_VERSION; the
+#   scheduler-policy value name has changed across releases, so it is not hardcoded here.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -31,5 +26,5 @@ spec:
           resources:
             limits:
               nvidia.com/gpu: 1
-              nvidia.com/gpumem: 1000
+              nvidia.com/gpumem-percentage: 10
               nvidia.com/gpucores: 10

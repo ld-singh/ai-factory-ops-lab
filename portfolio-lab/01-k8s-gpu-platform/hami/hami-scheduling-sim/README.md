@@ -1,97 +1,128 @@
-# HAMi scheduling simulation (control plane, no GPU)
+# HAMi GPU sharing simulation (control plane, no GPU)
 
 > Part of [Lesson 1C - GPU sharing with HAMi](../README.md) · Course home:
 > [AI Factory Operations Lab](../../../../README.md). The paired data-plane lesson is
 > [`../hami-isolation-realgpu/`](../hami-isolation-realgpu/README.md).
 
-## The boundary (read first)
+## What this proves (read first)
 
-This lesson validates HAMi's **control plane only**: the scheduling decision over
-fractional GPU requests, on a fake GPU fleet with no hardware. Validated here:
+On a fake GPU fleet with **no hardware**, this lab demonstrates HAMi's control plane,
+**including multiple pods sharing one GPU and reaching Running** - the thing the default
+scheduler cannot do. It proves:
 
-- the mutating webhook routing GPU pods to the HAMi scheduler (`schedulerName:
-  hami-scheduler` is injected),
-- the scheduler's filter/score over `nvidia.com/gpu`, `nvidia.com/gpumem`, and
-  `nvidia.com/gpucores` (fractional placement, not just whole GPUs),
-- capacity accounting: a `gpumem` request larger than any GPU stays Pending with
-  `CardInsufficientMemory`.
+- the mutating webhook routing GPU pods to the HAMi scheduler,
+- fractional placement over `nvidia.com/gpu` + a memory/compute slice (a pod **places and
+  runs**),
+- capacity **rejection**: a request that can't fit stays Pending with a clear reason,
+- **GPU sharing**: two (or more) fractional pods co-scheduled and **both Running**, each
+  holding a memory slice - validated on the fake fleet.
 
-It does **not** validate runtime isolation: the in-container memory cap, OOM
-behavior, time-sliced cores, or a virtualized `nvidia-smi`. Those need a real GPU and
-a real CUDA workload, and are the paired lesson
-[`../hami-isolation-realgpu/`](../hami-isolation-realgpu/README.md). A green run here
-proves HAMi made the right placement decision, not that a container is held to its
-slice.
+The trick is HAMi's own **mock device plugin**, which answers the kubelet's `Allocate`
+with no hardware (so shared pods are admitted, not rejected). What still needs a **real
+GPU** - the paired [`../hami-isolation-realgpu/`](../hami-isolation-realgpu/README.md)
+lesson - is the **data plane**: the slice actually *enforced* inside the container (a
+CUDA `malloc` past the cap failing), a virtualized `nvidia-smi`, OOM behaviour, and MIG.
 
-> **The course's central line, drawn through one YAML block.** Everything below is a
-> *decision* HAMi's scheduler makes over integers (does a slice fit? which device?).
-> What happens *after* placement - a CUDA `malloc` past the cap actually failing
-> inside the container - is *enforcement*, and only the real-GPU lesson proves it.
-> Decisions are free; enforcement needs hardware.
+> ### ⚠️ Two hard rules of the fake fleet
+>
+> 1. **Request GPU memory as a PERCENTAGE** (`nvidia.com/gpumem-percentage`), not absolute
+>    MiB. The mock plugin registers one device per MiB; an 80 GiB GPU = 81920 devices and a
+>    full node blows past the kubelet's ~120 GiB device limit, so **absolute `gpumem` comes
+>    back capacity `0`** (`OutOfnvidia.com/gpumem`). Percentage registers a small count
+>    (8×100) and allocates fine. So sim demos slice memory by **percent**; absolute-MiB
+>    slices are a real-GPU thing.
+> 2. **Pin HAMi to 2.8.x.** HAMi 2.9.0's Ascend user-space partitioning reshaped the
+>    `hami-scheduler-device` ConfigMap to a map, which the mock plugin (image 1.0.1)
+>    rejects (`cannot unmarshal map into []ascend.VNPUConfig`). 2.8.x emits the list format
+>    it expects. The Makefile pins `HAMI_VERSION ?= 2.8.0` for this reason.
+>
+> *Validated 2026-06-21:* two pods (`gpu:1` + `gpumem-percentage:20` each) both reached
+> Running on one node under HAMi 2.8.0 + mock plugin 1.0.1.
 
-## Relationship to the official HAMi tutorial
+## What this lab does that the official docs do NOT
 
-This lesson is based on the official
-[HAMi local-fake-gpu tutorial](https://project-hami.io/tutorials/labs/local-fake-gpu),
-with one important difference. The official tutorial uses run.ai's fake-gpu-operator
-and notes that only `nvidia.com/gpu` works, while `gpumem`/`gpucores` "require a real
-NVIDIA GPU environment." That statement is about runtime **isolation**. The
-**scheduling** of `gpumem`/`gpucores` does work on fakes once HAMi's scheduler has the
-per-GPU memory and core figures, which this lesson supplies through the
-`hami.io/node-nvidia-register` annotation (see below). With that annotation, fractional
-pods schedule on fakes; this was verified on the live cluster (a `gpu:1, gpumem:3000,
-gpucores:30` pod reaches Running, and an over-large `gpumem` request stays Pending).
+⭐ **No single official HAMi doc shows multi-pod GPU sharing running with zero hardware.**
+This lab does - by combining three pieces none of the docs combine, plus three gotchas we
+had to discover by hand. That's the original engineering here; it's worth being explicit
+about where the official material stops and this lab goes further.
 
-## How the fake fleet works (the validated recipe)
+| Source | What it does | Where it stops |
+|---|---|---|
+| Official [local-fake-gpu tutorial](https://project-hami.io/tutorials/labs/local-fake-gpu) | fake-gpu-operator advertises `nvidia.com/gpu`; HAMi's real device plugin **off** | a **single** pod schedules; says **sharing needs a real GPU** |
+| Official [mock-device-plugin](https://github.com/Project-HAMi/mock-device-plugin) | registers `gpumem`/`gpucores` into node `allocatable` and answers the kubelet `Allocate` | registers resources only - **no `hami.io/node-nvidia-register` annotation**, no fake-sharing recipe, and **breaks on current HAMi** |
+| **This lab** | **all three stitched together** → **multiple pods share one GPU and reach Running, no hardware** | runtime *isolation* (the slice enforced inside the container) - that's the real-GPU lab |
 
-Three pieces, in this order (the Makefile does them):
+**The three pieces we combine (no official doc combines them):**
 
-1. **fake-gpu-operator** (run.ai, JFrog `prod` chart) makes each labelled node
-   advertise `nvidia.com/gpu` by patching node status directly through the API. No
-   kubelet or driver. Use the JFrog `prod` chart; the `ghcr.io` OCI build is
-   DRA-oriented and does not populate `nvidia.com/gpu`.
-2. **HAMi**, installed with `devicePlugin.enabled=false`. HAMi's own device plugin
-   uses NVML to find GPUs and **crashes on GPU-free nodes**, so it must be off (the
-   official tutorial does the same). `mockDevicePlugin.enabled=false` too: the bundled
-   mock plugin (image 1.0.1) fails to parse HAMi 2.9.0's generated device config
-   (`cannot unmarshal map into []ascend.VNPUConfig`), so we do not use it.
-   `scheduler.kubeScheduler.imageTag` is pinned to `K8S_VERSION`.
-3. **Node registration.** With both device plugins off, nothing writes the annotation
-   HAMi's scheduler reads, so [`scripts/register-hami.sh`](scripts/register-hami.sh)
-   writes it: `hami.io/node-nvidia-register` (the per-GPU list including `devmem` and
-   `devcore`, which is what enables fractional placement) plus `hami.io/node-handshake`
-   (a liveness timestamp). HAMi drops a node whose handshake is stale beyond ~60s; on a
-   real node the device plugin refreshes it every ~30s, so here `make demo-*` refreshes
-   it before scheduling.
+1. **fake-gpu-operator** - advertises `nvidia.com/gpu` (from the local-fake-gpu tutorial).
+2. **HAMi's mock device plugin** - answers the kubelet `Allocate` so *shared* pods are
+   admitted, not just scheduled (the tutorial's missing data-plane half).
+3. **A hand-written `hami.io/node-nvidia-register` annotation** ([`register-hami.sh`](scripts/register-hami.sh))
+   - **this is our shim, not an official step.** The scheduler needs that annotation to see
+   a node's GPUs; in a real cluster HAMi's *real* device plugin writes it, but we've
+   disabled that (it needs NVML), and **neither the mock plugin nor fake-gpu-operator writes
+   it** (confirmed in the mock plugin's README). So we write it ourselves. A real GPU
+   cluster would not need this.
+
+**The three gotchas we discovered (undocumented):**
+
+1. **Pin HAMi to 2.8.x.** 2.9.0's Ascend user-space partitioning reshaped the
+   `hami-scheduler-device` ConfigMap to a map; the mock plugin (1.0.1) rejects it
+   (`cannot unmarshal map into []ascend.VNPUConfig`). 2.8.x emits the list it expects.
+2. **Slice memory by PERCENTAGE, never absolute MiB.** The mock plugin registers one device
+   per MiB, so an 80 GiB GPU = 81920 devices and a node exceeds the kubelet's ~120 GiB
+   device limit - absolute `gpumem` comes back capacity `0`. `gpumem-percentage` is a small
+   count and works.
+3. **Register ONCE, never per-demo.** Re-writing the node annotation mid-flight tangles
+   HAMi's per-node bind lock and leaves the second pod Pending
+   (`node ... has been locked within 5m0s`).
+
+> None of this is in the docs as a recipe; we proved it on a live cluster (2 pods sharing
+> one GPU, both Running - HAMi 2.8.0 + mock 1.0.1, 2026-06-21). **Treat it as a working
+> extension of the official material, not as official guidance.**
+
+## How the fake fleet works (the recipe)
+
+Four pieces, in order (the Makefile does them):
+
+1. **fake-gpu-operator** (run.ai, JFrog `prod` chart) makes each labelled node advertise
+   `nvidia.com/gpu` by patching node status through the API - no kubelet or driver. Use
+   the JFrog `prod` chart; the `ghcr.io` OCI build is DRA-oriented and won't populate it.
+2. **HAMi 2.8.x** with `devicePlugin.enabled=false` (the real plugin needs NVML and
+   crashes GPU-free) **and `mockDevicePlugin.enabled=true`** (image `1.0.1`). The mock
+   plugin registers `gpumem` / `gpumem-percentage` / `gpucores` and **answers `Allocate`**
+   - the part that lets shared pods be admitted. `scheduler.kubeScheduler.imageTag` is
+   pinned to `K8S_VERSION`.
+3. **Node registration** - [`scripts/register-hami.sh`](scripts/register-hami.sh) writes
+   the `hami.io/node-nvidia-register` annotation (per-GPU `devmem`/`devcore` list) + a
+   liveness handshake. The mock plugin registers devices with the *kubelet* but **not** the
+   annotation HAMi's *scheduler* reads - without it the scheduler reports "node
+   unregistered" and pods stay Pending. `make up` does this **once**.
+4. **Workloads** request `nvidia.com/gpu` + `gpumem-percentage` (+ optional `gpucores`).
+
+> **Why register runs ONCE, not before every demo (a bug worth knowing).** An earlier
+> version ran `register` as a prerequisite of *every* demo. Re-writing the node annotation
+> mid-flight tangles HAMi's per-node bind lock, leaving the second pod Pending with
+> `node ... has been locked within 5m0s`. Registering once at `make up` and leaving it
+> alone fixed sharing. If nodes go stale after long inactivity (~60s), `make register`
+> refreshes the handshake.
 
 ## Why not reuse the KWOK fleet from Lesson 1
 
-Two reasons. First, HAMi's scheduler reads GPU inventory from the
-`hami.io/node-nvidia-register` annotation, not from `allocatable`, so a KWOK node with
-`nvidia.com/gpu: 8` is invisible to it until something writes that annotation. Second,
-the pod still needs `nvidia.com/gpu` in node `allocatable` for the resource fit, which
-on a real worker comes from fake-gpu-operator. This lesson uses real kind workers (no
-GPU) so fake-gpu-operator can advertise the resource and pods run as ordinary
-containers. The annotation supplies HAMi's scheduler view.
-
-## One `K8S_VERSION` feeds both the node image and HAMi's scheduler image
-
-A mismatch between the cluster Kubernetes version and
-`scheduler.kubeScheduler.imageTag` is a common HAMi failure. The Makefile defines a
-single `K8S_VERSION` and passes it to both `kindest/node:vX.Y.Z` and
-`--set scheduler.kubeScheduler.imageTag=vX.Y.Z`, so they cannot drift.
+A pod needs `nvidia.com/gpu` in node `allocatable` for the resource fit (from
+fake-gpu-operator), the mock device plugin to register `gpumem-percentage`/`gpucores` and
+answer the kubelet's `Allocate`, and HAMi's scheduler to read the per-GPU figures. KWOK
+fake nodes give none of that wiring (no real kubelet for the device plugin), so this lab
+uses real kind workers.
 
 ## Resource semantics
 
-| Resource | Meaning | Unit |
+| Resource | Meaning | Unit / note |
 |---|---|---|
-| `nvidia.com/gpu` | number of physical GPUs | count |
-| `nvidia.com/gpumem` | per-pod GPU memory | MiB (1 unit = 1 MiB). HAMi docs sometimes write "MB"; treated as MiB here |
-| `nvidia.com/gpucores` | share of GPU compute | percent (1 unit = 1%) |
-
-`nvidia.com/gpumem-percentage` expresses memory as a fraction instead of an absolute;
-a pod sets that or `gpumem`, not both. Exercises 1-6 use absolute `gpumem`; Exercise 7
-shows the percentage form.
+| `nvidia.com/gpu` | number of (virtual) GPUs | count |
+| `nvidia.com/gpumem-percentage` | per-pod GPU memory as a fraction | percent (1 = 1%). **Use this on fakes.** |
+| `nvidia.com/gpucores` | share of GPU compute | percent (1 = 1%) |
+| `nvidia.com/gpumem` | per-pod GPU memory, absolute | MiB. **Does not register on the fake fleet** (device-count limit); real-GPU only. |
 
 ## Prerequisites
 
@@ -100,184 +131,100 @@ shows the percentage form.
 
 ## The loop (copy-paste)
 
+Each `make` step prints its result and ends with a `Verify:` line.
+
 ```bash
 cd portfolio-lab/01-k8s-gpu-platform/hami/hami-scheduling-sim
 
-make up                     # kind cluster + fake-gpu-operator + HAMi + node registration
-make verify                 # nvidia.com/gpu per node + the HAMi registration annotation
+make up               # kind + fake-gpu-operator + HAMi 2.8 with the mock device plugin ON
+make verify           # what each node advertises (nvidia.com/gpu, gpumem-percentage, gpucores)
 
-# The exercises (run in any order; each cleans up the previous workload it touches)
-make demo-fractional        # 1: a fractional pod (gpu:1, gpumem:3000, gpucores:30) binds
-make demo-pending           # 2: a gpumem request bigger than any GPU stays Pending
-make demo-placement         # 3: HAMi's per-pod placement decisions (FilteringSucceed)
-make demo-binpack           # 4: 12 pods share one 8-GPU node (several pods per device)
-make demo-mem-exhaustion    # 5: per-device gpumem budget exhausts; last pod Pending
-make demo-gpucores          # 6: gpucores (compute %) exhausts independently of memory
-make demo-gpumem-percentage # 7: the percentage memory form (gpumem-percentage) binds
+make demo-share       # ★ THE HEADLINE: two pods SHARE one GPU - both Running
+make demo-fractional  # 1: a single fractional pod places (Running)
+make demo-pending     # 2: an over-percentage request stays Pending (CardInsufficientMemory)
+make demo-placement   # 3: HAMi's per-pod placement DECISION (FilteringSucceed)
+make demo-binpack     # 4: six fractional pods coexist across the fleet (sharing at scale)
 
-make evidence               # capture control-plane evidence into evidence/<timestamp>/
-make clean                  # delete the demo workloads (keep the cluster)
-make down                   # delete the kind cluster
+make evidence         # capture control-plane evidence into evidence/<timestamp>/
+make clean            # delete the demo workloads
+make down             # delete the kind cluster
 ```
-
-Run `make up` and `make verify` **once**, then the exercises. Exercises 4-6 pin their
-pods to one node (via a `demo-node=target` label that [`scripts/pin-node.sh`](scripts/pin-node.sh)
-sets) so their per-device capacity arithmetic is deterministic. Capture evidence at the
-end of whichever exercise you want to document; `make clean` removes the workloads and
-the pin label.
 
 ---
 
 ## The exercises
 
-Each exercise is one scheduling *decision*. The first three are validated on the live
-cluster (real captured output). Exercises 4-7 are **runnable and expected** - their
-outcomes follow from per-device capacity arithmetic - but ship marked *Expected*: run
-them and capture the real output into your evidence before you claim them as validated,
-exactly as the project's [validation rule](../../../06-validation-reports/README.md)
-requires.
-
-| # | `make` target | Decision it proves | Status |
+| # | `make` target | What it proves | Status |
 |---|---|---|---|
-| 1 | `demo-fractional` | a fractional request (`gpu:1, gpumem:3000, gpucores:30`) places | ✅ Validated |
-| 2 | `demo-pending` | a `gpumem` larger than any GPU stays Pending (`CardInsufficientMemory`) | ✅ Validated |
-| 3 | `demo-placement` | per-pod node+device selection (`FilteringSucceed`) | ✅ Validated (decision) |
-| 4 | `demo-binpack` | multiple pods share ONE physical GPU (the sharing decision) | 🟡 Expected - run to confirm |
-| 5 | `demo-mem-exhaustion` | per-device `gpumem` budget exhausts while whole GPUs remain free | 🟡 Expected - run to confirm |
-| 6 | `demo-gpucores` | compute (`gpucores`) exhausts independently of memory | 🟡 Expected - run to confirm |
-| 7 | `demo-gpumem-percentage` | the percentage memory form places | 🟡 Expected - run to confirm |
+| ★ | `demo-share` | **two pods share one GPU, both Running** (default scheduler can't) | ✅ Validated |
+| 1 | `demo-fractional` | a fractional request (`gpu:1` + memory/compute %) places and runs | 🟡 Run to confirm |
+| 2 | `demo-pending` | a request bigger than a GPU stays **Pending** (`CardInsufficientMemory`) | 🟡 Run to confirm |
+| 3 | `demo-placement` | HAMi's per-pod node+device **selection** (`FilteringSucceed`) | 🟡 Run to confirm |
+| 4 | `demo-binpack` | several fractional pods coexist (sharing at scale) | 🟡 Run to confirm |
 
-### Exercise 1 - a fractional pod places (validated)
+### ★ The headline - two pods share one GPU (validated)
+
+```bash
+make demo-share
+```
+
+Applies [`manifests/00-share.yaml`](manifests/00-share.yaml): **two** pods, each `gpu:1` +
+`gpumem-percentage:20`. Both reach **Running** on one node - two pods sharing GPU memory,
+which the default scheduler can never do (it treats `nvidia.com/gpu` as a whole integer
+and has no memory-slice concept). The mock device plugin answers the kubelet `Allocate`,
+so the shared pods are admitted instead of erroring.
+
+✅ **Checkpoint:** `kubectl get pods -l app=hami-share -o wide` → **2/2 Running**.
+
+🔬 **Proved:** the sharing *decision* + admission on fakes. **Not proved:** that each
+container is actually held to its slice at runtime - that's the
+[real-GPU lesson](../hami-isolation-realgpu/README.md).
+
+### Exercise 1 - a single fractional pod places
 
 ```bash
 make demo-fractional
 ```
 
-Applies [`manifests/01-fractional-pod.yaml`](manifests/01-fractional-pod.yaml):
-`gpu:1, gpumem:3000, gpucores:30`. `schedulerName` is intentionally **not** set - the
-HAMi mutating webhook routes any pod that requests these resources to the HAMi
-scheduler automatically.
+[`manifests/01-fractional-pod.yaml`](manifests/01-fractional-pod.yaml): `gpu:1` +
+`gpumem-percentage:30` + `gpucores:30`. ✅ Reaches **Running** - HAMi placing a *slice*,
+not a whole device.
 
-✅ **Checkpoint:** the pod reaches **Running** on a worker. That is HAMi placing a
-*slice*, not a whole device - the thing Lessons 1/1B could not express.
-
-🔬 **Proved:** fractional scheduling arithmetic. **Not proved:** that a container is
-held to 3000 MiB at runtime (real-GPU lesson).
-
-### Exercise 2 - over-request stays Pending (validated)
+### Exercise 2 - an over-request stays Pending
 
 ```bash
 make demo-pending
 ```
 
-Applies [`manifests/02-overrequest-pending.yaml`](manifests/02-overrequest-pending.yaml):
-a single `gpumem: 999999` (≈976 GiB) that exceeds any one GPU.
+[`manifests/02-overrequest-pending.yaml`](manifests/02-overrequest-pending.yaml): one pod
+asking `gpumem-percentage:150` - impossible (no GPU has 150% of itself). ✅ Stays
+**Pending** with a `CardInsufficientMemory`-style reason. A pure scheduler decision (never
+reaches the kubelet), so it's clean evidence.
 
-✅ **Checkpoint:** **Pending** with `CardInsufficientMemory` in the events. The
-scheduler refused a slice that cannot fit on any device - capacity accounting at the
-control-plane level.
-
-> Exercise 2 over-requests against a **single** device. Exercise 5 is the subtler
-> cousin: every request fits a GPU, but the *aggregate* exhausts one.
-
-### Exercise 3 - the placement decision (validated)
+### Exercise 3 - the placement decision
 
 ```bash
 make demo-placement
 ```
 
-Applies [`manifests/03-placement-spread.yaml`](manifests/03-placement-spread.yaml):
-three small slices. The demo prints the hami-scheduler `FilteringSucceed` events -
-node chosen and fractional score, per pod.
+[`manifests/03-placement-spread.yaml`](manifests/03-placement-spread.yaml): three small
+slices. The demo prints the hami-scheduler `FilteringSucceed` events - the node chosen and
+fractional score per pod. ✅ A `FilteringSucceed` ("find fit node") per pod, and the pods
+reach Running.
 
-> **Binding-throughput quirk on fakes:** HAMi's binder serializes binds and briefly
-> locks a node per bind, so several concurrent fractional pods reach Running slowly on
-> simulated nodes. That is a fake-node quirk, not a scheduling error; the placement
-> **decision** (the `FilteringSucceed` events) is what this scenario demonstrates.
->
 > TODO: confirm the exact Helm value that selects binpack vs spread for `HAMI_VERSION`;
 > the scheduler-policy value name has changed across releases, so it is not set here.
 
-✅ **Checkpoint:** a `FilteringSucceed` ("find fit node") event per placed pod.
-
-### Exercise 4 - binpack: multiple pods on one device (expected)
+### Exercise 4 - sharing at scale
 
 ```bash
 make demo-binpack
 ```
 
-Pins one 8-GPU node and applies [`manifests/04-binpack.yaml`](manifests/04-binpack.yaml):
-**12** pods, each a tiny slice (`gpumem:2000, gpucores:5`), all confined to that node.
-
-💡 **Why it's deterministic:** 12 pods each need `nvidia.com/gpu: 1`, but the node has
-only 8 physical GPUs - by pigeonhole at least four GPUs must host two pods. The slices
-are tiny, so neither memory nor cores binds; the physical GPU count does, and HAMi
-*shares* devices to fit all 12. Stock Kubernetes caps this node at 8 (one pod per GPU).
-
-🟡 **Expected (run to confirm):** all **12 Running on the one node**. That co-residency
-- more pods than physical GPUs - is the core thing HAMi adds. Capture
-`kubectl get pods -l app=hami-binpack -o wide` showing 12 on one 8-GPU node.
-
-### Exercise 5 - per-device memory exhaustion (expected)
-
-```bash
-make demo-mem-exhaustion
-```
-
-Pins one 8-GPU node and applies [`manifests/05-mem-exhaustion.yaml`](manifests/05-mem-exhaustion.yaml):
-**17** pods, each `gpumem: 30000`.
-
-💡 **The arithmetic:** each GPU has 81920 MiB, so it fits two 30000-MiB pods (60000)
-but not three (90000). The node holds at most 8 × 2 = **16**; the 17th cannot be placed
-on any device. This is a capacity bound, not a policy choice, so it holds on any HAMi
-scheduler policy.
-
-🟡 **Expected (run to confirm):** **16 Running, 1 Pending** with `CardInsufficientMemory`
-- even though whole GPUs by *count* are still free. This is the sharpest proof that
-HAMi accounts memory **per device**, not just GPU count the way Lessons 1/1B do.
-
-### Exercise 6 - compute (gpucores) accounting (expected)
-
-```bash
-make demo-gpucores
-```
-
-Pins one 8-GPU node and applies [`manifests/06-gpucores.yaml`](manifests/06-gpucores.yaml):
-**9** pods, each `gpucores: 60` and only `gpumem: 1000`.
-
-💡 **The arithmetic:** by cores a GPU fits one pod (60) but not two (120 > 100); by
-memory it could fit dozens. So **cores** bind at one pod per GPU: 8 fit, the 9th does
-not. Same fleet as Exercise 5, *different* binding dimension.
-
-🟡 **Expected (run to confirm):** **8 Running, 1 Pending** on a compute/cores-insufficient
-reason. HAMi tracks memory and compute **independently**: a device can have memory to
-spare and still be full on cores.
-
-> **TODO - confirm the reason string.** The cores-insufficient Pending message varies
-> by HAMi version (it may read `CardInsufficientCore` / `CardComputeUnitsInsufficient`
-> or similar). The demo prints it; record the exact text from your run into evidence,
-> and confirm against the hami-scheduler logs and
-> [the HAMi repo](https://github.com/Project-HAMi/HAMi).
-
-### Exercise 7 - the percentage memory form (expected)
-
-```bash
-make demo-gpumem-percentage
-```
-
-Applies [`manifests/07-gpumem-percentage.yaml`](manifests/07-gpumem-percentage.yaml):
-one pod asking `nvidia.com/gpumem-percentage: 50` instead of an absolute MiB figure.
-
-💡 **Why:** HAMi accepts either the absolute (`gpumem`) or relative
-(`gpumem-percentage`) memory form - a pod sets one, not both. 50% resolves against each
-GPU's registered `devmem` (81920 MiB → ~40960 MiB).
-
-🟡 **Expected (run to confirm):** **Running**. Two such pods would fill one device's
-memory; a third 50% request would not fit - the same per-device accounting as
-Exercise 5, expressed as a percentage.
-
-> **TODO:** confirm `nvidia.com/gpumem-percentage` is the exact key, and that it is
-> mutually exclusive with `nvidia.com/gpumem`, for your `HAMI_VERSION`.
+[`manifests/04-binpack.yaml`](manifests/04-binpack.yaml): **six** pods, each `gpu:1` +
+`gpumem-percentage:30`, all reaching **Running** across the fleet - many more concurrent
+fractional tenants than the default scheduler could place. (Each node admits up to its 8
+`nvidia.com/gpu` slots, so the six spread across workers.)
 
 ---
 
@@ -285,27 +232,25 @@ Exercise 5, expressed as a percentage.
 
 | Capability | Learnable on the fake fleet? | Why |
 |---|---|---|
-| Fractional request placement (gpumem/gpucores) | ✅ Yes | Control-plane arithmetic over registered devmem/devcore |
-| Multi-pod sharing of one device (binpack) | ✅ Yes | A placement decision; co-residency is visible in `get pods` |
-| Per-device memory / compute accounting & exhaustion | ✅ Yes | Capacity bookkeeping over integers |
+| Fractional placement + a pod running | ✅ Yes | Scheduler arithmetic + mock plugin admission |
+| **Multiple pods sharing one GPU (both Running)** | ✅ Yes | Mock device plugin answers `Allocate` with no hardware |
+| Capacity **rejection** (Pending + reason) | ✅ Yes | Pure scheduler decision |
 | `FilteringSucceed` node+device selection | ✅ Yes | Scheduler-internal decision, surfaced as events |
-| **In-container memory cap enforcement** | ❌ No | HAMi-core must intercept real CUDA calls - [real-GPU lesson](../hami-isolation-realgpu/README.md) |
-| **Virtualized `nvidia-smi`, OOM at the slice limit** | ❌ No | Runtime behavior on a real device |
-| Compute-throttling accuracy / interference under load | ❌ No | Needs sustained real workloads + measurement |
-| MIG hardware partitioning | ❌ No | Needs an Ampere+ datacenter GPU |
+| **The slice ENFORCED inside the container** (cap, OOM, virtualized `nvidia-smi`) | ❌ No | HAMi-core must intercept real CUDA calls - [real-GPU lesson](../hami-isolation-realgpu/README.md) |
+| Absolute-MiB memory slices (`gpumem`) | ❌ No | Per-MiB device count exceeds the kubelet limit on fakes |
+| Compute-throttling accuracy / MIG | ❌ No | Real hardware / a MIG-capable card (A100, H100, …) |
 
-💡 The pattern matches the whole course: **decisions** are learnable on fakes;
-**execution and isolation** need real hardware. HAMi splits cleanly along that line -
-this lesson is the decisions half, [`hami-isolation-realgpu/`](../hami-isolation-realgpu/README.md)
-is the enforcement half.
+💡 The pattern matches the whole course: **scheduling and sharing *decisions*** are
+learnable on fakes; **runtime *enforcement*** needs real hardware. This lesson is the
+decisions half (now including sharing); [`hami-isolation-realgpu/`](../hami-isolation-realgpu/README.md)
+proves the slice is actually held inside the container.
 
 ## What "done" looks like
 
-`make evidence` captures the node registration, each deployed exercise's pod/event
-output, and the Pending reasons that prove exercises 5-6. That evidence backs one
-claim: **HAMi's control plane scheduled fractional requests correctly on a fake fleet**
-- placement, device sharing, and per-device memory/compute accounting. For the
-isolation claim, go to [`../hami-isolation-realgpu/`](../hami-isolation-realgpu/README.md).
+`make evidence` captures what each node advertises, the shared pods Running, the fractional
+pod, the Pending rejection, and the `FilteringSucceed` decisions. That backs the claim:
+**HAMi's control plane schedules and *shares* GPUs correctly on a fake fleet.** For the slice being
+*enforced*, go to [`../hami-isolation-realgpu/`](../hami-isolation-realgpu/README.md).
 
 📎 **Related runbooks:**
 [device-plugin-not-advertising-gpus.md](../../../../runbooks/device-plugin-not-advertising-gpus.md),

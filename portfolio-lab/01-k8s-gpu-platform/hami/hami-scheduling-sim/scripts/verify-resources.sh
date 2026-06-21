@@ -1,25 +1,22 @@
 #!/usr/bin/env bash
-# verify-resources.sh - show what HAMi's scheduler sees on each GPU node:
-#   1) nvidia.com/gpu in allocatable (advertised by fake-gpu-operator),
-#   2) the hami.io/node-nvidia-register annotation (what HAMi schedules against,
-#      including per-GPU devmem/devcore that enable fractional placement).
-# Read-only.
+# verify-resources.sh - show what each GPU node advertises after setup. With the mock
+# device plugin on, the schedulable resources are:
+#   nvidia.com/gpu                 (count, from fake-gpu-operator)
+#   nvidia.com/gpumem-percentage   (percent, from the mock plugin - USE THIS on fakes)
+#   nvidia.com/gpucores            (percent, from the mock plugin)
+# Absolute nvidia.com/gpumem will read 0 here on purpose (its per-MiB device count exceeds
+# the kubelet limit) - that's why demos slice memory by percentage. Read-only.
 set -euo pipefail
 POOL="run.ai/simulated-gpu-node-pool=default"
 
-echo "== nvidia.com/gpu in node allocatable (fake-gpu-operator) =="
-kubectl get nodes -l "$POOL" \
-  -o custom-columns=NAME:.metadata.name,GPU:.status.allocatable.nvidia\\.com/gpu --no-headers
-
-echo
-echo "== HAMi scheduler registration (hami.io/node-nvidia-register) =="
-echo "   each entry: id, count(split), devmem(MiB), devcore(%), type"
+echo "== allocatable per pool node =="
 kubectl get nodes -l "$POOL" -o json | jq -r '
   .items[] | "\(.metadata.name): " +
-  ( (.metadata.annotations["hami.io/node-nvidia-register"] // "<none>")
-    | if . == "<none>" then . else (fromjson | length | tostring) + " GPUs registered" end )'
+  "gpu=\(.status.allocatable["nvidia.com/gpu"] // "-") " +
+  "gpumem-percentage=\(.status.allocatable["nvidia.com/gpumem-percentage"] // "-") " +
+  "gpucores=\(.status.allocatable["nvidia.com/gpucores"] // "-") " +
+  "gpumem=\(.status.allocatable["nvidia.com/gpumem"] // "-")  (gpumem 0/absent is expected)"'
 
 echo
-echo "== handshake freshness (HAMi drops nodes stale > ~60s) =="
-kubectl get nodes -l "$POOL" -o json | jq -r '
-  .items[] | "\(.metadata.name): " + (.metadata.annotations["hami.io/node-handshake"] // "<none>")'
+echo "== HAMi mock-device-plugin pods =="
+kubectl -n kube-system get pods | grep -iE "mock|hami" || echo "  (none found)"

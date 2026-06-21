@@ -30,6 +30,26 @@
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
+Each script verifies itself, but you can re-check by hand at each step:
+
+```bash
+# 1. on the VM
+sudo PUBLIC_IP=<vm-ip> bash host-setup.sh
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+kubectl get nodes -o wide                 # verify: node Ready
+kubectl get runtimeclass nvidia           # verify: the nvidia container runtime exists
+
+# 2. on your laptop (open TCP 6443 to the VM first)
+./fetch-kubeconfig.sh <ssh-user>@<vm-ip>
+export KUBECONFIG=$PWD/kubeconfig-tensordock
+kubectl get nodes -o wide                 # verify: reachable from your laptop, node Ready
+
+# 3. GPU layer + smoke test
+./install-gpu-operator.sh
+kubectl get nodes -o jsonpath='{.items[0].status.allocatable.nvidia\.com/gpu}'; echo   # verify: >= 1
+kubectl logs cuda-smoke                    # verify: nvidia-smi ran on the real GPU
+```
+
 After that you have a real GPU cluster you drive from your laptop. Work the
 [Lesson 6 phases](../README.md): Part A evidence is already produced by the smoke test;
 then [Part B - HAMi](../../01-k8s-gpu-platform/hami/hami-isolation-realgpu/README.md),

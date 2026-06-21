@@ -1,13 +1,12 @@
-# Scenario 2: request more GPU memory than any node advertises, so the pod cannot
-# fit anywhere and stays Pending. This proves HAMi's capacity accounting at the
-# control-plane level.
+# Scenario 2: request more GPU memory than a single device has, so the pod cannot fit and
+# stays Pending. This proves HAMi's per-device memory accounting at the control-plane level
+# (a pure scheduler decision - it never reaches the kubelet).
 #
-# The real threshold depends on the memory the mock device plugin advertises per
-# GPU. Read it first:
-#   kubectl describe node | grep nvidia.com
-# then make sure the value below is comfortably ABOVE that number. 999999 MiB
-# (about 976 GiB) is far beyond any single simulated GPU; lower it only if your
-# mock advertises something unusually large.
+# 150% is impossible: no GPU has more than 100% of its own memory, so HAMi rejects it.
+# (We use the percentage form because absolute gpumem can't register on the fake fleet -
+# see 00-share.yaml.) Expect Pending with a CardInsufficientMemory-style reason.
+#   TODO: confirm the exact reason string HAMi emits for an over-percentage request on your
+#   version; capture it into evidence.
 apiVersion: v1
 kind: Pod
 metadata:
@@ -20,4 +19,4 @@ spec:
       resources:
         limits:
           nvidia.com/gpu: 1
-          nvidia.com/gpumem: 999999
+          nvidia.com/gpumem-percentage: 150

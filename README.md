@@ -190,7 +190,7 @@ make phase1-up && make phase1-demo && make phase1-evidence && make phase1-down
 ( cd portfolio-lab/01-k8s-gpu-platform/kai-scheduler && make up && make demo-quota )
 
 # Lesson 1C - GPU sharing with HAMi (scheduling sim, no GPU; own Makefile)
-( cd portfolio-lab/01-k8s-gpu-platform/hami/hami-scheduling-sim && make up && make verify )
+( cd portfolio-lab/01-k8s-gpu-platform/hami/hami-scheduling-sim && make up && make demo-fractional )
 
 # Lesson 2 - Slurm-in-Docker with fake GRES  (targets: phase3-*)
 make phase3-up && make phase3-demo && make phase3-drain && make phase3-evidence && make phase3-down

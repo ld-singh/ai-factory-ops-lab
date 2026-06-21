@@ -1,28 +1,18 @@
-# Exercise 4 (binpack / sharing): more fractional pods than there are physical GPUs,
-# all pinned to ONE node, so the scheduler is FORCED to place several pods on the same
-# physical GPU. That co-residency on a device is the core thing HAMi adds over Lesson
-# 1's whole-GPU scheduling, and here it is a pure control-plane decision.
+# Scenario 4 (sharing at scale, run-to-confirm): six fractional pods, each asking for one
+# GPU and a 30% memory slice. They coexist across the fleet's GPUs - more concurrent
+# fractional tenants than the default scheduler could ever place (it gives each pod a
+# whole device). The mock device plugin answers the kubelet Allocate, so they reach
+# Running rather than failing admission.
 #
-# Why this is deterministic (independent of HAMi's binpack-vs-spread policy): the
-# target node advertises 8 fake GPUs (see register-hami.sh GPU_COUNT). Twelve pods
-# each asking for nvidia.com/gpu: 1 cannot each get a private device on an 8-GPU node,
-# so by pigeonhole at least four GPUs must host two pods. Each slice is tiny
-# (2000 MiB / 5% cores), so neither memory nor cores is the binding constraint - the
-# physical GPU count is, and HAMi shares devices to satisfy all twelve.
-#
-# Pinning: demo-binpack.sh labels one pool node demo-node=target; the nodeSelector
-# below confines the whole Deployment to it. Stock Kubernetes would cap this node at
-# 8 such pods (one per GPU); HAMi runs all 12.
-#
-# Container is pause: it never touches a GPU. This proves the PLACEMENT decision
-# (multiple pods share one device), not in-container isolation - that is the paired
-# real-GPU lesson.
+# Memory is requested as a PERCENTAGE (see 00-share.yaml for why absolute gpumem can't
+# register on fakes). Each node admits at most its 8 nvidia.com/gpu slots, so these six
+# spread across the workers. Control-plane test; pause containers.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: hami-binpack
 spec:
-  replicas: 12
+  replicas: 6
   selector:
     matchLabels:
       app: hami-binpack
@@ -31,13 +21,10 @@ spec:
       labels:
         app: hami-binpack
     spec:
-      nodeSelector:
-        demo-node: target
       containers:
         - name: app
           image: registry.k8s.io/pause:3.9
           resources:
             limits:
               nvidia.com/gpu: 1
-              nvidia.com/gpumem: 2000
-              nvidia.com/gpucores: 5
+              nvidia.com/gpumem-percentage: 30

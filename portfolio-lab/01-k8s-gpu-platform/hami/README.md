@@ -4,14 +4,17 @@
 > [Lesson 1B - KAI Scheduler](../kai-scheduler/README.md) · Next:
 > [Lesson 2 - Slurm GPU Workload Management](../../02-slurm-gpu-platform/README.md)
 
-Lessons 1 and 1B treated a GPU as an indivisible integer: a pod asks for
-`nvidia.com/gpu: 1` and gets a whole device. In real fleets that's often wasteful -
-an inference pod using 3 GB of an 80 GB A100 strands the other 77 GB. **GPU sharing**
-is how platforms fix that, and [HAMi](https://github.com/Project-HAMi/HAMi)
-(Heterogeneous AI Computing Virtualization Middleware, a CNCF sandbox project) is an
-open-source way to do it: it lets one physical GPU be requested as *fractions* -
-"2 GB of GPU memory and 30% of compute" - with the scheduler packing multiple pods
-onto one device and a runtime layer enforcing the limits inside each container.
+So far you've requested a GPU as an indivisible integer: a pod asks for
+`nvidia.com/gpu: 1` and gets a whole device. Lesson 1's default scheduler can do nothing
+else, and Lesson 1B's KAI exercises kept to whole GPUs on purpose - to focus on *queue*
+policy (KAI can itself slice GPUs, via a `gpu-fraction` request; see the contrast below).
+In real fleets, whole-GPU allocation is often wasteful - an inference pod using 3 GB of
+an 80 GB A100 strands the other 77 GB. **GPU sharing** is how platforms fix that, and
+[HAMi](https://github.com/Project-HAMi/HAMi) (Heterogeneous AI Computing Virtualization
+Middleware, a CNCF sandbox project) is an open-source way to do it: it lets one physical
+GPU be requested as *fractions* - "2 GB of GPU memory and 30% of compute" - with the
+scheduler packing multiple pods onto one device and a runtime layer enforcing the limits
+inside each container.
 
 This lesson matters doubly for this course's mission of learning cheaply:
 
@@ -53,9 +56,15 @@ Kubernetes) - all part of that one rental session.
 > versions:
 >
 > - **🟦 [Scheduling simulation](./hami-scheduling-sim/README.md) - no GPU, free.** Prove
->   HAMi's *placement* decisions (fractional scheduling, device sharing, per-device
->   memory/compute accounting) on a fake GPU fleet, on your laptop. This is most of the
->   lesson and costs nothing.
+>   HAMi's scheduling *and GPU sharing* on a fake GPU fleet, on your laptop: a fractional
+>   pod runs, an over-large request is rejected, the per-pod placement decision is visible,
+>   and - using HAMi's own **mock device plugin** - **two pods share one GPU and both reach
+>   Running** (memory sliced by percentage). What's *not* here is the slice being *enforced*
+>   inside the container - that's the real-GPU half below. Free.
+>   **⭐ This goes beyond every official HAMi doc** - no single tutorial shows multi-pod GPU
+>   sharing running with zero hardware; this lab stitches fake-gpu-operator + the mock device
+>   plugin + a hand-written scheduler annotation to get there. See
+>   [*What this lab does that the official docs don't*](./hami-scheduling-sim/README.md#what-this-lab-does-that-the-official-docs-do-not).
 > - **🟥 [Isolation on a real GPU](./hami-isolation-realgpu/README.md) - the real half,
 >   run in [Lesson 6](../../real-gpu-session/README.md).** Two pods sharing one physical
 >   card, a virtualized `nvidia-smi`, and a CUDA allocation refused at the slice limit -
@@ -81,7 +90,7 @@ One physical GPU, many workloads. Four mainstream ways to slice it:
 |---|---|---|---|---|
 | **Time-slicing** (NVIDIA device plugin option) | Advertise N "replicas" of each GPU; contexts take turns | ❌ None - any pod can OOM the device for everyone | ❌ None (round-robin, no limit) | No |
 | **MPS** (Multi-Process Service) | CUDA contexts share the GPU concurrently via a daemon | ⚠️ Limited (resource limits per client, weaker fault isolation) | ⚠️ Partial (active thread percentage) | No |
-| **MIG** (Multi-Instance GPU) | Hardware partitions the GPU into isolated instances | ✅ Hardware-enforced | ✅ Hardware-enforced | Yes - Ampere+ datacenter GPUs (A100/H100…) |
+| **MIG** (Multi-Instance GPU) | Hardware partitions the GPU into isolated instances | ✅ Hardware-enforced | ✅ Hardware-enforced | Yes - only specific datacenter cards: A100/A30, H100/H200, Blackwell. **Not** Ada Lovelace (L4/L40S) |
 | **HAMi** (software virtualization) | Device plugin advertises virtual GPUs; HAMi-core library intercepts CUDA calls in-container to cap memory/compute | ✅ Software-enforced (CUDA-API level) | ⚠️ Software-enforced (core-percentage throttling) | No - works on consumer and datacenter GPUs |
 
 > ### 💡 Why HAMi is the one worth learning here
@@ -153,9 +162,10 @@ arithmetic, is what happens after placement: HAMi-core making a CUDA `malloc` be
 2 000 MiB actually fail inside the container. Decision vs enforcement - the course's
 fake/real line, drawn through a single YAML block.
 
-Contrast with [KAI Scheduler](../kai-scheduler/README.md), which also has a
-fractional-GPU concept: KAI's strength is queue policy (quota/borrow/reclaim/gang);
-HAMi's strength is per-device slicing with in-container enforcement. Real platforms
+Contrast with [KAI Scheduler](../kai-scheduler/README.md), which **also** does GPU
+fractions (a `gpu-fraction: 0.5` request, plus time-slicing/MPS sharing). The difference
+is emphasis, not capability: KAI's strength is queue policy (quota/borrow/reclaim/gang);
+HAMi's strength is per-device memory slicing with in-container enforcement. Real platforms
 combine a queue layer with a sharing layer.
 
 ---
@@ -231,14 +241,12 @@ sides of the scope boundary. Each has its own Makefile and pinned versions.
 - [`hami-scheduling-sim/`](./hami-scheduling-sim/README.md) - control plane, **no GPU**.
   Based on the official [HAMi local-fake-gpu tutorial](https://project-hami.io/tutorials/labs/local-fake-gpu):
   a kind cluster with real workers, the run.ai fake-gpu-operator advertising
-  `nvidia.com/gpu`, HAMi with its device plugin disabled, and a node-registration
-  annotation that lets the scheduler place fractional requests. Validated: a fractional
-  pod (`gpu:1, gpumem:3000, gpucores:30`) schedules, and an over-large `gpumem` request
-  stays Pending (`CardInsufficientMemory`). It then extends to four further
-  scheduling-decision exercises (run-to-confirm): **binpacking** several pods onto one
-  physical GPU, **per-device memory exhaustion** (Pending while whole GPUs remain),
-  **compute (`gpucores`) accounting** as a dimension independent of memory, and the
-  **percentage memory form**. Scheduling only, not isolation.
+  `nvidia.com/gpu`, **HAMi 2.8 with its mock device plugin enabled**, and a node-registration
+  annotation. Validated: a fractional pod runs, an over-large request stays Pending, the
+  per-pod placement decision (`FilteringSucceed`) is visible, and - the headline - **two
+  pods share one GPU and both reach Running** (memory sliced by percentage). What it does
+  **not** do is *enforce* the slice inside the container (the cap that actually fails a CUDA
+  `malloc`) - that runtime isolation is the real-GPU lab below.
 - [`hami-isolation-realgpu/`](./hami-isolation-realgpu/README.md) - data plane, **one
   cheap real GPU**. Two pods share a single consumer 24 GB card; you observe the
   virtualized `nvidia-smi` and a CUDA allocation refused at the slice limit. Validates
@@ -261,7 +269,7 @@ proves the placement decision, the real-GPU lesson proves enforcement.
 | Multi-pod co-residency on one device | 🟥 Real GPU (Part 3) | Needs a real device plugin path |
 | **Memory-cap enforcement inside the container** | 🟥 Real GPU (Part 3) | HAMi-core intercepts real CUDA calls |
 | Compute throttling accuracy / interference under load | ❌ Out of scope | Needs sustained real workloads + measurement |
-| MIG hardware partitioning | ❌ Out of scope | Needs Ampere+ datacenter GPU |
+| MIG hardware partitioning | ❌ Out of scope | Needs a MIG-capable card (A100/A30, H100/H200, Blackwell) - not Ada Lovelace |
 
 ---
 

@@ -46,6 +46,14 @@ front.
 🧭 **Mode:** 🟦 Simulation (no GPU), via the fake-gpu-operator. Real runtime behavior
 (CUDA, memory isolation, MIG) is out of scope; see [Lesson 6](../gpu-operator-real/README.md).
 
+> **KAI can also slice GPUs - this lesson just doesn't.** Every exercise here requests
+> *whole* GPUs (`nvidia.com/gpu: 1`) to keep the focus on **queue policy** - quota,
+> borrowing, reclaim, gang. But KAI itself does GPU **fractions** too (a `gpu-fraction: 0.5`
+> request, plus time-slicing/MPS sharing), so don't read "whole-GPU" as a KAI limitation -
+> it's a scoping choice. GPU sharing is exercised hands-on in
+> [Lesson 1C (HAMi)](../hami/README.md); real platforms layer a queue scheduler (KAI) over
+> a sharing layer (KAI's own fractions, or HAMi).
+
 📋 **Prerequisites:** docker, kind, kubectl, helm, jq. The lesson's `make up` builds
 the shared Lesson 1 fleet (kind + KWOK + fake-gpu-operator, 32 GPUs) if it is not
 already up, then installs KAI.
@@ -77,6 +85,26 @@ Run `make up` and `make queues` **once**. Each exercise below applies its own ma
 and re-prepares its workloads (it clears the `kai-demo` namespace first), so you can run
 them back to back. Capture evidence and uninstall **at the very end**, not between
 exercises.
+
+### The whole loop
+
+Each `make` step prints its own result and ends with a `Verify:` line - the `kubectl`
+command to re-check that state by hand. (The exercise sections below explain each result.)
+
+```bash
+cd portfolio-lab/01-k8s-gpu-platform/kai-scheduler
+
+make up            # shared Lesson 1 fleet (kind+KWOK+fake-gpu-operator) + KAI
+make queues        # create the namespace + the queue hierarchy
+
+make demo-quota    # A: two teams each fill their 8-GPU quota
+make demo-borrow   # B: prod submits 16 (double its quota)
+make demo-reclaim  # C: research returns (run right after demo-borrow)
+make demo-gang     # D: a 10-GPU gang binds all-or-none
+
+make evidence      # snapshot queues/pods/events into evidence/<timestamp>/
+make uninstall     # delete the whole kind cluster (KAI + fleet + workloads)
+```
 
 ## The exercises (run in order)
 
