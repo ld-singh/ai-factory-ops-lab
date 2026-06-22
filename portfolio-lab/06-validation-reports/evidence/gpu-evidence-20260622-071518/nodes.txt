@@ -1,0 +1,2 @@
+NAME                STATUS   ROLES           AGE   VERSION        INTERNAL-IP   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION     CONTAINER-RUNTIME
+ambitious-hawking   Ready    control-plane   53m   v1.35.5+k3s1   10.0.0.138    <none>        Ubuntu 22.04.5 LTS   6.8.0-40-generic   containerd://2.2.3-k3s1

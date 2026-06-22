@@ -98,8 +98,10 @@ cat <<EOF
 
 === GPU layer ready (mode: ${MODE}) ===
 nvidia.com/gpu is advertised and a CUDA pod ran on the real GPU. That is Lesson 6
-Phase A's core artifact. Capture it with ../../scripts/collect-gpu-evidence.sh and
-record it in ../06-validation-reports/real-gpu-validation-report.md.
+Phase A's core artifact. Capture it (self-contained - writes a tarball here):
+    ./capture-evidence.sh
+Then scp the gpu-evidence-*.tgz off this VM before teardown - it's the deliverable -
+and record it in portfolio-lab/06-validation-reports/real-gpu-validation-report.md.
 Clean up the test pod: kubectl delete pod cuda-smoke
 Then continue with Lesson 6 Part B (HAMi) and Part C (Slurm GRES).
 EOF

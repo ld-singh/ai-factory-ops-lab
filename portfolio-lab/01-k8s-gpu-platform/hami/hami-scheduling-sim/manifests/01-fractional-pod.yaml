@@ -1,16 +1,13 @@
-# Scenario 1: a single fractional GPU request the HAMi scheduler can place and run.
-#   nvidia.com/gpu: 1                 one (virtual) GPU
-#   nvidia.com/gpumem-percentage: 30  30% of the device's memory for this slice
-#   nvidia.com/gpucores: 30           30% of the device's compute
+# Scenario 1: a single fractional GPU request the HAMi scheduler places.
+#   nvidia.com/gpu: 1        one GPU
+#   nvidia.com/gpumem: 3000  per-pod GPU memory in MiB (the scheduler scores this against
+#                            each node's registered devmem)
+#   nvidia.com/gpucores: 30  share of GPU compute, in percent
 #
-# Memory is requested as a PERCENTAGE, not absolute MiB: on the fake fleet the mock device
-# plugin can't register absolute gpumem (the per-MiB device count exceeds the kubelet's
-# ~120 GiB limit), so absolute gpumem comes back capacity 0. Percentage registers fine.
-# See 00-share.yaml.
-#
-# The HAMi mutating webhook routes pods requesting these resources to the HAMi scheduler,
-# so schedulerName is intentionally NOT set. The container is pause: it never touches a
-# GPU - this is a control-plane-only placement test.
+# The HAMi mutating webhook routes pods that request these resources to the HAMi scheduler
+# automatically, so schedulerName is intentionally NOT set. The container is pause - this
+# is a control-plane test: it proves HAMi's scheduling DECISION (placement), not that the
+# slice is enforced at runtime (that's the real-GPU lesson).
 apiVersion: v1
 kind: Pod
 metadata:
@@ -23,5 +20,5 @@ spec:
       resources:
         limits:
           nvidia.com/gpu: 1
-          nvidia.com/gpumem-percentage: 30
+          nvidia.com/gpumem: 3000
           nvidia.com/gpucores: 30

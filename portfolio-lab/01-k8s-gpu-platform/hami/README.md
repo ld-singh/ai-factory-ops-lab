@@ -56,15 +56,11 @@ Kubernetes) - all part of that one rental session.
 > versions:
 >
 > - **🟦 [Scheduling simulation](./hami-scheduling-sim/README.md) - no GPU, free.** Prove
->   HAMi's scheduling *and GPU sharing* on a fake GPU fleet, on your laptop: a fractional
->   pod runs, an over-large request is rejected, the per-pod placement decision is visible,
->   and - using HAMi's own **mock device plugin** - **two pods share one GPU and both reach
->   Running** (memory sliced by percentage). What's *not* here is the slice being *enforced*
->   inside the container - that's the real-GPU half below. Free.
->   **⭐ This goes beyond every official HAMi doc** - no single tutorial shows multi-pod GPU
->   sharing running with zero hardware; this lab stitches fake-gpu-operator + the mock device
->   plugin + a hand-written scheduler annotation to get there. See
->   [*What this lab does that the official docs don't*](./hami-scheduling-sim/README.md#what-this-lab-does-that-the-official-docs-do-not).
+>   HAMi's *scheduling decisions* on a fake GPU fleet, on your laptop: a fractional request
+>   is placed, an over-large request is rejected (Pending + reason), and the per-pod
+>   placement decision (`FilteringSucceed`) is visible. **GPU sharing** (multiple pods
+>   co-resident on one device) and isolation are *not* here - the fake fleet can't do them
+>   without forcing - so they live in the real-GPU half below. Free.
 > - **🟥 [Isolation on a real GPU](./hami-isolation-realgpu/README.md) - the real half,
 >   run in [Lesson 6](../../real-gpu-session/README.md).** Two pods sharing one physical
 >   card, a virtualized `nvidia-smi`, and a CUDA allocation refused at the slice limit -
@@ -241,12 +237,12 @@ sides of the scope boundary. Each has its own Makefile and pinned versions.
 - [`hami-scheduling-sim/`](./hami-scheduling-sim/README.md) - control plane, **no GPU**.
   Based on the official [HAMi local-fake-gpu tutorial](https://project-hami.io/tutorials/labs/local-fake-gpu):
   a kind cluster with real workers, the run.ai fake-gpu-operator advertising
-  `nvidia.com/gpu`, **HAMi 2.8 with its mock device plugin enabled**, and a node-registration
-  annotation. Validated: a fractional pod runs, an over-large request stays Pending, the
-  per-pod placement decision (`FilteringSucceed`) is visible, and - the headline - **two
-  pods share one GPU and both reach Running** (memory sliced by percentage). What it does
-  **not** do is *enforce* the slice inside the container (the cap that actually fails a CUDA
-  `malloc`) - that runtime isolation is the real-GPU lab below.
+  `nvidia.com/gpu`, HAMi with its device plugins off, and a node-registration annotation.
+  Validates HAMi's **scheduling decisions**: a fractional request is placed, an over-large
+  request stays Pending (`CardInsufficientMemory`), and the per-pod placement decision
+  (`FilteringSucceed`) is visible. It does **not** do GPU *sharing* (multiple pods on one
+  device) or *isolation* - the fake fleet can't without forcing - so those are the real-GPU
+  lab below.
 - [`hami-isolation-realgpu/`](./hami-isolation-realgpu/README.md) - data plane, **one
   cheap real GPU**. Two pods share a single consumer 24 GB card; you observe the
   virtualized `nvidia-smi` and a CUDA allocation refused at the slice limit. Validates

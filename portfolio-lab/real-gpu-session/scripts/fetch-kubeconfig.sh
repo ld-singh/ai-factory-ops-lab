@@ -12,7 +12,7 @@
 #   ./fetch-kubeconfig.sh <ssh-user>@<vm-ip> [--port N] [--key path] [--ip PUBLIC_IP] [--out FILE]
 # Examples:
 #   ./fetch-kubeconfig.sh root@203.0.113.10
-#   ./fetch-kubeconfig.sh user@203.0.113.10 --port 2222 --key ~/.ssh/tensordock
+#   ./fetch-kubeconfig.sh user@203.0.113.10 --port 2222 --key ~/.ssh/gpuvm
 #
 # Requires: ssh, sed locally; kubectl is used only to verify (skipped if absent).
 set -euo pipefail
@@ -23,7 +23,7 @@ TARGET="$1"; shift
 SSH_PORT=22
 SSH_KEY=""
 PUBLIC_IP="${TARGET##*@}"   # default the API IP to the SSH host
-OUT="./kubeconfig-tensordock"
+OUT="./kubeconfig-gpuvm"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -57,7 +57,7 @@ if command -v kubectl >/dev/null; then
     cat >&2 <<EOF
 
 kubectl could not reach the cluster. Most common causes:
-  - TCP 6443 is not open to your laptop. Open it in TensorDock's networking/port
+  - TCP 6443 is not open to your laptop. Open it in your provider's networking/firewall
     settings for this VM (the k3s API listens on 6443).
   - The public IP is wrong. Re-run with --ip <correct-public-ip>.
   - host-setup.sh ran without that IP in --tls-san (TLS name mismatch). Re-run

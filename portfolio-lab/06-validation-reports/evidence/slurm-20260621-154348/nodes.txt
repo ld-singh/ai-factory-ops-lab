@@ -1,0 +1,38 @@
+$ scontrol show node
+
+NodeName=c1 Arch=x86_64 CoresPerSocket=1 
+   CPUAlloc=0 CPUTot=16 CPULoad=0.41
+   AvailableFeatures=(null)
+   ActiveFeatures=(null)
+   Gres=gpu:8
+   NodeAddr=c1 NodeHostName=c1 Version=21.08.5
+   OS=Linux 6.18.33.1-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Fri Jun  5 01:12:21 UTC 2026 
+   RealMemory=2000 AllocMem=0 FreeMem=6002 Sockets=16 Boards=1
+   State=IDLE ThreadsPerCore=1 TmpDisk=0 Weight=1 Owner=N/A MCS_label=N/A
+   Partitions=gpu 
+   BootTime=2026-06-19T06:28:35 SlurmdStartTime=2026-06-21T05:37:29
+   LastBusyTime=2026-06-21T05:43:35
+   CfgTRES=cpu=16,mem=2000M,billing=16,gres/gpu=8
+   AllocTRES=
+   CapWatts=n/a
+   CurrentWatts=0 AveWatts=0
+   ExtSensorsJoules=n/s ExtSensorsWatts=0 ExtSensorsTemp=n/s
+
+NodeName=c2 Arch=x86_64 CoresPerSocket=1 
+   CPUAlloc=0 CPUTot=16 CPULoad=0.41
+   AvailableFeatures=(null)
+   ActiveFeatures=(null)
+   Gres=gpu:8
+   NodeAddr=c2 NodeHostName=c2 Version=21.08.5
+   OS=Linux 6.18.33.1-microsoft-standard-WSL2 #1 SMP PREEMPT_DYNAMIC Fri Jun  5 01:12:21 UTC 2026 
+   RealMemory=2000 AllocMem=0 FreeMem=5984 Sockets=16 Boards=1
+   State=IDLE ThreadsPerCore=1 TmpDisk=0 Weight=1 Owner=N/A MCS_label=N/A
+   Partitions=gpu 
+   BootTime=2026-06-19T06:28:35 SlurmdStartTime=2026-06-21T05:37:29
+   LastBusyTime=2026-06-21T05:43:19
+   CfgTRES=cpu=16,mem=2000M,billing=16,gres/gpu=8
+   AllocTRES=
+   CapWatts=n/a
+   CurrentWatts=0 AveWatts=0
+   ExtSensorsJoules=n/s ExtSensorsWatts=0 ExtSensorsTemp=n/s
+

@@ -71,10 +71,11 @@ complete and defensible without it; this lesson is where you turn "I simulated i
 
 The shared foundation every phase builds on; do it a single time.
 
-> 🚀 **Scripted path (TensorDock or any Ubuntu/Debian GPU VM):** the
+> 🚀 **Scripted path (any bare GPU VM with root - Hyperstack, Lambda, hyperscaler):** the
 > [`scripts/`](./scripts/README.md) directory automates this - `host-setup.sh` on the
 > VM (toolkit + k3s), then `fetch-kubeconfig.sh` on your laptop so you drive the cluster
-> from local. Read [`scripts/README.md`](./scripts/README.md) first.
+> from local. (Not for marketplace *containers* like Vast.ai/RunPod pods.) Read
+> [`scripts/README.md`](./scripts/README.md) first.
 
 If you prefer to do it by hand (or aren't on apt):
 

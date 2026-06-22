@@ -1,0 +1,55 @@
+$ sacct -X --starttime today --format=JobID,JobName,Partition,QOS,AllocTRES%30,State,Elapsed
+
+JobID           JobName  Partition        QOS                      AllocTRES      State    Elapsed 
+------------ ---------- ---------- ---------- ------------------------------ ---------- ---------- 
+1             gpu-small        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:20 
+2            gpu-toobig        gpu     normal                                    FAILED   00:00:00 
+3            gpu-qoscap        gpu     capped                                   PENDING   00:00:00 
+4_1                  qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_2                  qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_3                  qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_4                  qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_5                  qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_6                  qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_7                  qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_8                  qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_9                  qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_10                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_11                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_12                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_13                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_14                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_15                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_16                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_17                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_18                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_19                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_20                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_21                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_22                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_23                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+4_24                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_1                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_2                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_3                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_4                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_5                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_6                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_7                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_8                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_9                 qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_10                qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_11                qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_12                qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_13                qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_14                qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_15                qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_16                qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_17                qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_18                qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_19                qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_20                qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_21                qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_22                qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_23                qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 
+28_24                qp        gpu     normal billing=1,cpu=1,gres/gpu=1,no+  COMPLETED   00:00:25 

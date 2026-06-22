@@ -1,9 +1,7 @@
 # Scenario 3: small fractional slices. The point is the SCHEDULER DECISION - watch the
 # hami-scheduler "FilteringSucceed" events choose a node and score it for each fractional
-# pod (the demo prints them). With the mock device plugin the pods also reach Running.
+# pod (the demo prints them). That decision is what the fake fleet proves.
 #
-# Memory as a percentage (see 00-share.yaml for why). Whether slices binpack onto one
-# worker or spread is a HAMi scheduler policy.
 #   TODO: confirm the exact Helm value that selects binpack vs spread for HAMI_VERSION; the
 #   scheduler-policy value name has changed across releases, so it is not hardcoded here.
 apiVersion: apps/v1
@@ -26,5 +24,5 @@ spec:
           resources:
             limits:
               nvidia.com/gpu: 1
-              nvidia.com/gpumem-percentage: 10
+              nvidia.com/gpumem: 1000
               nvidia.com/gpucores: 10

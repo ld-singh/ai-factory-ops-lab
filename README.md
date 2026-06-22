@@ -266,12 +266,12 @@ contains real captured output.
 | 0 | Repo foundation / Orientation | Complete |
 | 1 | Kubernetes fake-GPU scheduling (simulation) | Complete |
 | 1B | Queue-based scheduling with KAI Scheduler | Runnable; quota enforcement validated. Needs the fake-gpu-operator (not bare KWOK); borrow/reclaim/gang documented with sim limits |
-| 1C | GPU sharing & fractional GPUs with HAMi (scheduling sim) | Sim scenarios 1–3 validated; binpack / per-device exhaustion / gpucores / gpumem-percentage runnable (run-to-confirm). Real isolation moved to Lesson 6 |
+| 1C | GPU sharing & fractional GPUs with HAMi | Sim validates HAMi's scheduling *decisions* (fractional placement, Pending rejection, `FilteringSucceed`). GPU *sharing* + memory-cap *isolation* are real-GPU only → done in Lesson 6 |
 | 2 | Slurm GPU workload management | Complete (runnable; validated with captured output) |
 | 3 | Observability | Complete (runnable; metrics/alerts/dashboards validated) |
 | 4 | Inference serving | Harness runnable + validated; real benchmark in Lesson 6 |
 | 5 | BCM-style cluster lifecycle (conceptual + drill) | Drill runnable + validated; BCM specifics conceptual |
-| 6 | Real GPU (capstone: runtime path, real DCGM, HAMi isolation, Slurm GRES, inference) | Guides complete; evidence pending one hardware run |
+| 6 | Real GPU (capstone: runtime path, real DCGM, HAMi isolation, Slurm GRES, inference) | **Part A (runtime path + real DCGM telemetry) validated on an RTX A6000** - driver→toolkit→containerd→device-plugin→CUDA pod, discovered GFD labels, real `DCGM_FI_*` metrics ([real-gpu-validation-report.md](./portfolio-lab/06-validation-reports/real-gpu-validation-report.md), 2026-06-22). HAMi isolation, Slurm GRES, inference benchmark pending (same rental) |
 
 ## Documentation site
 

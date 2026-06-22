@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# host-setup.sh - bring a fresh TensorDock (or any Ubuntu/Debian) GPU VM up to a
+# host-setup.sh - bring a fresh GPU VM (any provider; Ubuntu/Debian, root) up to a
 # single-node k3s cluster that can schedule GPU pods. Run this ON THE VM as root
 # (or with sudo), once, at the start of your Lesson 6 rental session.
 #
@@ -36,7 +36,7 @@ command -v apt-get >/dev/null || die "this script assumes an apt-based distro (U
 # --- 1. driver ---------------------------------------------------------------
 log "1/4 NVIDIA driver check"
 if ! command -v nvidia-smi >/dev/null || ! nvidia-smi >/dev/null 2>&1; then
-  die "nvidia-smi not working. TensorDock GPU images usually ship the driver; if not,
+  die "nvidia-smi not working. Most GPU VM images ship the driver; if not,
        install it per https://docs.nvidia.com/datacenter/tesla/driver-installation-guide/
        and re-run. Nothing below works without a healthy host driver."
 fi
@@ -102,11 +102,11 @@ cat <<EOF
 Cluster is up on this VM. Public IP for remote access: ${PUBLIC_IP}
 
 Next, from your LAPTOP:
-  1. Make sure TCP 6443 is reachable on this VM (open it in TensorDock's networking /
-     port settings if it isn't).
+  1. Make sure TCP 6443 is reachable on this VM (open it in your provider's networking /
+     firewall settings if it isn't).
   2. Fetch the kubeconfig and rewrite it to the public IP:
        ./fetch-kubeconfig.sh <ssh-user>@${PUBLIC_IP}
   3. Install the GPU layer (Lesson 6 Part A):
-       KUBECONFIG=./kubeconfig-tensordock ./install-gpu-operator.sh
+       KUBECONFIG=./kubeconfig-gpuvm ./install-gpu-operator.sh
 Then work through Lesson 6's phases. Tear the VM down when evidence is captured.
 EOF
