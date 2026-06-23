@@ -107,10 +107,11 @@ nav:
       - "5 - Cluster lifecycle (BCM-style)": portfolio-lab/05-bcm-style-cluster-lifecycle/README.md
       - "6 - Real GPU (one-rental capstone)":
           - Overview: portfolio-lab/real-gpu-session/README.md
-          - "Setup scripts (TensorDock → k3s)": portfolio-lab/real-gpu-session/scripts/README.md
+          - "Setup scripts (bare GPU VM → k3s)": portfolio-lab/real-gpu-session/scripts/README.md
           - "Part A - GPU runtime path": portfolio-lab/01-k8s-gpu-platform/gpu-operator-real/README.md
           - "Part B - HAMi isolation (real GPU)": portfolio-lab/01-k8s-gpu-platform/hami/hami-isolation-realgpu/README.md
-          - "Part C - Slurm real GRES": portfolio-lab/02-slurm-gpu-platform/slurm-realgpu/README.md
+          - "Part C - Inference benchmark": portfolio-lab/04-inference-serving/README.md
+          - "Part D - Slurm real GRES": portfolio-lab/02-slurm-gpu-platform/slurm-realgpu/README.md
   - Deep dives:
       - kind (local cluster): portfolio-lab/01-k8s-gpu-platform/kind/README.md
       - KWOK (fake nodes): portfolio-lab/01-k8s-gpu-platform/kwok/README.md
@@ -119,6 +120,7 @@ nav:
   - Runbooks:
       - Overview: runbooks/README.md
       - Device plugin not advertising GPUs: runbooks/device-plugin-not-advertising-gpus.md
+      - k3s default runtime / containerd config: runbooks/k3s-default-runtime-containerd-config.md
       - GPU node not ready: runbooks/gpu-node-not-ready.md
       - GPU operator driver pod failing: runbooks/gpu-operator-driver-pod-failing.md
       - CUDA_VISIBLE_DEVICES debugging: runbooks/cuda-visible-devices-debugging.md

@@ -22,8 +22,9 @@ Each time you finish a runnable lesson:
 |---|---|---|---|
 | [local-simulation-report.md](./local-simulation-report.md) | [1 - K8s GPU scheduling](../01-k8s-gpu-platform/README.md) | 🟦 Sim | `make phase1-up/-demo/-evidence` |
 | [slurm-gres-validation.md](./slurm-gres-validation.md) | [2 - Slurm](../02-slurm-gpu-platform/README.md) | 🟦 Sim (+ real GRES in Lesson 6) | *Phase 3* |
-| [real-gpu-validation-report.md](./real-gpu-validation-report.md) | [6 - Real GPU](../real-gpu-session/README.md) | 🟥 Real | The Lesson 6 hardware run |
-| [inference-benchmark-report.md](./inference-benchmark-report.md) | [6 - Real GPU](../real-gpu-session/README.md) (inference) | 🟥 Real | The Lesson 6 hardware run |
+| [real-gpu-validation-report.md](./real-gpu-validation-report.md) | [6 - Real GPU](../real-gpu-session/README.md) (Part A) | 🟥 Real | The Lesson 6 hardware run ✅ |
+| [hami-isolation-validation.md](./hami-isolation-validation.md) | [6 - Real GPU](../real-gpu-session/README.md) (Part B - HAMi) | 🟥 Real | The Lesson 6 Part B run ✅ |
+| [inference-benchmark-report.md](./inference-benchmark-report.md) | [6 - Real GPU](../real-gpu-session/README.md) (Part C - inference) | 🟥 Real | The Lesson 6 hardware run |
 
 ## The limitations ledger - read this to grade your own claims
 

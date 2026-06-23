@@ -1,6 +1,0 @@
-$ sacctmgr show qos format=Name,MaxTRESPU%20,Priority
-
-      Name            MaxTRESPU   Priority 
----------- -------------------- ---------- 
-    normal                               0 
-    capped           gres/gpu=4          0 

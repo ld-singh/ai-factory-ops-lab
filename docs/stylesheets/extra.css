@@ -17,3 +17,20 @@
 .md-grid {
   max-width: 64rem;
 }
+
+/* Navigation: clearly indent nested entries so sub-items sit under their parent.
+   Material's stepped per-level padding doesn't fire in this tabs+sections layout,
+   so we set it explicitly on the link, per nesting depth, for both the left page
+   tree (primary) and the right table of contents (secondary). */
+.md-nav--primary .md-nav__item .md-nav__item > .md-nav__link {
+  padding-left: 1.2rem;
+}
+.md-nav--primary .md-nav__item .md-nav__item .md-nav__item > .md-nav__link {
+  padding-left: 1.9rem;
+}
+.md-nav--secondary .md-nav__item .md-nav__item > .md-nav__link {
+  padding-left: 1rem;
+}
+.md-nav--secondary .md-nav__item .md-nav__item .md-nav__item > .md-nav__link {
+  padding-left: 1.6rem;
+}

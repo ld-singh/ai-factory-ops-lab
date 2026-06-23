@@ -1,7 +1,7 @@
 # Real GPU Validation Report - Module 01 (Lesson 2 / Phase 2)
 
 > STATUS: ✅ VALIDATED - captured on a real NVIDIA RTX A6000 (Hyperstack), 2026-06-22.
-> Evidence: [`evidence/gpu-evidence-20260622-071518/`](evidence/gpu-evidence-20260622-071518/).
+> Evidence: real command output captured during the run (artifact files cited in the table below).
 
 ## Environment
 

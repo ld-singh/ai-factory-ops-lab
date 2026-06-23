@@ -1,48 +1,85 @@
-# Host setup notes (real GPU)
+# Host setup notes (real GPU) - HAMi Part B
 
-Ordered steps from a fresh rented instance to two pods sharing one GPU. These are
-notes, not a one-command script, because the host-level steps depend on the provider
-image and the installed driver and are not safe to run blindly. Read each step, adjust
-for your host, then run it. Defer to the upstream docs linked below for exact commands.
+Ordered steps from a fresh rented instance to two pods sharing one GPU, **with the
+reasoning**. Read each step, adjust for your host, then run it. Defer to the upstream docs
+linked below for exact commands.
+
+> 🚀 **Scripted equivalent:** `set-default-runtime.sh` (step 2) → `install-hami.sh` (steps
+> 3–5) → `capture-evidence.sh` (step 6). See the [lab README](../README.md#how-to-run-it-scripts).
+> These notes are the by-hand version - run them if you want to see each link, or when a
+> script needs adjusting for your host image.
+
+> ⚠️ **Run HAMi *without* the NVIDIA GPU Operator.** HAMi ships its own device plugin, and
+> [HAMi requires that it not coexist with NVIDIA's official device plugin](https://project-hami.io/docs/v2.4.1/installation/prerequisites).
+> GPU-Operator + HAMi integration is **not** officially documented
+> ([HAMi #1708](https://github.com/Project-HAMi/HAMi/issues/1708) is an open question), so
+> for this lab **don't run `install-gpu-operator.sh`** - HAMi provides the device plugin.
+> (Part A's runtime-path evidence is captured separately, on its own run, with the Operator.)
 
 ## 0. Requirements
 
-- One NVIDIA GPU visible to the host (a consumer 24 GB card such as RTX 4090 or
-  RTX 3090 is the intended target: no MIG, which is HAMi's core use case).
-- root on the host, and the ability to install packages and configure the container
-  runtime. A locked marketplace container you cannot reconfigure will not work.
+- One NVIDIA GPU visible to the host. A **non-MIG** card is the intended target (RTX A6000,
+  L4, L40/L40S, RTX A-series) - no MIG is exactly HAMi's use case. The sizing below is for a
+  **48 GB RTX A6000**; adjust the slice sizes for a smaller card.
+- root on the host, and the ability to configure the container runtime. A locked
+  marketplace container you cannot reconfigure will not work.
+- **GPUs are scarce** - the card you want is often out of stock. Any non-MIG card works the
+  same here; take whatever is available rather than waiting (see the
+  [Lesson 6 hub](../../../../real-gpu-session/README.md) note).
 
-## 1. Confirm the host sees the GPU
+## 1. Host base setup (toolkit + k3s)
 
-```bash
-nvidia-smi
-```
-
-You should see the card and a driver version. If this fails, stop: nothing below will
-work until the host driver is healthy.
-
-## 2. Install the NVIDIA Container Toolkit and set the containerd runtime
-
-Install the toolkit and configure it as a containerd runtime. Do this BEFORE
-installing k3s, so k3s detects the NVIDIA runtime when it starts.
-
-- NVIDIA Container Toolkit install guide:
-  https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
-- The configure step is, in outline, `nvidia-ctk runtime configure --runtime=containerd`
-  followed by restarting containerd. Confirm the exact invocation for your host in the
-  guide above.
-
-## 3. Install single-node k3s
+Use [`real-gpu-session/scripts/host-setup.sh`](../../../../real-gpu-session/scripts/README.md):
 
 ```bash
-curl -sfL https://get.k3s.io | sh -
+sudo PUBLIC_IP=<vm-ip> bash host-setup.sh
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-kubectl get nodes
+nvidia-smi                                 # host sees the card
+kubectl get nodes                          # Ready
+kubectl get runtimeclass nvidia            # the nvidia runtime exists
 ```
 
-k3s bundles its own containerd. With the toolkit installed first (step 2), k3s should
-detect the NVIDIA container runtime. Confirm against the k3s advanced/GPU docs if the
-runtime is not picked up: https://docs.k3s.io/
+It installs the NVIDIA Container Toolkit, then k3s (so k3s auto-detects the nvidia runtime),
+and labels the node `gpu=on` (HAMi schedules onto `gpu=on` nodes). It does **not** install
+any device plugin - which is what we want here.
+
+## 2. Make nvidia the DEFAULT containerd runtime
+
+HAMi requires `default_runtime_name = "nvidia"` so HAMi-core is injected into every GPU pod
+(HAMi pods don't set `runtimeClassName`). `host-setup.sh` only creates the *non-default*
+`nvidia` RuntimeClass. Use k3s's own **`--default-runtime`** flag - the clean way that works
+regardless of the containerd config schema (v2 vs v3). **Do not** hand-edit
+`config.toml` / `config.toml.tmpl`: redeclaring an existing table breaks k3s, and the v3
+schema differs (it uses `[plugins.'io.containerd.cri.v1.runtime']` and a
+`config-v3.toml.tmpl`).
+
+```bash
+echo 'default-runtime: nvidia' | sudo tee -a /etc/rancher/k3s/config.yaml
+sudo systemctl restart k3s
+sleep 5 && systemctl is-active k3s
+```
+
+Verify it took (the generated config is regenerated by k3s, not edited by you):
+
+```bash
+sudo grep default_runtime_name /var/lib/rancher/k3s/agent/etc/containerd/config.toml
+# expect: default_runtime_name = "nvidia"
+```
+
+(`set-default-runtime.sh` does exactly this and is idempotent.) k3s flag reference:
+[k3s advanced docs](https://docs.k3s.io/advanced).
+
+## 3. Confirm no NVIDIA device plugin is present
+
+HAMi must be the only device plugin. On a fresh `host-setup.sh` cluster there is none -
+verify:
+
+```bash
+kubectl get pods -A | grep -iE 'device-plugin|gpu-operator' || echo "none - good"
+```
+
+If you (or a previous step) installed the GPU Operator, either use a fresh cluster or
+disable its device plugin before continuing - do not run both.
 
 ## 4. Capture the Kubernetes server version
 
@@ -50,18 +87,13 @@ runtime is not picked up: https://docs.k3s.io/
 kubectl version
 ```
 
-Note the **server** version (for example v1.31.x). You will pass it to HAMi as the
-scheduler image tag in the next step. A mismatch here is the most common HAMi failure.
+Note the **server** version (e.g. v1.35.x). You pass it to HAMi as the scheduler image tag
+in the next step. A mismatch here is the most common HAMi failure.
 
-## 5. Label the node
+## 5. Install HAMi (scheduler image tag = server version)
 
-```bash
-kubectl label node "$(kubectl get nodes -o name | head -1 | cut -d/ -f2)" gpu=on --overwrite
-```
-
-## 6. Install HAMi with the scheduler image tag matched to the server version
-
-Replace `vX.Y.Z` with the server version from step 4.
+Replace `vX.Y.Z` with the server version from step 4. Check the
+[latest HAMi release](https://github.com/Project-HAMi/HAMi/releases) for the `--version`.
 
 ```bash
 helm repo add hami-charts https://project-hami.github.io/HAMi
@@ -74,11 +106,20 @@ helm upgrade --install hami hami-charts/hami \
 kubectl -n kube-system get pods | grep -i hami
 ```
 
-The hami-device-plugin and hami-scheduler pods should reach Running. The device
-plugin will register the real GPU into the node's `nvidia.com/*` resources and the
-`hami.io/node-nvidia-register` annotation.
+`hami-device-plugin` and `hami-scheduler` should reach Running. Verify HAMi registered the
+GPU. Note HAMi advertises **only `nvidia.com/gpu`** in allocatable (= physical GPUs ×
+`deviceSplitCount`, default 10) and records the shareable memory in the
+`hami.io/node-nvidia-register` annotation - `gpumem`/`gpucores` are accounted by the HAMi
+scheduler + enforced by HAMi-core, **not** node allocatable:
 
-## 7. Deploy the two sharing pods and probe
+```bash
+kubectl get node -o jsonpath='{.items[0].status.allocatable.nvidia\.com/gpu}'; echo
+# expect a number (e.g. 10)
+kubectl get node -o jsonpath='{.items[0].metadata.annotations.hami\.io/node-nvidia-register}'; echo
+# expect the card listed with devmem, e.g. devmem:49140 ... type:"NVIDIA RTX A6000"
+```
+
+## 6. Deploy the two sharing pods and probe
 
 ```bash
 kubectl apply -f manifests/share-two-pods.yaml
@@ -88,7 +129,7 @@ kubectl wait --for=condition=Ready pod/hami-share-a pod/hami-share-b --timeout=3
 ./scripts/probe-memory.sh hami-share-b
 
 # Exercise 4: a third pod that fits an empty card but not beside the two slices.
-# Size its gpumem first (see the manifest comment), then apply and watch it stay Pending.
+# Size its gpumem first (see the manifest comment: ~45000 for a 48 GB A6000), then apply.
 kubectl apply -f manifests/oversubscribe-pending.yaml
 sleep 15
 kubectl get pod hami-oversubscribe -o wide
@@ -98,15 +139,17 @@ kubectl describe pod hami-oversubscribe | sed -n '/Events:/,$p' | head -8   # Ca
 ./scripts/probe-mechanism.sh hami-share-a
 ```
 
-The first probe shows the virtualized `nvidia-smi` (the slice, not the full card).
-The second shows a CUDA allocation refused near the slice limit. Exercise 4 shows the
-card's memory is one shared, accounted budget on real hardware; Exercise 5 surfaces the
-HAMi-core mechanism behind the cap. Record all of them as the isolation evidence. Then
-tear the instance down.
+The first probe shows the virtualized `nvidia-smi` (the slice, not the full card). The
+second shows a CUDA allocation refused near the slice limit. Exercise 4 shows the card's
+memory is one shared, accounted budget on real hardware; Exercise 5 surfaces the HAMi-core
+mechanism behind the cap. Record all of them as the isolation evidence, then tear the
+instance down.
 
 ## Notes
 
-- Consumer-card marketplaces vary in reliability (driver versions, host config,
-  uptime). Expect to occasionally discard an instance and reprovision.
-- TODO: `nvidia.com/gpumem` unit. HAMi docs phrase it as "MB"; this lesson treats it
-  as MiB. Confirm against the chart version you installed if exact sizing matters.
+- **GPU scarcity / marketplace reliability:** the card you want is often out of stock, and
+  consumer-card marketplaces vary in driver versions, host config, and uptime. Expect to
+  occasionally discard an instance and reprovision, or switch card/region/provider. Any
+  non-MIG card works the same.
+- TODO: `nvidia.com/gpumem` unit. HAMi docs phrase it as "MB"; this lesson treats it as MiB.
+  Confirm against the chart version you installed if exact sizing matters.

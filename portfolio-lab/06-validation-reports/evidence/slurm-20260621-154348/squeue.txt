@@ -1,5 +1,0 @@
-$ squeue -l
-
-Sun Jun 21 05:43:48 2026
-             JOBID PARTITION     NAME     USER    STATE       TIME TIME_LIMI  NODES NODELIST(REASON)
-                 3       gpu gpu-qosc     root  PENDING       0:00      5:00      1 (QOSMaxGRESPerUser)
