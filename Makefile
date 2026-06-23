@@ -44,7 +44,7 @@ phase1-down: ## Delete the kind cluster
 	kind delete cluster --name $(CLUSTER_NAME)
 
 # ---------------------------------------------------------------------------
-# Phase 2 - Real GPU validation (requires one NVIDIA GPU machine)
+# Real GPU validation - Lesson 6 Part A (requires one NVIDIA GPU machine)
 # ---------------------------------------------------------------------------
 .PHONY: phase2-guide
 phase2-guide: ## Print the real-GPU validation guide location
@@ -68,7 +68,7 @@ kai-guide: ## Lesson 1B (KAI Scheduler): runnable lesson with its own Makefile
 hami-guide: ## Lesson 1C (HAMi): print example manifests + install check
 	@echo "Lesson 1C - GPU sharing / fractional GPUs with HAMi."
 	@echo "Guide:    $(LAB1)/hami/README.md"
-	@echo "Examples: $(LAB1)/hami/examples/ (ILLUSTRATIVE - run on the Lesson 2 GPU)"
+	@echo "Examples: $(LAB1)/hami/examples/ (ILLUSTRATIVE - run on the Lesson 6 GPU)"
 	@echo "Is HAMi installed?"
 	@kubectl get pods -A 2>/dev/null | grep -i hami || echo "  (no HAMi pods found - install per the official docs on the GPU machine)"
 
@@ -111,7 +111,7 @@ phase4-down: ## Remove the observability stack (keeps the kind cluster)
 # ---------------------------------------------------------------------------
 # Phase 5 - Inference serving / benchmarking
 # $0 harness tier runs against a CPU-served model; numbers are NOT a benchmark.
-# Real benchmark numbers require the Lesson 2 GPU machine.
+# Real benchmark numbers require the Lesson 6 GPU machine.
 # ---------------------------------------------------------------------------
 .PHONY: phase5-serve-cpu phase5-bench phase5-down
 phase5-serve-cpu: ## [$0] Serve a tiny model on CPU to validate the load harness

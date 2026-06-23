@@ -1,13 +1,13 @@
-# Scenario 1: a single fractional GPU request the HAMi scheduler can place.
-#   nvidia.com/gpu: 1        one physical GPU
-#   nvidia.com/gpumem: 3000  per-pod GPU memory in MiB (1 unit = 1 MiB).
-#                            TODO: HAMi docs phrase this as "MB"; confirm vs the chart.
+# Scenario 1: a single fractional GPU request the HAMi scheduler places.
+#   nvidia.com/gpu: 1        one GPU
+#   nvidia.com/gpumem: 3000  per-pod GPU memory in MiB (the scheduler scores this against
+#                            each node's registered devmem)
 #   nvidia.com/gpucores: 30  share of GPU compute, in percent
 #
-# The HAMi mutating webhook routes pods that request these resources to the HAMi
-# scheduler automatically, so schedulerName is intentionally NOT set here. The
-# container is pause: it never touches a GPU, which is the whole point of a
-# control-plane-only test.
+# The HAMi mutating webhook routes pods that request these resources to the HAMi scheduler
+# automatically, so schedulerName is intentionally NOT set. The container is pause - this
+# is a control-plane test: it proves HAMi's scheduling DECISION (placement), not that the
+# slice is enforced at runtime (that's the real-GPU lesson).
 apiVersion: v1
 kind: Pod
 metadata:

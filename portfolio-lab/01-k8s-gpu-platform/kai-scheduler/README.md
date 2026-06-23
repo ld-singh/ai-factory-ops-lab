@@ -44,7 +44,24 @@ front.
    precise limits of demonstrating them on a fake-GPU simulation.
 
 🧭 **Mode:** 🟦 Simulation (no GPU), via the fake-gpu-operator. Real runtime behavior
-(CUDA, memory isolation, MIG) is out of scope; see [Lesson 2](../gpu-operator-real/README.md).
+(CUDA, memory isolation, MIG) is out of scope; see [Lesson 6](../gpu-operator-real/README.md).
+
+> **KAI can also slice GPUs - this lesson just doesn't.** Every exercise here asks for
+> *whole* GPUs (`nvidia.com/gpu: 1`) to keep the focus on **queue policy** - quota,
+> borrowing, reclaim, gang. KAI does fractions too, so read "whole-GPU" as a scoping
+> choice, not a KAI limit. The hands-on sharing lab is [Lesson 1C (HAMi)](../hami/README.md).
+>
+> **What KAI can do as of June 2026.** A pod can ask for a slice two ways - a fixed amount
+> of GPU memory, or a `gpu-fraction` (e.g. `0.5`) that KAI converts to a memory limit once
+> it picks the node. KAI owns the *scheduling*: which pods share which GPU. For the cap
+> *inside* the container it sets a `CUDA_DEVICE_MEMORY_LIMIT` and leaves enforcement to
+> **HAMi-core**, run on each GPU node
+> ([NVIDIA/KAI-Scheduler #60](https://github.com/NVIDIA/KAI-Scheduler/pull/60), merged
+> 2026-06-09).
+>
+> **So KAI and HAMi aren't rivals here** - they're two layers of one stack. KAI brings the
+> queue and the scheduling; HAMi-core brings the hard memory isolation, which is exactly
+> what [Lesson 1C](../hami/README.md) teaches.
 
 📋 **Prerequisites:** docker, kind, kubectl, helm, jq. The lesson's `make up` builds
 the shared Lesson 1 fleet (kind + KWOK + fake-gpu-operator, 32 GPUs) if it is not
@@ -77,6 +94,26 @@ Run `make up` and `make queues` **once**. Each exercise below applies its own ma
 and re-prepares its workloads (it clears the `kai-demo` namespace first), so you can run
 them back to back. Capture evidence and uninstall **at the very end**, not between
 exercises.
+
+### The whole loop
+
+Each `make` step prints its own result and ends with a `Verify:` line - the `kubectl`
+command to re-check that state by hand. (The exercise sections below explain each result.)
+
+```bash
+cd portfolio-lab/01-k8s-gpu-platform/kai-scheduler
+
+make up            # shared Lesson 1 fleet (kind+KWOK+fake-gpu-operator) + KAI
+make queues        # create the namespace + the queue hierarchy
+
+make demo-quota    # A: two teams each fill their 8-GPU quota
+make demo-borrow   # B: prod submits 16 (double its quota)
+make demo-reclaim  # C: research returns (run right after demo-borrow)
+make demo-gang     # D: a 10-GPU gang binds all-or-none
+
+make evidence      # snapshot queues/pods/events into evidence/<timestamp>/
+make uninstall     # delete the whole kind cluster (KAI + fleet + workloads)
+```
 
 ## The exercises (run in order)
 
@@ -372,7 +409,7 @@ see the all-or-nothing logic directly, on fake nodes, in seconds.
 🔬 **Proved on fake GPUs:** the gang admission decision (bind-all-or-none) and the
 anti-deadlock behaviour - fully control-plane. **Not proved:** the actual NCCL
 all-reduce the gang would run once placed (that needs real GPUs + NVLink/network -
-[Lesson 2](../gpu-operator-real/README.md) territory, and even there, single-node).
+[Lesson 6](../gpu-operator-real/README.md) territory, and even there, single-node).
 
 ---
 
@@ -448,6 +485,6 @@ backed once those captures exist. See
 
 ➡️ **Back to:** [Lesson 1](../README.md) · **Next:**
 [Lesson 1C - GPU sharing & fractional GPUs with HAMi](../hami/README.md) (the
-sharing concepts are free; its hands-on part shares the Lesson 2 rental), then
-[Lesson 2 - Real GPU validation](../gpu-operator-real/README.md), where you finally
-run something below the kubelet on real hardware.
+sharing concepts are free; its hands-on isolation half runs in the Lesson 6 rental),
+and eventually [Lesson 6 - Real GPU](../../real-gpu-session/README.md), where you
+finally run something below the kubelet on real hardware.

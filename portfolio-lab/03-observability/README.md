@@ -1,8 +1,8 @@
-# Lesson 4 - GPU Observability
+# Lesson 3 - GPU Observability
 
 > Course home: [AI Factory Operations Lab](../../README.md) · Previous:
-> [Lesson 3 - Slurm GPU Platform](../02-slurm-gpu-platform/README.md) · Next:
-> [Lesson 5 - Inference Serving](../04-inference-serving/README.md)
+> [Lesson 2 - Slurm GPU Platform](../02-slurm-gpu-platform/README.md) · Next:
+> [Lesson 4 - Inference Serving](../04-inference-serving/README.md)
 
 > ✅ **STATUS: RUNNABLE (Phase 4).** This lesson installs a real Prometheus/Grafana
 > stack onto the Phase 1 kind cluster, scrapes a **synthetic DCGM exporter**, ships
@@ -10,7 +10,7 @@
 > GPU**. Validated end to end (target scraping, rules loading, alerts firing,
 > dashboards importing). Metric names are the standard DCGM Exporter field names.
 
-You've scheduled GPU work under both Kubernetes (Lessons 1–2) and Slurm (Lesson 3).
+You've scheduled GPU work under both Kubernetes (Lesson 1) and Slurm (Lesson 2).
 Now you make a fleet *observable* - so you can see utilization, catch problems before
 users do, and back every alert with a runbook.
 
@@ -41,10 +41,10 @@ this lesson.
 💡 **Why you can build observability before owning a GPU:** dashboards and alert
 rules are queries and thresholds - they're correct or not regardless of whether the
 underlying numbers are real. So you design and validate the *pipeline* on synthetic
-metrics, then point it at real DCGM data from [Lesson 2](../01-k8s-gpu-platform/gpu-operator-real/README.md).
+metrics, then point it at real DCGM data from [Lesson 6](../01-k8s-gpu-platform/gpu-operator-real/README.md).
 
 > **Note:** synthetic-metric dashboards are labelled `[DESIGN]`. Real DCGM evidence
-> comes from Lesson 2 hardware runs only.
+> comes from Lesson 6 hardware runs only.
 
 ---
 
@@ -113,13 +113,13 @@ The classic USE method (Utilization, Saturation, Errors) maps cleanly:
 
 - **Utilization:** SM_ACTIVE (compute), FB_USED/total (memory), PCIe bytes (I/O).
 - **Saturation:** Pending GPU pods (Lesson 1's signal!), Slurm `Resources`-pending
-  jobs (Lesson 3's), inference queue depth (Lesson 5's).
+  jobs (Lesson 2's), inference queue depth (Lesson 4's).
 - **Errors:** XID events, thermal throttling, DCGM health checks, NotReady GPU nodes.
 
 Notice that *saturation lives in the schedulers, not in DCGM* - queue depth is a
 control-plane metric. That's why this lesson can wire saturation panels entirely
 from the free simulation (kube-state-metrics over the fake fleet), while utilization
-panels need either synthetic DCGM (design) or Lesson 2 hardware (validated).
+panels need either synthetic DCGM (design) or Lesson 6 hardware (validated).
 
 ## Concept 3 - The five dashboards, and the question each answers
 
@@ -128,7 +128,7 @@ panels need either synthetic DCGM (design) or Lesson 2 hardware (validated).
 | GPU fleet overview | "Is the fleet healthy right now?" | DCGM temp/power/XID, node status |
 | K8s GPU workloads | "Who is using which GPUs, and what's stuck Pending, why?" | kube-state-metrics, DCGM per-pod attribution |
 | Slurm queue pressure | "How long are jobs waiting and which reason dominates?" | Slurm exporter / sacct-derived |
-| Inference SLOs | "Are we serving within TTFT/p95/p99 targets?" | Server metrics (Lesson 5) |
+| Inference SLOs | "Are we serving within TTFT/p95/p99 targets?" | Server metrics (Lesson 4) |
 | Idle-GPU & capacity | "Which allocated GPUs are doing nothing, and when do we run out?" | SM_ACTIVE vs allocation joins |
 
 💡 The idle-GPU dashboard is the one platform teams get paged about by finance, not
@@ -172,7 +172,7 @@ same Prometheus once Phases 3/5 feed it. The control-plane alerts (`GPUPodsPendi
 
 🔬 **What the sim will and won't prove:** pipeline design, query correctness,
 control-plane alerting, and dashboard/runbook wiring - all provable for free.
-Real GPU telemetry values, XID behaviour, and thermals require Lesson 2 hardware.
+Real GPU telemetry values, XID behaviour, and thermals require Lesson 6 hardware.
 Ledger: [`fake-vs-real-limitations.md`](../06-validation-reports/fake-vs-real-limitations.md).
 
-➡️ **Next:** [Lesson 5 - Inference Serving](../04-inference-serving/README.md).
+➡️ **Next:** [Lesson 4 - Inference Serving](../04-inference-serving/README.md).

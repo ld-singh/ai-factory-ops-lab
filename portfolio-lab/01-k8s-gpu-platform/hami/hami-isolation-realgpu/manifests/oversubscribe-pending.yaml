@@ -1,0 +1,29 @@
+# Exercise 4 (real-hardware per-device accounting): a third pod whose memory slice
+# fits the card when it is empty, but NOT alongside the two ~4000 MiB slices that
+# hami-share-a / hami-share-b already hold. On the real GPU it stays Pending with
+# CardInsufficientMemory - proving the device plugin and scheduler account the card's
+# memory as ONE shared, finite budget, end to end on hardware (not just in the
+# simulation). This is the real-GPU counterpart of the sim lesson's Exercise 5.
+#
+# Apply this ONLY after hami-share-a and hami-share-b are Running.
+#
+# Sizing (IMPORTANT - adjust for your card): set gpumem ABOVE (card_total - 8000) so
+# it cannot fit beside the two 4000 MiB slices, and BELOW card_total so it WOULD fit
+# on an empty card. 20000 MiB works for a 24 GB (24576 MiB) consumer card where ~8000
+# is already taken (~16500 free). Read the card size first:
+#   kubectl exec hami-share-a -- nvidia-smi --query-gpu=memory.total --format=csv
+# then set the value below accordingly.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hami-oversubscribe
+spec:
+  restartPolicy: Never
+  containers:
+    - name: cuda
+      image: nvidia/cuda:12.4.1-devel-ubuntu22.04
+      command: ["bash", "-c", "nvidia-smi; sleep 3600"]
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+          nvidia.com/gpumem: 20000

@@ -3,12 +3,12 @@
 [`app.py`](./app.py) serves Prometheus metrics using the **exact field names and
 labels** of NVIDIA's real [DCGM Exporter](https://github.com/NVIDIA/dcgm-exporter)
 (`DCGM_FI_DEV_*`, `DCGM_FI_PROF_*`) - but every value is fabricated. It exists so
-Lesson 4 can build and validate the entire observability pipeline (scrape →
+Lesson 3 can build and validate the entire observability pipeline (scrape →
 dashboard → alert → runbook) before any real GPU exists.
 
 > **SCOPE NOTE:** synthetic values. A dashboard or alert built on this proves
 > **design**, not real telemetry. Real DCGM evidence comes only from the
-> [Lesson 2](../../01-k8s-gpu-platform/gpu-operator-real/README.md) hardware run.
+> [Lesson 6](../../01-k8s-gpu-platform/gpu-operator-real/README.md) hardware run.
 
 ## The synthetic fleet
 

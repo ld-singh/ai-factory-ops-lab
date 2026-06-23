@@ -1,0 +1,10 @@
+NAME                                                          READY   STATUS      RESTARTS   AGE   IP           NODE                NOMINATED NODE   READINESS GATES
+gpu-feature-discovery-9jg62                                   1/1     Running     0          34m   10.42.0.17   ambitious-hawking   <none>           <none>
+gpu-operator-fdfdb94d4-cpcc8                                  1/1     Running     0          34m   10.42.0.12   ambitious-hawking   <none>           <none>
+gpu-operator-node-feature-discovery-gc-585b876f9c-2n2fb       1/1     Running     0          34m   10.42.0.10   ambitious-hawking   <none>           <none>
+gpu-operator-node-feature-discovery-master-7f6684fb45-tmjkd   1/1     Running     0          34m   10.42.0.11   ambitious-hawking   <none>           <none>
+gpu-operator-node-feature-discovery-worker-9ms4v              1/1     Running     0          34m   10.42.0.9    ambitious-hawking   <none>           <none>
+nvidia-cuda-validator-mg9z2                                   0/1     Completed   0          34m   10.42.0.15   ambitious-hawking   <none>           <none>
+nvidia-dcgm-exporter-kfnw5                                    1/1     Running     0          34m   10.42.0.16   ambitious-hawking   <none>           <none>
+nvidia-device-plugin-daemonset-5zxdz                          1/1     Running     0          34m   10.42.0.14   ambitious-hawking   <none>           <none>
+nvidia-operator-validator-8jzvz                               1/1     Running     0          34m   10.42.0.13   ambitious-hawking   <none>           <none>

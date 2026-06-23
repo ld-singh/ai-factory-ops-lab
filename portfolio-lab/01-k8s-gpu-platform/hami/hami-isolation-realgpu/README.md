@@ -77,8 +77,35 @@ runtime, k3s install) depend on the provider image and are not safe to run blind
 | File | Purpose |
 |---|---|
 | [`manifests/share-two-pods.yaml`](manifests/share-two-pods.yaml) | two pods, each `nvidia.com/gpu: 1` and a `nvidia.com/gpumem` slice, both on the one GPU |
+| [`manifests/oversubscribe-pending.yaml`](manifests/oversubscribe-pending.yaml) | a third pod that fits an empty card but not beside the two slices → Pending on real HW |
 | [`scripts/probe-memory.sh`](scripts/probe-memory.sh) | in-container checks: virtualized `nvidia-smi`, and a CUDA allocation that should fail at the slice limit |
+| [`scripts/probe-mechanism.sh`](scripts/probe-mechanism.sh) | surfaces HOW the cap is enforced: HAMi-core env/library injection + device view |
 | [`scripts/setup-notes.md`](scripts/setup-notes.md) | ordered host setup steps |
+
+## The exercises
+
+Work these in order on the rented host; each builds on the pods the previous one left
+Running. Capture the output of each into your
+[lab notebook](../../../06-validation-reports/README.md) as the isolation evidence.
+
+| # | Step | Proves |
+|---|---|---|
+| 1 | apply [`share-two-pods.yaml`](manifests/share-two-pods.yaml); `kubectl get pods -o wide` | **co-residency** - two pods Running on one physical GPU, which stock Kubernetes cannot do |
+| 2 | [`probe-memory.sh`](scripts/probe-memory.sh) part 1 (in-pod `nvidia-smi`) | **virtualized device view** - each pod reports its slice, not the card's full memory |
+| 3 | [`probe-memory.sh`](scripts/probe-memory.sh) part 2 (CUDA allocator) | **memory-cap enforcement** - an allocation past the slice is refused by HAMi-core |
+| 4 | apply [`oversubscribe-pending.yaml`](manifests/oversubscribe-pending.yaml) | **per-device accounting on real HW** - a pod that fits an empty card stays Pending (`CardInsufficientMemory`) beside the two slices |
+| 5 | [`probe-mechanism.sh`](scripts/probe-mechanism.sh) | **the mechanism** - the HAMi-core env/library the runtime injects to intercept CUDA calls (software isolation, not MIG) |
+
+Exercise 4 is the real-hardware counterpart of the simulation's per-device exhaustion
+test: the sim proves the *scheduler* does the arithmetic; here the *device plugin +
+real card* prove the same budget is finite and shared end to end. Exercise 5 ties to
+the [CUDA_VISIBLE_DEVICES runbook](../../../../runbooks/cuda-visible-devices-debugging.md).
+
+> **Out of scope (state this when presenting):** this lab does **not** measure
+> compute-throttling accuracy or noisy-neighbour interference under sustained load -
+> the [limitations ledger](../../../06-validation-reports/fake-vs-real-limitations.md)
+> places GPU-sharing performance there. The isolation claim is the memory cap and the
+> virtualized device view, not throughput fairness.
 
 ## Resource semantics
 

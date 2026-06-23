@@ -1,13 +1,10 @@
-# Scenario 2: request more GPU memory than any node advertises, so the pod cannot
-# fit anywhere and stays Pending. This proves HAMi's capacity accounting at the
-# control-plane level.
+# Scenario 2: request more GPU memory than any node has, so the pod cannot fit anywhere
+# and stays Pending. This proves HAMi's per-device memory accounting at the control-plane
+# level - a pure scheduler decision (it never reaches the kubelet), so it's the cleanest,
+# most deterministic evidence on the fake fleet.
 #
-# The real threshold depends on the memory the mock device plugin advertises per
-# GPU. Read it first:
-#   kubectl describe node | grep nvidia.com
-# then make sure the value below is comfortably ABOVE that number. 999999 MiB
-# (about 976 GiB) is far beyond any single simulated GPU; lower it only if your
-# mock advertises something unusually large.
+# 999999 MiB (~976 GiB) is far beyond any single simulated GPU (devmem 81920 here). Expect
+# Pending with CardInsufficientMemory in the pod's events.
 apiVersion: v1
 kind: Pod
 metadata:

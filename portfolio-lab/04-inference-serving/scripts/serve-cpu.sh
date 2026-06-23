@@ -5,7 +5,7 @@
 # SCOPE NOTE: numbers from this server are NOT a benchmark - CPU inference of
 # a tiny model tells you nothing about GPU serving. This tier exists so you can
 # build and debug the harness for free, then point it at a real GPU server
-# (Lesson 2) where the numbers actually mean something.
+# (Lesson 6) where the numbers actually mean something.
 #
 # Uses Ollama in Docker (exposes an OpenAI-compatible /v1 endpoint). If you prefer
 # llama.cpp's server or vLLM-CPU, any OpenAI-compatible /v1/chat/completions works.

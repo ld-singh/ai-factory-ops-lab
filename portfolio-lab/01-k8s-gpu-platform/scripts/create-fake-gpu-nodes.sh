@@ -11,7 +11,7 @@
 # nvidia.com/gpu here: the fake-gpu-operator advertises it from each pool's topology,
 # keyed off the run.ai/simulated-gpu-node-pool label below. That makes the
 # advertisement operator-shaped (a device plugin, like production) and gives us a
-# per-node DCGM exporter for free (the bridge to Lesson 4). The gpu-pool label is what
+# per-node DCGM exporter for free (the bridge to Lesson 3). The gpu-pool label is what
 # the demo workloads' nodeSelectors target.
 #
 # SIMULATION SCOPE: KWOK fake nodes + synthetic GPU advertisement. Proves scheduler

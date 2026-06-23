@@ -1,28 +1,27 @@
 #!/usr/bin/env bash
-# register-hami.sh - register the fake GPUs with HAMi's SCHEDULER.
+# register-hami.sh - tell HAMi's SCHEDULER what GPUs each node has.
 #
-# fake-gpu-operator makes nodes advertise nvidia.com/gpu, but HAMi's scheduler builds
-# its device cache from a node annotation, not from allocatable. With HAMi's own
-# device plugin disabled (it crashes with no GPU) and the bundled mock plugin broken
-# at this chart version, nothing writes that annotation - so we write it ourselves:
+# Both HAMi device plugins are off on this fake fleet (the real one needs NVML; the mock one
+# isn't used - see the README), so nothing writes the annotation HAMi's SCHEDULER reads to
+# know a node has GPUs. Without it the scheduler reports "node unregistered" and pods stay
+# Pending. So we write it ourselves:
 #
-#   hami.io/node-nvidia-register : the per-GPU list, including devmem + devcore, which
-#                                  is exactly what lets HAMi place FRACTIONAL requests
-#                                  (gpumem/gpucores), not just whole GPUs.
-#   hami.io/node-handshake       : a timestamp HAMi treats as a liveness signal; it
-#                                  drops a node whose handshake is stale (~60s). On a
-#                                  real node the device plugin refreshes it every ~30s;
-#                                  here we refresh it before each demo.
+#   hami.io/node-nvidia-register : the per-GPU list (id, split count, devmem, devcore) the
+#                                  scheduler scores fractional requests against.
+#   hami.io/node-handshake       : a liveness timestamp; HAMi drops a node whose handshake
+#                                  is stale beyond ~60s.
+#
+# Run it ONCE at setup (`make up` does). If nodes go stale after long inactivity, run again.
 #
 # Usage: register-hami.sh [register|refresh]
-#   register : write the device list + a fresh handshake (run once at setup)
-#   refresh  : update only the handshake (run before scheduling new pods)
+#   register : write the device list + a fresh handshake (setup)
+#   refresh  : update only the handshake (if nodes have gone stale)
 set -euo pipefail
 
 MODE="${1:-register}"
 POOL="run.ai/simulated-gpu-node-pool=default"
 GPU_COUNT="${GPU_COUNT:-8}"
-DEVMEM="${GPU_MEMORY:-81920}"        # MiB per fake GPU
+DEVMEM="${GPU_MEMORY:-81920}"        # MiB per fake GPU; percentages resolve against this
 GPU_PRODUCT="${GPU_PRODUCT:-NVIDIA-H100-80GB-HBM3}"
 
 nodes=$(kubectl get nodes -l "$POOL" -o jsonpath='{.items[*].metadata.name}')
@@ -42,6 +41,4 @@ for n in $nodes; do
 done
 
 echo "${MODE}: $(echo "$nodes" | wc -w) node(s) (${GPU_COUNT} fake GPUs each, ${DEVMEM} MiB)."
-if [[ "$MODE" == "register" ]]; then
-  echo "NOTE: handshake goes stale after ~60s; 'make demo-*' refreshes it automatically."
-fi
+[[ "$MODE" == "register" ]] && echo "NOTE: run demos soon; if nodes go stale (~60s), 'make register' refreshes the handshake."

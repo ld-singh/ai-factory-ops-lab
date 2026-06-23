@@ -86,11 +86,23 @@ kubectl get pods -o wide          # both should land on the single GPU node
 kubectl wait --for=condition=Ready pod/hami-share-a pod/hami-share-b --timeout=300s
 ./scripts/probe-memory.sh hami-share-a
 ./scripts/probe-memory.sh hami-share-b
+
+# Exercise 4: a third pod that fits an empty card but not beside the two slices.
+# Size its gpumem first (see the manifest comment), then apply and watch it stay Pending.
+kubectl apply -f manifests/oversubscribe-pending.yaml
+sleep 15
+kubectl get pod hami-oversubscribe -o wide
+kubectl describe pod hami-oversubscribe | sed -n '/Events:/,$p' | head -8   # CardInsufficientMemory
+
+# Exercise 5: show HOW the cap is enforced (HAMi-core injection + device view)
+./scripts/probe-mechanism.sh hami-share-a
 ```
 
 The first probe shows the virtualized `nvidia-smi` (the slice, not the full card).
-The second shows a CUDA allocation refused near the slice limit. Record both as the
-isolation evidence. Then tear the instance down.
+The second shows a CUDA allocation refused near the slice limit. Exercise 4 shows the
+card's memory is one shared, accounted budget on real hardware; Exercise 5 surfaces the
+HAMi-core mechanism behind the cap. Record all of them as the isolation evidence. Then
+tear the instance down.
 
 ## Notes
 

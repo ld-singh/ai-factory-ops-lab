@@ -1,11 +1,13 @@
 # HAMi scheduling simulation - control plane only, no GPU.
 # Self-contained: its own kind cluster and pinned versions. See README.md for the
-# boundary (this validates fractional SCHEDULING, NOT runtime isolation).
+# boundary: this validates HAMi's fractional SCHEDULING DECISIONS, NOT GPU sharing or
+# runtime isolation. Anything where pods must actually SHARE a device lives in the
+# real-GPU lesson (../hami-isolation-realgpu/) - the fake fleet cannot do it without
+# forcing, so we don't.
 #
 # Setup mirrors the official HAMi local-fake-gpu tutorial
-# (https://project-hami.io/tutorials/labs/local-fake-gpu), with one addition that
-# makes FRACTIONAL scheduling work: the per-node hami.io/node-nvidia-register
-# annotation (with devmem/devcore) so HAMi's scheduler can place gpumem/gpucores.
+# (https://project-hami.io/tutorials/labs/local-fake-gpu), plus the per-node
+# hami.io/node-nvidia-register annotation so HAMi's scheduler can score gpumem/gpucores.
 
 SHELL := /bin/bash
 
@@ -50,7 +52,7 @@ fleet: ## Install run.ai fake-gpu-operator so nodes advertise nvidia.com/gpu (no
 	$(SCRIPTS)/setup-fleet.sh
 
 .PHONY: hami
-hami: ## Install HAMi: real device-plugin OFF (it crashes with no GPU), scheduler tag pinned
+hami: ## Install HAMi: device plugin OFF (it needs NVML); scheduler tag pinned to K8S_VERSION
 	helm repo add hami-charts $(HAMI_REPO)
 	helm repo update hami-charts
 	helm upgrade --install hami hami-charts/hami \
@@ -63,39 +65,39 @@ hami: ## Install HAMi: real device-plugin OFF (it crashes with no GPU), schedule
 	kubectl -n kube-system get pods | grep -i hami
 
 .PHONY: register
-register: ## Register the fake GPUs with HAMi's scheduler (node annotation + handshake)
+register: ## Tell HAMi's scheduler what GPUs each node has (run once; 'make up' does it)
 	$(SCRIPTS)/register-hami.sh register
+
+# SCOPE: this fake fleet proves HAMi's control-plane SCHEDULING DECISIONS only - a single
+# fractional pod placing, and a request that can't fit being rejected (Pending + reason).
+# It does NOT do GPU sharing (multiple pods on one device, both Running): that needs a real
+# device plugin to complete and release each bind, which only real hardware provides.
+# Sharing + isolation live in ../hami-isolation-realgpu/. `make up` runs `register` once to
+# write the scheduler's node-GPU annotation (both device plugins are off, so nothing else
+# writes it); if nodes go stale (~60s), `make register` refreshes the handshake.
 
 .PHONY: verify
 verify: ## Show nvidia.com/gpu and the HAMi registration annotation per node
 	$(SCRIPTS)/verify-resources.sh
 
 .PHONY: demo-fractional
-demo-fractional: ## Scenario 1: a fractional pod (gpu:1, gpumem:3000, gpucores:30) binds
-	@$(SCRIPTS)/register-hami.sh refresh
+demo-fractional: ## Scenario 1: a single fractional pod (gpu:1, gpumem, gpucores) schedules
 	kubectl apply -f manifests/01-fractional-pod.yaml
 	@sleep 12
 	kubectl get pod hami-fractional -o wide
-	@echo "Bound to node: $$(kubectl get pod hami-fractional -o jsonpath='{.spec.nodeName}')"
+	@echo "Verify:  kubectl get pod hami-fractional -o wide"
 
 .PHONY: demo-pending
 demo-pending: ## Scenario 2: a gpumem request bigger than any GPU stays Pending
-	@$(SCRIPTS)/register-hami.sh refresh
 	kubectl apply -f manifests/02-overrequest-pending.yaml
 	@sleep 10
 	kubectl get pod hami-overrequest -o wide
 	@kubectl describe pod hami-overrequest | sed -n '/Events:/,$$p' | head -8
+	@echo "Verify:  kubectl get pod hami-overrequest -o wide   (Pending: CardInsufficientMemory)"
 
 .PHONY: demo-placement
-demo-placement: ## Scenario 3: small slices; show HAMi's per-pod placement DECISIONS
-	@$(SCRIPTS)/register-hami.sh refresh
-	kubectl apply -f manifests/03-placement-spread.yaml
-	@sleep 15
-	@echo "HAMi placement decisions (node chosen + fractional score per pod):"
-	@kubectl get events --field-selector reason=FilteringSucceed 2>/dev/null \
-	  | grep -i "find fit node" | tail -3 || echo "  (re-run; events may still be arriving)"
-	@echo "Pods (binding onto fake nodes is slow/serialized; see the manifest note):"
-	kubectl get pods -l app=hami-placement -o wide
+demo-placement: ## Scenario 3: show HAMi's per-pod placement DECISION (FilteringSucceed)
+	$(SCRIPTS)/demo-placement.sh
 
 .PHONY: evidence
 evidence: ## Capture control-plane evidence into evidence/<timestamp>/

@@ -22,6 +22,7 @@ help: ## Show targets
 .PHONY: up
 up: cluster kai ## Full setup: shared Lesson 1 fleet + KAI (queues are a separate step)
 	@echo "Ready. Next: make queues, then make demo-quota / demo-borrow / demo-reclaim / demo-gang"
+	@echo "Verify:  kubectl -n kai-scheduler get pods   (KAI pods Running)"
 
 .PHONY: cluster
 cluster: ## Ensure the shared Lesson 1 fleet exists (kind + KWOK + fake-gpu-operator + nodes)
@@ -36,22 +37,27 @@ queues: ## Create the demo namespace + the parent/leaf queues (research, prod, g
 	kubectl apply -f manifests/namespace.yaml
 	kubectl apply -f manifests/queues.yaml
 	kubectl get queues.scheduling.run.ai
+	@echo "Verify:  kubectl get queues.scheduling.run.ai"
 
 .PHONY: demo-quota
 demo-quota: ## Exercise A: two teams each fill their 8-GPU quota
 	$(SCRIPTS)/demo-quota.sh
+	@echo "Verify:  kubectl get pods -n kai-demo -L kai.scheduler/queue   (8 Running per queue)"
 
 .PHONY: demo-borrow
 demo-borrow: ## Exercise B: prod borrows research's idle GPUs (runs beyond its quota)
 	$(SCRIPTS)/demo-borrow.sh
+	@echo "Verify:  kubectl get pods -n kai-demo -L kai.scheduler/queue   (prod ~8 on fakes)"
 
 .PHONY: demo-reclaim
 demo-reclaim: ## Exercise C: research returns; KAI reclaims borrowed GPUs (run after demo-borrow)
 	$(SCRIPTS)/demo-reclaim.sh
+	@echo "Verify:  kubectl get events -n kai-demo --sort-by=.lastTimestamp | tail"
 
 .PHONY: demo-gang
 demo-gang: ## Exercise D: a 10-GPU gang binds all-or-none (anti-deadlock)
 	$(SCRIPTS)/demo-gang.sh
+	@echo "Verify:  kubectl get pods -n kai-demo -l app=gang-job -o wide"
 
 .PHONY: evidence
 evidence: ## Capture queues, pods, and events into evidence/<timestamp>/
