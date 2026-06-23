@@ -110,6 +110,12 @@ One physical GPU, many workloads. Four mainstream ways to slice it:
 > Master that line - **decision vs enforcement** - and you can evaluate *any*
 > GPU-sharing technology, not just HAMi. It is the single most transferable idea in
 > this lesson.
+>
+> **And it isn't a niche bet.** In June 2026 NVIDIA's own KAI Scheduler adopted
+> **HAMi-core** as the engine that enforces its fractional-GPU memory limits
+> ([PR #60](https://github.com/NVIDIA/KAI-Scheduler/pull/60)). So the runtime layer you
+> learn here is the same one a flagship scheduler now leans on - HAMi-core is becoming the
+> de-facto isolation layer, not an underdog.
 
 How HAMi's pieces fit together:
 

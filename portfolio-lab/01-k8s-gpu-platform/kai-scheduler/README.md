@@ -46,13 +46,22 @@ front.
 🧭 **Mode:** 🟦 Simulation (no GPU), via the fake-gpu-operator. Real runtime behavior
 (CUDA, memory isolation, MIG) is out of scope; see [Lesson 6](../gpu-operator-real/README.md).
 
-> **KAI can also slice GPUs - this lesson just doesn't.** Every exercise here requests
+> **KAI can also slice GPUs - this lesson just doesn't.** Every exercise here asks for
 > *whole* GPUs (`nvidia.com/gpu: 1`) to keep the focus on **queue policy** - quota,
-> borrowing, reclaim, gang. But KAI itself does GPU **fractions** too (a `gpu-fraction: 0.5`
-> request, plus time-slicing/MPS sharing), so don't read "whole-GPU" as a KAI limitation -
-> it's a scoping choice. GPU sharing is exercised hands-on in
-> [Lesson 1C (HAMi)](../hami/README.md); real platforms layer a queue scheduler (KAI) over
-> a sharing layer (KAI's own fractions, or HAMi).
+> borrowing, reclaim, gang. KAI does fractions too, so read "whole-GPU" as a scoping
+> choice, not a KAI limit. The hands-on sharing lab is [Lesson 1C (HAMi)](../hami/README.md).
+>
+> **What KAI can do as of June 2026.** A pod can ask for a slice two ways - a fixed amount
+> of GPU memory, or a `gpu-fraction` (e.g. `0.5`) that KAI converts to a memory limit once
+> it picks the node. KAI owns the *scheduling*: which pods share which GPU. For the cap
+> *inside* the container it sets a `CUDA_DEVICE_MEMORY_LIMIT` and leaves enforcement to
+> **HAMi-core**, run on each GPU node
+> ([NVIDIA/KAI-Scheduler #60](https://github.com/NVIDIA/KAI-Scheduler/pull/60), merged
+> 2026-06-09).
+>
+> **So KAI and HAMi aren't rivals here** - they're two layers of one stack. KAI brings the
+> queue and the scheduling; HAMi-core brings the hard memory isolation, which is exactly
+> what [Lesson 1C](../hami/README.md) teaches.
 
 📋 **Prerequisites:** docker, kind, kubectl, helm, jq. The lesson's `make up` builds
 the shared Lesson 1 fleet (kind + KWOK + fake-gpu-operator, 32 GPUs) if it is not
