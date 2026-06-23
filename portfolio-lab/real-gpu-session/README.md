@@ -92,11 +92,17 @@ defensible without it; this is where "I simulated it" becomes "I ran it on hardw
 The shared foundation every part builds on; do it a single time.
 
 ```bash
-# on the GPU VM (SSH in as a sudo user, then: sudo su -)
-scp -r scripts <user>@<vm-ip>:~/lesson6-scripts      # from your laptop first (private repo)
-sudo PUBLIC_IP=<vm-ip> bash host-setup.sh            # NVIDIA toolkit + k3s + API cert
+# 1. ON YOUR LAPTOP - copy the scripts onto the VM (private repo)
+scp -r scripts <user>@<vm-ip>:~/lesson6-scripts
+```
 
-# on your laptop (open TCP 6443 to the VM first)
+```bash
+# 2. ON THE GPU VM (SSH in as a sudo user, then: sudo su -)
+sudo PUBLIC_IP=<vm-ip> bash host-setup.sh            # NVIDIA toolkit + k3s + API cert
+```
+
+```bash
+# 3. BACK ON YOUR LAPTOP (open TCP 6443 to the VM first)
 ./fetch-kubeconfig.sh <ssh-user>@<vm-ip> --key <ssh-key>   # writes ./kubeconfig-gpuvm
 export KUBECONFIG=$PWD/kubeconfig-gpuvm
 ```

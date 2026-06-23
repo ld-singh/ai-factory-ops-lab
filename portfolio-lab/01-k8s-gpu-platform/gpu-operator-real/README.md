@@ -11,10 +11,8 @@ not prove anything below the kubelet. Here you prove the whole thing - the compl
 path to a running pod - on actual silicon, and capture the evidence.
 
 > ✅ **Validated.** Captured on a **Hyperstack RTX A6000** (driver 535.183.06, k3s v1.35,
-> GPU Operator) on 2026-06-22:
-> [`real-gpu-validation-report.md`](../../06-validation-reports/real-gpu-validation-report.md)
-> · evidence in
-> [`evidence/gpu-evidence-20260622-071518/`](../../06-validation-reports/evidence/).
+> GPU Operator) on 2026-06-22 - see
+> [`real-gpu-validation-report.md`](../../06-validation-reports/real-gpu-validation-report.md).
 > The steps below reproduce it on a fresh VM.
 
 🎯 **After this part you can:**

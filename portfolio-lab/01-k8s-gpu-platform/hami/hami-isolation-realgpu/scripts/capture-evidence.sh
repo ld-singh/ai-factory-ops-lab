@@ -27,7 +27,12 @@ kubectl get nodes >/dev/null  || { echo "ERROR: kubectl can't reach the cluster 
 
 log "Exercise 1: co-residency - two pods on one GPU"
 kubectl apply -f "$LAB_DIR/manifests/share-two-pods.yaml" >/dev/null
-kubectl wait --for=condition=Ready pod/hami-share-a pod/hami-share-b --timeout=300s || true
+if ! kubectl wait --for=condition=Ready pod/hami-share-a pod/hami-share-b --timeout=300s; then
+  cap 1-co-residency.txt kubectl get pods -o wide
+  echo "ERROR: share pods didn't become Ready - status captured to $OUT/1-co-residency.txt."
+  echo "The probes need them Running; stopping. Check: kubectl describe pod hami-share-a"
+  exit 1
+fi
 cap 1-co-residency.txt        kubectl get pods -o wide
 cap node-allocatable.txt      bash -c "kubectl get nodes -o json | grep -oE '\"nvidia.com/(gpu|gpumem|gpucores)\": *\"[0-9]+\"' | sort -u"
 

@@ -80,7 +80,12 @@ helm upgrade --install hami hami-charts/hami \
   --version "$HAMI_VERSION" \
   -n kube-system \
   --set scheduler.kubeScheduler.imageTag="$IMAGE_TAG" \
-  --wait --timeout 5m || true
+  --wait --timeout 5m \
+  || die "helm install failed. Inspect what went wrong:
+       helm -n kube-system status hami
+       kubectl -n kube-system get pods | grep -i hami
+       Then fix the cause (often a scheduler imageTag mismatch) and re-run - this script
+       auto-clears the failed release on the next run."
 
 log "HAMi pods"
 kubectl -n kube-system get pods | grep -i hami || echo "(no hami pods yet - check 'kubectl -n kube-system get pods')"

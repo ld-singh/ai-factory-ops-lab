@@ -44,11 +44,16 @@ systemctl is-active k3s >/dev/null || die "k3s did not come back active - check:
 
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 log "Waiting for the node to be Ready again"
+ready=false
 for _ in $(seq 1 30); do
-  kubectl get nodes 2>/dev/null | grep -q ' Ready ' && break
+  if kubectl get nodes --no-headers 2>/dev/null | awk '{print $2}' | grep -qx Ready; then
+    ready=true; break
+  fi
   sleep 4
 done
 kubectl get nodes -o wide || true
+[[ "$ready" == true ]] \
+  || die "node did not become Ready ~2m after the restart. Check: systemctl status k3s ; kubectl get nodes"
 
 log "Verifying the default runtime is now nvidia"
 if grep -q 'default_runtime_name = "nvidia"' "$GEN" 2>/dev/null; then

@@ -15,7 +15,6 @@
 | CUDA version (driver-reported) | 12.2 (host `nvidia-smi`); a CUDA 12.4 base image ran fine in-pod |
 | Kubernetes distro/version | k3s **v1.35.5+k3s1**, runtime `containerd://2.2.3-k3s1` (single control-plane node, schedulable) |
 | GPU Operator | full stack deployed via the `nvidia/gpu-operator` Helm chart (chart version not captured - `helm` was absent on the VM at evidence time; operand pods enumerated below) |
-| Evidence directory | `evidence/gpu-evidence-20260622-071518/` |
 
 ## Validation checklist
 
