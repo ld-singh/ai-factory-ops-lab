@@ -1,6 +1,0 @@
-$ sinfo -N -l
-
-Sun Jun 21 05:43:48 2026
-NODELIST   NODES PARTITION       STATE CPUS    S:C:T MEMORY TMP_DISK WEIGHT AVAIL_FE REASON              
-c1             1      gpu*        idle 16     16:1:1   2000        0      1   (null) none                
-c2             1      gpu*        idle 16     16:1:1   2000        0      1   (null) none                

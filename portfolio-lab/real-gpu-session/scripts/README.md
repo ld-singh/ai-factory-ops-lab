@@ -1,7 +1,7 @@
 # Lesson 6 setup scripts - bare GPU VM → k3s → kubeconfig
 
-> Part of [Lesson 6 - Real GPU](../README.md). These automate **Phase 0 (host setup)**
-> and the **Phase A install** on any **bare GPU VM you get root on** - e.g. Hyperstack,
+> Part of [Lesson 6 - Real GPU](../README.md). These automate **Part 0 (host setup)**
+> and the **Part A install** on any **bare GPU VM you get root on** - e.g. Hyperstack,
 > Lambda, or a hyperscaler GPU VM. Ubuntu/Debian assumed. They do **not** work on a
 > marketplace *container* (Vast.ai / RunPod pods, managed notebooks): those don't let you
 > install the container toolkit + k3s. The lab itself (Parts A–D) is driven by the Lesson 6
@@ -47,32 +47,41 @@ don't need the repo-root `scripts/collect-gpu-evidence.sh`.)
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 
-Each script verifies itself, but you can re-check by hand at each step:
+Each script verifies itself, but you can re-check by hand. Three steps:
+
+**1. On the VM** - set up the host, then confirm the node and runtime:
 
 ```bash
-# 1. on the VM
 sudo PUBLIC_IP=<vm-ip> bash host-setup.sh
 export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
-kubectl get nodes -o wide                 # verify: node Ready
-kubectl get runtimeclass nvidia           # verify: the nvidia container runtime exists
+kubectl get nodes -o wide                 # node Ready
+kubectl get runtimeclass nvidia           # the nvidia container runtime exists
+```
 
-# 2. on your laptop (open TCP 6443 to the VM first)
-./fetch-kubeconfig.sh <ssh-user>@<vm-ip>
+**2. On your laptop** - fetch the kubeconfig and confirm you can reach the cluster
+(open TCP 6443 to the VM first):
+
+```bash
+./fetch-kubeconfig.sh <ssh-user>@<vm-ip> --key <ssh-key>   # --port N too if non-22
 export KUBECONFIG=$PWD/kubeconfig-gpuvm
-kubectl get nodes -o wide                 # verify: reachable from your laptop, node Ready
+kubectl get nodes -o wide                 # reachable from your laptop, node Ready
+```
 
-# 3. GPU layer + smoke test
+**3. GPU layer + smoke test** - install the operator, then confirm the GPU is
+allocatable and runs CUDA:
+
+```bash
 ./install-gpu-operator.sh
-kubectl get nodes -o jsonpath='{.items[0].status.allocatable.nvidia\.com/gpu}'; echo   # verify: >= 1
-kubectl logs cuda-smoke                    # verify: nvidia-smi ran on the real GPU
+kubectl get nodes -o jsonpath='{.items[0].status.allocatable.nvidia\.com/gpu}'; echo   # >= 1
+kubectl logs cuda-smoke                    # nvidia-smi ran on the real GPU
 ```
 
 After that you have a real GPU cluster you drive from your laptop. Work the
-[Lesson 6 phases](../README.md): Part A evidence is already produced by the smoke test;
+[Lesson 6 parts](../README.md): Part A evidence is already produced by the smoke test;
 then [Part B - HAMi](../../01-k8s-gpu-platform/hami/hami-isolation-realgpu/README.md),
-[Part C - Slurm GRES](../../02-slurm-gpu-platform/slurm-realgpu/README.md), and the
-[Part D inference benchmark](../../04-inference-serving/README.md). **Tear the VM down
-the moment your evidence is captured.**
+[Part C - inference benchmark](../../04-inference-serving/README.md), and
+[Part D - Slurm GRES](../../02-slurm-gpu-platform/slurm-realgpu/README.md). **Tear the VM
+down the moment your evidence is captured.**
 
 ## The scripts
 
@@ -81,7 +90,7 @@ the moment your evidence is captured.**
 | [`host-setup.sh`](host-setup.sh) | the VM (root) | NVIDIA Container Toolkit + k3s with the public IP in the API cert; labels the node `gpu=on` |
 | [`fetch-kubeconfig.sh`](fetch-kubeconfig.sh) | your laptop | reads k3s.yaml over SSH, rewrites the server to the VM's public IP, verifies `kubectl` |
 | [`install-gpu-operator.sh`](install-gpu-operator.sh) | laptop or VM | installs the GPU layer (Operator, or `MODE=device-plugin`) and runs a CUDA smoke-test pod |
-| [`capture-evidence.sh`](capture-evidence.sh) | the VM | snapshots Phase A evidence (host + in-pod `nvidia-smi`, allocatable, DCGM) into a tarball to scp back |
+| [`capture-evidence.sh`](capture-evidence.sh) | the VM | snapshots Part A evidence (host + in-pod `nvidia-smi`, allocatable, DCGM) into a tarball to scp back |
 
 ## GPU VM requirements (any provider) and gotchas
 
@@ -106,6 +115,6 @@ the moment your evidence is captured.**
 ## What these prove (and don't)
 
 They are **setup tooling**, not a validation. A green smoke test is real evidence for
-Lesson 6 Phase A (the runtime path) once you capture it; everything else still has to be
+Lesson 6 Part A (the runtime path) once you capture it; everything else still has to be
 run and captured per its lesson. Same fake-vs-real boundary as the rest of the course:
 see [`fake-vs-real-limitations.md`](../../06-validation-reports/fake-vs-real-limitations.md).

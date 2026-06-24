@@ -1,4 +1,0 @@
-$ squeue --states=PENDING -o %.10i %.12j %.8T %.6D %.20R
-
-     JOBID         NAME    STATE  NODES     NODELIST(REASON)
-         3   gpu-qoscap  PENDING      1  (QOSMaxGRESPerUser)

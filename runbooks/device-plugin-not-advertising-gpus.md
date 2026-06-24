@@ -4,6 +4,20 @@
 **Applies to:** real GPU clusters with NVIDIA GPU Operator. (In the simulation,
 the analogue is a fake node missing its `status.allocatable` entry.)
 
+> 🧩 **Running HAMi instead of the standard device plugin?** Don't chase a non-bug:
+> HAMi advertises **only `nvidia.com/gpu`** in `status.allocatable` (= physical GPUs ×
+> `deviceSplitCount`, default 10). It does **not** put `nvidia.com/gpumem` or
+> `nvidia.com/gpucores` there - those are accounted by the HAMi scheduler from the
+> `hami.io/node-nvidia-register` node annotation and enforced per-pod by HAMi-core. So the
+> health check is `nvidia.com/gpu` present **and** the annotation populated:
+> ```bash
+> kubectl get node -o jsonpath='{.items[0].status.allocatable.nvidia\.com/gpu}'; echo
+> kubectl get node -o jsonpath='{.items[0].metadata.annotations.hami\.io/node-nvidia-register}'; echo
+> ```
+> Empty annotation → check the `hami-device-plugin` pod logs and that the node is labelled
+> `gpu=on`. Also note HAMi requires `nvidia` to be the **default** containerd runtime - see
+> [k3s default runtime / containerd config](k3s-default-runtime-containerd-config.md).
+
 ## Symptom
 
 - GPU pods Pending with `Insufficient nvidia.com/gpu` despite a GPU node existing

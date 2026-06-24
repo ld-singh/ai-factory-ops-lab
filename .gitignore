@@ -1,5 +1,11 @@
-# Evidence directories contain captured command output - keep them in git
-# intentionally (they ARE the portfolio). Ignore only local noise.
+# Evidence directories hold captured command output. Kept LOCAL ONLY - not pushed to
+# GitHub (they can be large/personal; the validation reports cite the captured values
+# inline). The explainer README in the validation-reports evidence dir is kept.
+**/evidence/
+!portfolio-lab/06-validation-reports/evidence/
+portfolio-lab/06-validation-reports/evidence/*
+!portfolio-lab/06-validation-reports/evidence/README.md
+
 .DS_Store
 *.swp
 __pycache__/

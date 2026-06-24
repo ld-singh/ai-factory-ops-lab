@@ -1,1 +1,1 @@
-Evidence directories created by scripts/collect-*-evidence.sh land here.
+Evidence directories created by the labs' capture scripts land here as timestamped folders.
