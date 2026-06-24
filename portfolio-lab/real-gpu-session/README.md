@@ -27,14 +27,15 @@ additions coming in future updates:**
 > The steps below re-stand it on a fresh VM, then carry on to Part B. Parts C & D are
 > planned additions coming in future updates.
 
-🎯 **After this lesson you can:**
+🎯 **After this lesson you can** (items 1–3 are live today; 4–5 land with Parts C & D):
 
 1. Stand up the full GPU runtime path on one node and run a CUDA pod (driver → toolkit →
-   device plugin → kubelet → scheduler → container).
-2. Pull *real* DCGM telemetry - the hardware counterpart of Lesson 3's synthetic stream.
-3. Share one physical GPU between pods with HAMi and prove the memory cap is enforced.
-4. Produce real inference benchmark numbers (the real tier of Lesson 4).
+   device plugin → kubelet → scheduler → container). ✅
+2. Pull *real* DCGM telemetry - the hardware counterpart of Lesson 3's synthetic stream. ✅
+3. Share one physical GPU between pods with HAMi and prove the memory cap is enforced. ✅
+4. Produce real inference benchmark numbers (the real tier of Lesson 4). 🚧 *planned (Part C)*
 5. Enforce real `--gres=gpu` in Slurm - the hardware counterpart of Lesson 2's fake GRES.
+   🚧 *planned (Part D, optional)*
 6. State precisely what one real GPU proves, and what still needs scale/topology.
 
 🧭 **Mode:** 🟥 Real GPU (one entry-level card). **Optional** - the course is complete and
@@ -199,10 +200,11 @@ from "pending hardware run" to Complete:
 - 🚧 [`inference-benchmark-report.md`](../06-validation-reports/inference-benchmark-report.md) - the concurrency sweep (Part C — **planned, coming in a future update**)
 - 🚧 [`slurm-gres-validation.md`](../06-validation-reports/slurm-gres-validation.md) - the real `--gres=gpu` enforcement section (Part D — **planned future update, optional**)
 
-🔬 **What this session proves - and does not.** It proves the real, single-node runtime
-path: execution, enforced GPU sharing, real telemetry, real benchmarks, and enforced Slurm
-GRES. It does **not** prove NCCL/NVLink/MIG/GPUDirect-RDMA, multi-node scale, or
-sharing-performance under sustained load. Full ledger:
+🔬 **What this session proves - and does not.** Today (Parts A & B) it proves the real,
+single-node runtime path: execution, real telemetry, and enforced GPU sharing. Real
+benchmarks (Part C) and enforced Slurm GRES (Part D) are planned additions, not yet
+delivered. Even complete, it does **not** prove NCCL/NVLink/MIG/GPUDirect-RDMA, multi-node
+scale, or sharing-performance under sustained load. Full ledger:
 [`fake-vs-real-limitations.md`](../06-validation-reports/fake-vs-real-limitations.md).
 
 ➡️ **Next:** [★ Your lab notebook](../06-validation-reports/) - confirm every lesson you

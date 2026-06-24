@@ -1,7 +1,7 @@
 # Runbook - Slurm Job Pending with a GRES/QOS Reason
 
 **Severity:** Medium - GPU work isn't running; could be a healthy queue wait or an
-unsatisfiable request that will *never* run. The first triage job is telling them apart.
+unsatisfiable request that will *never* run. The first triage step is telling them apart.
 **Applies to:** Slurm GPU clusters. Exercised in the Lesson 2 simulation
 ([fake-GRES Slurm lab](../portfolio-lab/02-slurm-gpu-platform/README.md)); the *scheduling*
 reasons are identical on real hardware.

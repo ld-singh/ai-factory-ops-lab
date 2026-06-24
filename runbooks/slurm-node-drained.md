@@ -39,7 +39,7 @@ journalctl -u slurmd --since "30 min ago" | tail -30
 ```
 
 A `gres count` mismatch (node advertises fewer GPUs than `gres.conf` declares) keeps a node
-`drain`ed - see [device-plugin / GRES registration](device-plugin-not-advertising-gpus.md)
+`drained` - see [device-plugin / GRES registration](device-plugin-not-advertising-gpus.md)
 for the equivalent "node not advertising GPUs" triage.
 
 ### 3. Resume the node (only once it's actually healthy)
