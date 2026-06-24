@@ -1,14 +1,17 @@
-# Slurm real GRES on a real GPU (Lesson 6, Phase C)
+# Slurm real GRES on a real GPU (Lesson 6, Part D)
 
 > Part of [Lesson 6 - Real GPU](../../real-gpu-session/README.md) · The simulation
 > counterpart is [Lesson 2 - Slurm (fake GRES)](../README.md) · Course home:
 > [AI Factory Operations Lab](../../../README.md)
 
-> 🟡 **STATUS: GUIDE - run to confirm.** This is the real-hardware half of the Slurm
-> lesson. It is written as ordered notes with pointers to the official Slurm docs, not
-> a copy-paste script, because the directives depend on your Slurm version and host.
-> Confirm every directive against https://slurm.schedmd.com/gres.html before running,
-> and record your actual output as evidence.
+> 🚧 **STATUS: PLANNED — coming in a future update (optional).** The *scheduling* half
+> of Slurm GRES is fully validated in [Lesson 2 (fake GRES)](../README.md); this
+> real-hardware *enforcement* half is an optional add-on planned for a later update. The
+> guide below is already run-ready for when it lands: it's
+> ordered notes with pointers to the official Slurm docs rather than a copy-paste script,
+> because the directives depend on your Slurm version and host. Confirm every directive
+> against https://slurm.schedmd.com/gres.html before running, and record your output as
+> evidence.
 
 ## The boundary (read first)
 

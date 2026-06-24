@@ -38,21 +38,71 @@ sim-vs-real boundary you learned in Lesson 1 applies here.
 
 ---
 
-## The loop (run this)
+## Running it, step by step
+
+Run these **one at a time** — *not* as a single block. The cluster **stays up between
+steps**, so you can inspect it by hand (step 3). Save the last one, `phase3-down`, for when
+you're completely finished.
+
+**1. Start the cluster** — builds + starts slurmctld / slurmdbd / MariaDB / 2× slurmd /
+login and bootstraps accounting:
 
 ```bash
-make phase3-up        # build + start slurmctld/slurmdbd/MariaDB/2× slurmd/login, bootstrap accounting
-make phase3-demo      # submit the four scenarios; print the queue + pending reasons
-make phase3-drain     # drain a node, watch work route around it, resume
-make phase3-evidence  # capture sinfo/squeue/sacct/qos into 06-validation-reports/
-make phase3-down      # tear it all down (containers + volumes)
+make phase3-up
 ```
 
-Poke around by hand inside the cluster any time:
+**2. Submit the four scenarios** and print the queue + pending reasons:
+
+```bash
+make phase3-demo
+```
+
+**3. Inspect what the demo did, by hand.** Open a shell on the **login** node (the cluster
+is still up):
 
 ```bash
 docker compose -f portfolio-lab/02-slurm-gpu-platform/docker/docker-compose.yml exec login bash
-# then: sinfo -N -l   squeue -l   scontrol show job <id>   sacct -X
+```
+
+From inside that shell, run these one at a time — first the fleet, then the queue:
+
+```bash
+sinfo -N -l        # nodes: state, CPUs, and GPUs (gres) per compute node
+```
+
+```bash
+squeue -l          # the queue: every job's STATE and the REASON it's pending
+```
+
+To inspect a single job you need its **job id** — the **`JOBID`** (first) column of
+`squeue`. Copy one from there and pass it to `scontrol`:
+
+```bash
+scontrol show job <JOBID>   # e.g. `scontrol show job 12` - requested gres, assigned node, pending reason
+```
+
+```bash
+sacct -X           # accounting: one row per finished job (exit code, elapsed, state)
+```
+
+Type `exit` to leave the login shell. (You can re-open it the same way after step 4 too.)
+
+**4. Drain/resume drill** — drain a node, watch work route around it, then resume it:
+
+```bash
+make phase3-drain
+```
+
+**5. Capture evidence** — `sinfo` / `squeue` / `sacct` / `qos` into `06-validation-reports/`:
+
+```bash
+make phase3-evidence
+```
+
+**6. Tear it all down — only when you're done** (removes containers + volumes):
+
+```bash
+make phase3-down
 ```
 
 ✅ **Checkpoint - the four scenarios.** After `make phase3-demo` you should see, via

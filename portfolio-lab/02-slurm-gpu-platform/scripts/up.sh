@@ -47,4 +47,3 @@ in_login sinfo -N -l || true
 echo
 echo "Next:"
 echo "  make phase3-demo       # submit the four scenarios and watch the queue"
-echo "  docker compose -f $COMPOSE exec login bash   # poke around by hand"
