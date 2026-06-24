@@ -48,7 +48,16 @@ k3s has a first-class flag - use it via `/etc/rancher/k3s/config.yaml`:
 
 ```bash
 k3s server --help | grep -i default-runtime          # confirm the flag exists
-echo 'default-runtime: nvidia' | sudo tee -a /etc/rancher/k3s/config.yaml
+
+# set the key idempotently (replace if present, else append) - appending blindly with
+# `tee -a` can create a duplicate YAML key, which is parser-dependent and may be ignored:
+sudo touch /etc/rancher/k3s/config.yaml
+if grep -qE '^[[:space:]]*default-runtime[[:space:]]*:' /etc/rancher/k3s/config.yaml; then
+  sudo sed -i 's/^[[:space:]]*default-runtime[[:space:]]*:.*/default-runtime: nvidia/' /etc/rancher/k3s/config.yaml
+else
+  echo 'default-runtime: nvidia' | sudo tee -a /etc/rancher/k3s/config.yaml
+fi
+
 sudo systemctl restart k3s && sleep 5 && systemctl is-active k3s
 ```
 

@@ -127,8 +127,10 @@ Install HAMi and wait for the node to advertise shareable memory:
 ./scripts/install-hami.sh
 ```
 
-When it prints `nvidia.com/gpumem = ...`, setup is done. Now work
-[the exercises](#the-exercises) **one at a time**.
+When it prints `OK: nvidia.com/gpu = ...` plus the `node-nvidia-register` annotation, setup
+is done. (HAMi advertises only `nvidia.com/gpu` in allocatable; the shareable memory lives
+in that annotation, not in `nvidia.com/gpumem`.) Now work [the exercises](#the-exercises)
+**one at a time**.
 
 > ⚠️ **Install interrupted? (flaky laptop↔API link).** Driving a remote k3s API over an
 > unstable connection can drop helm mid-install (`http2: client connection lost`) and leave

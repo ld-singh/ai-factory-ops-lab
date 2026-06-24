@@ -34,7 +34,9 @@ if ! kubectl wait --for=condition=Ready pod/hami-share-a pod/hami-share-b --time
   exit 1
 fi
 cap 1-co-residency.txt        kubectl get pods -o wide
-cap node-allocatable.txt      bash -c "kubectl get nodes -o json | grep -oE '\"nvidia.com/(gpu|gpumem|gpucores)\": *\"[0-9]+\"' | sort -u"
+# HAMi puts only nvidia.com/gpu in allocatable; the shareable memory is in the
+# hami.io/node-nvidia-register annotation - capture both explicitly.
+cap node-allocatable.txt      bash -c "echo 'allocatable nvidia.com/gpu:'; kubectl get nodes -o jsonpath='{.items[0].status.allocatable.nvidia\\.com/gpu}'; echo; echo; echo 'hami.io/node-nvidia-register:'; kubectl get nodes -o jsonpath='{.items[0].metadata.annotations.hami\\.io/node-nvidia-register}'; echo"
 
 log "Exercise 2+3: virtualized nvidia-smi + memory-cap probe (both pods)"
 cap 2-3-probe-memory-a.txt    bash "$SCRIPT_DIR/probe-memory.sh" hami-share-a
