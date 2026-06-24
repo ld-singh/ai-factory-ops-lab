@@ -12,18 +12,20 @@ lifecycle). This is the **one lesson that needs real hardware**. It gathers ever
 piece into a single rental so you **rent once, prove what a simulation cannot, capture
 evidence, and tear down**.
 
-You run four things on one cheap card, in order:
+You run these on one cheap card, in order. **Parts A & B are live; C & D are planned
+additions coming in future updates:**
 
-| Part | What it proves | Counterpart sim lesson |
-|---|---|---|
-| **A - Runtime path + telemetry** | a CUDA pod actually executes on the GPU; real `DCGM_FI_*` metrics | Lessons 1 / 3 |
-| **B - HAMi sharing** | two pods share one card with an **enforced** memory cap | Lesson 1C sim |
-| **C - Inference** | real tokens/sec and latency under load | Lesson 4 CPU tier |
-| **D - Slurm GRES** | `--gres=gpu` actually confines a job to its device | Lesson 2 fake GRES |
+| Part | What it proves | Counterpart sim lesson | Status |
+|---|---|---|---|
+| **A - Runtime path + telemetry** | a CUDA pod actually executes on the GPU; real `DCGM_FI_*` metrics | Lessons 1 / 3 | ✅ validated |
+| **B - HAMi sharing** | two pods share one card with an **enforced** memory cap | Lesson 1C sim | ✅ validated |
+| **C - Inference** | real tokens/sec and latency under load | Lesson 4 CPU tier | 🚧 planned |
+| **D - Slurm GRES** | `--gres=gpu` actually confines a job to its device | Lesson 2 fake GRES | 🚧 planned (optional) |
 
 > ✅ **Part A is already validated** - captured on a **Hyperstack RTX A6000** (2026-06-22):
 > [`real-gpu-validation-report.md`](../06-validation-reports/real-gpu-validation-report.md).
-> The steps below re-stand it on a fresh VM, then carry on to Parts B–D on the same rental.
+> The steps below re-stand it on a fresh VM, then carry on to Part B. Parts C & D are
+> planned additions coming in future updates.
 
 🎯 **After this lesson you can:**
 
@@ -154,7 +156,10 @@ deliberately cannot prove.
 Pending `CardInsufficientMemory` from the oversubscribe exercise - into the lab notebook,
 **separate** from Part A (they back different claims).
 
-### Part C - Real inference benchmark
+### Part C - Real inference benchmark · 🚧 planned
+
+> 🚧 **Coming in a future update.** This lab is on the roadmap, not yet built out. The plan
+> below is the intended shape.
 
 Serve a small model with vLLM and point the (already-validated) harness at it:
 [Lesson 4 → real benchmark tier](../04-inference-serving/README.md#the-loop-run-this).
@@ -165,12 +170,13 @@ degrade) into
 Optional high-value tie-in to Part B: two replicas sharing one card via HAMi slices vs one
 dedicated replica - measuring what sharing costs in p99.
 
-### Part D - Slurm real GRES (enforcement on hardware)
+### Part D - Slurm real GRES (enforcement on hardware) · 🚧 planned (optional)
 
-Last, because it stands up a separate scheduler on the same host. The fake-GRES
-[Slurm lesson](../02-slurm-gpu-platform/README.md) (Lesson 2) proved the *scheduling*
-decision; this proves real `--gres=gpu` **enforcement** - a job confined to its allocated
-device via cgroups: [Slurm real-GRES guide](../02-slurm-gpu-platform/slurm-realgpu/README.md).
+> 🚧 **Coming in a future update (optional).** The fake-GRES [Slurm lesson](../02-slurm-gpu-platform/README.md)
+> (Lesson 2) already validates the *scheduling* half. This real `--gres=gpu` **enforcement**
+> half - a job confined to its allocated device via cgroups - is an optional real-hardware
+> add-on planned for a later update. The run-ready guide is
+> [here](../02-slurm-gpu-platform/slurm-realgpu/README.md) for when it lands.
 
 📸 **Capture:** `nvidia-smi` and `CUDA_VISIBLE_DEVICES` from *inside* the job step (it sees
 only its allocated GPU), plus the `gres.conf` / `slurm.conf` you used - into the
@@ -190,8 +196,8 @@ from "pending hardware run" to Complete:
 
 - [x] [`real-gpu-validation-report.md`](../06-validation-reports/real-gpu-validation-report.md) - runtime path + DCGM (Part A) — **done, RTX A6000, 2026-06-22**
 - [x] [`hami-isolation-validation.md`](../06-validation-reports/hami-isolation-validation.md) - co-residency, virtualized `nvidia-smi`, allocation refusal, real-HW exhaustion, mechanism (Part B) — **done, RTX A6000, 2026-06-23**
-- [ ] [`inference-benchmark-report.md`](../06-validation-reports/inference-benchmark-report.md) - the concurrency sweep (Part C)
-- [ ] [`slurm-gres-validation.md`](../06-validation-reports/slurm-gres-validation.md) - the real `--gres=gpu` enforcement section (Part D)
+- 🚧 [`inference-benchmark-report.md`](../06-validation-reports/inference-benchmark-report.md) - the concurrency sweep (Part C — **planned, coming in a future update**)
+- 🚧 [`slurm-gres-validation.md`](../06-validation-reports/slurm-gres-validation.md) - the real `--gres=gpu` enforcement section (Part D — **planned future update, optional**)
 
 🔬 **What this session proves - and does not.** It proves the real, single-node runtime
 path: execution, enforced GPU sharing, real telemetry, real benchmarks, and enforced Slurm

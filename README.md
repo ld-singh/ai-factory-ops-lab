@@ -271,7 +271,7 @@ contains real captured output.
 | 3 | Observability | Complete (runnable; metrics/alerts/dashboards validated) |
 | 4 | Inference serving | Harness runnable + validated; real benchmark in Lesson 6 |
 | 5 | BCM-style cluster lifecycle (conceptual + drill) | Drill runnable + validated; BCM specifics conceptual |
-| 6 | Real GPU (capstone: runtime path, real DCGM, HAMi isolation, Slurm GRES, inference) | **Parts A & B validated on an RTX A6000.** Part A - runtime path + real `DCGM_FI_*` telemetry ([real-gpu-validation-report.md](./portfolio-lab/06-validation-reports/real-gpu-validation-report.md), 2026-06-22). Part B - HAMi GPU sharing: two pods on one card, slice enforced by HAMi-core (CUDA `malloc` refused at 8 GB while 40 GB free), `CardInsufficientMemory` oversubscribe ([hami-isolation-validation.md](./portfolio-lab/06-validation-reports/hami-isolation-validation.md), 2026-06-23). Inference benchmark + Slurm GRES pending |
+| 6 | Real GPU (capstone: runtime path, real DCGM, HAMi isolation, Slurm GRES, inference) | **Parts A & B validated on an RTX A6000.** Part A - runtime path + real `DCGM_FI_*` telemetry ([real-gpu-validation-report.md](./portfolio-lab/06-validation-reports/real-gpu-validation-report.md), 2026-06-22). Part B - HAMi GPU sharing: two pods on one card, slice enforced by HAMi-core (CUDA `malloc` refused at 8 GB while 40 GB free), `CardInsufficientMemory` oversubscribe ([hami-isolation-validation.md](./portfolio-lab/06-validation-reports/hami-isolation-validation.md), 2026-06-23). **Parts C (inference benchmark) and D (Slurm real GRES, optional) are planned additions coming in future updates.** |
 
 ## Documentation site
 

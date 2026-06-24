@@ -52,5 +52,3 @@ echo "  01-schedulable        -> Running"
 echo "  02-capacity-mismatch  -> REJECTED at submit (impossible: no node has 16 GPUs)"
 echo "  03-qos-blocked        -> Pending, QOSMax...PerUser (capped at 4 GPUs/user)"
 echo "  04-queue-pressure     -> ~16 Running, rest Pending Resources/Priority"
-echo
-echo "Capture evidence:  make phase3-evidence"
