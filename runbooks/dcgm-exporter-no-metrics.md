@@ -129,4 +129,3 @@ exporter to zero and you watch the target go **DOWN** and `DCGMExporterAbsent` f
 (~60s), then it restores. Walk steps 1-4 above while it's down. Real mode: on the
 Lesson 6 GPU node, stop the GPU Operator's `nvidia-dcgm-exporter` and walk the same path
 including step 5, capturing output for the validation report.
-</content>

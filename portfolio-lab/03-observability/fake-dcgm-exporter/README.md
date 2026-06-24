@@ -38,4 +38,3 @@ curl -X POST "localhost:9400/scenario?name=normal"         # reset
 stock `python:3.12-slim` image - **no image build, no registry**.
 [`../manifests/servicemonitor.yaml`](../manifests/servicemonitor.yaml) points Prometheus at
 it; [`../manifests/alerts.yaml`](../manifests/alerts.yaml) defines the rules.
-</content>

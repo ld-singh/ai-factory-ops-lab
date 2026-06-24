@@ -284,5 +284,3 @@ XID behaviour, and thermals require Lesson 6 hardware. Ledger:
 [`fake-vs-real-limitations.md`](../06-validation-reports/fake-vs-real-limitations.md).
 
 ➡️ **Next:** [Lesson 4 - Inference Serving](../04-inference-serving/README.md).
-</content>
-</invoke>
