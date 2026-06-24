@@ -232,7 +232,7 @@ arrival order, and that's *all* it can do. The default scheduler has no concept 
 | **Gang scheduling** | Can this 8-pod job get *all 8* GPUs or *none*? | Partial allocation: 5 pods hold GPUs waiting for 3 that never come - **deadlock that wastes GPUs** |
 | **Priority** | Is this a production job that should jump the queue? | Batch experiments delay revenue-serving work |
 
-💡 **The financial framing matters in interviews and in practice:** an idle GPU is
+💡 **The financial framing is what matters in practice:** an idle GPU is
 money on fire, and a *partially* gang-allocated distributed job is worse - it holds
 GPUs hostage while making no progress. Queue schedulers exist to turn the Pending
 pile above into *policy*.

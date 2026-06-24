@@ -100,9 +100,7 @@ nav:
           - Overview: portfolio-lab/01-k8s-gpu-platform/hami/README.md
           - "Scheduling sim (no GPU)": portfolio-lab/01-k8s-gpu-platform/hami/hami-scheduling-sim/README.md
       - "2 - Slurm workload management": portfolio-lab/02-slurm-gpu-platform/README.md
-      - "3 - GPU observability":
-          - Overview: portfolio-lab/03-observability/README.md
-          - Fake DCGM exporter: portfolio-lab/03-observability/fake-dcgm-exporter/README.md
+      - "3 - GPU observability": portfolio-lab/03-observability/README.md
       - "4 - Inference serving": portfolio-lab/04-inference-serving/README.md
       - "5 - Cluster lifecycle (BCM-style)": portfolio-lab/05-bcm-style-cluster-lifecycle/README.md
       - "6 - Real GPU (one-rental capstone)":

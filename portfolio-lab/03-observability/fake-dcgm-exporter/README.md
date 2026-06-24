@@ -1,48 +1,41 @@
 # fake-dcgm-exporter - synthetic DCGM metrics, no GPU
 
-[`app.py`](./app.py) serves Prometheus metrics using the **exact field names and
-labels** of NVIDIA's real [DCGM Exporter](https://github.com/NVIDIA/dcgm-exporter)
-(`DCGM_FI_DEV_*`, `DCGM_FI_PROF_*`) - but every value is fabricated. It exists so
-Lesson 3 can build and validate the entire observability pipeline (scrape →
-dashboard → alert → runbook) before any real GPU exists.
+> 📖 This is a code companion. The full tutorial - how this exporter fits the scrape →
+> dashboard → alert → runbook pipeline, the four-GPU fleet, and the break-it drill - lives
+> in the lesson: **[Lesson 3 - GPU Observability](../README.md)**.
 
-> **SCOPE NOTE:** synthetic values. A dashboard or alert built on this proves
-> **design**, not real telemetry. Real DCGM evidence comes only from the
+[`app.py`](./app.py) serves Prometheus metrics using the **exact field names and labels**
+of NVIDIA's real [DCGM Exporter](https://github.com/NVIDIA/dcgm-exporter) (`DCGM_FI_DEV_*`,
+`DCGM_FI_PROF_*`) - but every value is fabricated. It lets Lesson 3 build and validate the
+whole observability pipeline before any real GPU exists.
+
+> **SCOPE NOTE:** synthetic values. A dashboard or alert built on this proves **design**,
+> not real telemetry. Real DCGM evidence comes only from the
 > [Lesson 6](../../01-k8s-gpu-platform/gpu-operator-real/README.md) hardware run.
 
-## The synthetic fleet
+## Run it standalone
 
-Four GPUs with deliberately *interesting* personas, so the dashboards and alerts
-have something real to show:
-
-| GPU | Model | Persona | Why |
-|---|---|---|---|
-| 0, 1 | A100 | busy | high SM-active, the normal case |
-| 2 | H100 | spiky | oscillates idle↔full, exercises time-series panels |
-| 3 | L40S | **idle** | allocated memory, ~0 SM-active - the money-fire the idle dashboard hunts |
+```bash
+# run from the repo root (same place you run the make targets):
+PORT=9400 python3 portfolio-lab/03-observability/fake-dcgm-exporter/app.py &
+curl -s localhost:9400/metrics | grep DCGM_FI_PROF_SM_ACTIVE
+```
 
 ## The `/scenario` switch
 
-The break-it drill (`make phase4-break`) POSTs to flip the synthetic state:
+POST to flip the synthetic state (this is what `make phase4-break` drives):
 
 ```bash
-curl -X POST "http://<exporter>:9400/scenario?name=mem-pressure"   # GPU 0 → 98% FB
-curl -X POST "http://<exporter>:9400/scenario?name=thermal"        # GPU 2 → 92 °C
-curl -X POST "http://<exporter>:9400/scenario?name=xid"            # GPU 0 → XID error
-curl -X POST "http://<exporter>:9400/scenario?name=normal"         # reset
+curl -X POST "localhost:9400/scenario?name=mem-pressure"   # a GPU → 98% framebuffer
+curl -X POST "localhost:9400/scenario?name=thermal"        # GPU 2 → 92 °C
+curl -X POST "localhost:9400/scenario?name=xid"            # a GPU → XID error
+curl -X POST "localhost:9400/scenario?name=normal"         # reset
 ```
 
 ## How it's deployed
 
-[`../scripts/up.sh`](../scripts/up.sh) creates a ConfigMap from `app.py` and runs it
-on a stock `python:3.12-slim` image - **no image build, no registry**. The
-[`../manifests/servicemonitor.yaml`](../manifests/servicemonitor.yaml) points
-Prometheus at it; [`../manifests/alerts.yaml`](../manifests/alerts.yaml) defines the
-rules.
-
-Run it standalone to inspect the output:
-
-```bash
-PORT=9400 python3 app.py &
-curl -s localhost:9400/metrics | grep DCGM_FI_PROF_SM_ACTIVE
-```
+[`../scripts/up.sh`](../scripts/up.sh) creates a ConfigMap from `app.py` and runs it on a
+stock `python:3.12-slim` image - **no image build, no registry**.
+[`../manifests/servicemonitor.yaml`](../manifests/servicemonitor.yaml) points Prometheus at
+it; [`../manifests/alerts.yaml`](../manifests/alerts.yaml) defines the rules.
+</content>
