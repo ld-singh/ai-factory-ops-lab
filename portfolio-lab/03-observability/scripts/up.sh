@@ -38,14 +38,18 @@ kubectl -n gpu-observability create configmap fake-dcgm-app \
 kubectl apply -f "${LAB}/manifests/exporter.yaml"
 kubectl apply -f "${LAB}/manifests/servicemonitor.yaml"
 kubectl apply -f "${LAB}/manifests/alerts.yaml"
-kubectl -n gpu-observability rollout status deployment/fake-dcgm-exporter --timeout=120s
 
+# Load the dashboards BEFORE waiting on the exporter rollout: they don't depend on the
+# exporter being Ready, so a slow first-time image pull can't leave them uninstalled.
 echo "==> Loading Grafana dashboards (sidecar auto-imports labelled ConfigMaps)..."
 for dash in "${LAB}"/dashboards/*.json; do
   name="dash-$(basename "$dash" .json)"
   kubectl -n "$NS_MON" create configmap "$name" --from-file="$(basename "$dash")=$dash" \
     --dry-run=client -o yaml | kubectl label --local -f - grafana_dashboard=1 -o yaml | kubectl apply -f -
 done
+
+echo "==> Waiting for the fake-DCGM exporter to be ready (first run pulls the image)..."
+kubectl -n gpu-observability rollout status deployment/fake-dcgm-exporter --timeout=300s
 
 echo
 echo "==> Done. Access the UIs with port-forwards:"

@@ -63,9 +63,8 @@ is *for* without pretending hands-on experience.
 The course's whole discipline is not overclaiming. Rather than fake BCM output,
 this lesson connects BCM's lifecycle model to image pipelines, node pools, and
 lifecycle hooks you *have* operated - which is a transferable, defensible
-understanding without pretending to hands-on BCM experience. In an interview, "I've
-mapped BCM's concepts onto systems I've run, and here's the mapping" is a stronger
-position than recited command names.
+understanding without pretending to hands-on BCM experience. Mapping BCM's concepts
+onto systems you've actually run is a stronger position than reciting command names.
 
 ## The drill (run this)
 

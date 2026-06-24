@@ -30,6 +30,6 @@ Each time you finish a runnable lesson:
 
 [**fake-vs-real-limitations.md**](./fake-vs-real-limitations.md) is the single source
 of truth for what each lab *mode* can and cannot prove. Before you write any claim in
-a report - or on a résumé - check it against that ledger.
+a report, check it against that ledger.
 
 ➡️ **Back to:** [the Learning Path](../../README.md#the-learning-path).
