@@ -179,7 +179,7 @@ only its own memory slice.
 
 ### Step 1 - Install HAMi
 
-On the Lesson 6 machine (driver + container toolkit + Kubernetes already validated):
+On the Lesson 6 machine (driver + container toolkit + Kubernetes already set up):
 
 ```bash
 # ILLUSTRATIVE - confirm the current repo URL, chart name, and values in the

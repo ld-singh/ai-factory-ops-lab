@@ -12,17 +12,18 @@
 > scripts flag the version-sensitive bits and link the official docs. Never pipe a
 > setup script you haven't read onto a host you're paying for.
 
-## Get the scripts onto the VM
+## Get the lab onto the VM
 
-These four scripts are self-contained - you only need **this `scripts/` directory** on the
-VM, not the whole repo. Two ways:
+Clone the repo on the VM and run from the repo root:
 
-- **Public repo:** `git clone <repo-url>` on the VM, then `cd ai-factory-ops-lab/portfolio-lab/real-gpu-session/scripts`.
-- **Private repo (no git auth on the VM):** copy just this folder from your laptop -
-  ```bash
-  scp -i <key> -r portfolio-lab/real-gpu-session/scripts <user>@<vm-ip>:~/lesson6-scripts
-  ```
-  then on the VM: `cd ~/lesson6-scripts && chmod +x *.sh`.
+```bash
+git clone https://github.com/ld-singh/ai-factory-ops-lab.git
+cd ai-factory-ops-lab
+```
+
+The setup scripts live in `portfolio-lab/real-gpu-session/scripts/` and are self-contained;
+run them by path from the repo root (e.g.
+`sudo PUBLIC_IP=<vm-ip> bash portfolio-lab/real-gpu-session/scripts/host-setup.sh`).
 
 (Evidence capture is `capture-evidence.sh` here - self-contained, writes a tarball - so you
 don't need the repo-root `scripts/collect-gpu-evidence.sh`.)

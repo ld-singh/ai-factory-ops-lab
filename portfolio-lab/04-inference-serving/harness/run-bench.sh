@@ -6,12 +6,11 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 URL="${ENDPOINT:-http://localhost:8000}"
-MODEL="${MODEL:-local}"
+MODEL="${MODEL:-qwen2:0.5b}"   # matches serve-cpu.sh's default; override for a GPU server
 CONC="${CONCURRENCY:-1,2,4,8}"
 REQS="${REQUESTS_PER_LEVEL:-12}"
 
 echo "Benchmarking ${URL} (model=${MODEL})"
-echo "Reminder: CPU-served numbers validate the HARNESS only, not the hardware."
 echo
 exec python3 "${SCRIPT_DIR}/loadgen.py" \
   --url "$URL" --model "$MODEL" \

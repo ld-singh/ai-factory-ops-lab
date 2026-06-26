@@ -31,8 +31,8 @@ Knowing exactly where that line sits is itself one of the skills this course tea
 
 | Tier | Lessons | You pay | You get |
 |---|---|---|---|
-| **$0 simulation** | 0, 1, 1B, 1C (sim), 3, 4, 5 (harness), 6 | Nothing, a laptop runs it | Scheduling, queueing, GPU-sharing decisions, triage, observability design |
-| **~$5 one GPU session** | 2, 1C (real), 5 (benchmark) | A few hours on one entry-level GPU VM | The real runtime path, enforced sharing, real telemetry and benchmarks |
+| **$0 simulation** | 0, 1, 1B, 1C, 2, 3, 4, 5 | Nothing, a laptop runs it | Scheduling, queueing, GPU-sharing decisions, triage, observability design, lifecycle - most of the course |
+| **$5-10 one GPU session** | 6 (the real-GPU capstone) | A few hours on one entry-level GPU VM | The real runtime path, enforced sharing, real telemetry and benchmarks |
 
 ## The lessons
 

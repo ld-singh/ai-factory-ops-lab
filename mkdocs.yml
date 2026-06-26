@@ -108,7 +108,7 @@ nav:
           - "Setup scripts (bare GPU VM → k3s)": portfolio-lab/real-gpu-session/scripts/README.md
           - "Part A - GPU runtime path": portfolio-lab/01-k8s-gpu-platform/gpu-operator-real/README.md
           - "Part B - HAMi isolation (real GPU)": portfolio-lab/01-k8s-gpu-platform/hami/hami-isolation-realgpu/README.md
-          - "Part C - Inference benchmark": portfolio-lab/04-inference-serving/README.md
+          - "Part C - Inference benchmark (real GPU)": portfolio-lab/04-inference-serving/inference-realgpu/README.md
           - "Part D - Slurm real GRES": portfolio-lab/02-slurm-gpu-platform/slurm-realgpu/README.md
   - Deep dives:
       - kind (local cluster): portfolio-lab/01-k8s-gpu-platform/kind/README.md
