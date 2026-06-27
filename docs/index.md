@@ -119,5 +119,9 @@ make phase1-down    # tear it down
 
 ---
 
-Built by **[Lovedeep Singh](https://www.linkedin.com/in/lovedeep-singh-cloud-infra/)**,
-cloud infrastructure engineer. See [About](about.md) for more.
+⭐ **Finding this useful?** [Star it on GitHub](https://github.com/ld-singh/ai-factory-ops-lab/stargazers)
+— it helps other engineers find the course.
+
+Built by **[Lovedeep Singh](https://www.linkedin.com/in/lovedeep-singh-cloud-infra/)** —
+Cloud Infrastructure Architect (AWS, Azure, Kubernetes & DevSecOps), building secure, governed
+cloud platforms. See [About](about.md) for more.
