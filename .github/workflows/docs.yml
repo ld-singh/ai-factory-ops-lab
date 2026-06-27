@@ -45,6 +45,10 @@ jobs:
         # live in the repo but are not part of the rendered site, which strict rejects.
         run: mkdocs build
       - uses: actions/configure-pages@v5
+        # enablement: true turns Pages on (build type = GitHub Actions) on the first run,
+        # so no manual Settings -> Pages step is needed.
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
