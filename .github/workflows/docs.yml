@@ -44,11 +44,9 @@ jobs:
         # Not --strict: lesson pages intentionally link to code files (.sh/.yaml) that
         # live in the repo but are not part of the rendered site, which strict rejects.
         run: mkdocs build
+      # Pages must be enabled once in repo Settings (Source: GitHub Actions) - the workflow
+      # token can deploy to Pages but cannot create the Pages site itself.
       - uses: actions/configure-pages@v5
-        # enablement: true turns Pages on (build type = GitHub Actions) on the first run,
-        # so no manual Settings -> Pages step is needed.
-        with:
-          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
