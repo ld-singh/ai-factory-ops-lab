@@ -15,4 +15,5 @@ echo
 exec python3 "${SCRIPT_DIR}/loadgen.py" \
   --url "$URL" --model "$MODEL" \
   --concurrency "$CONC" --requests-per-level "$REQS" \
+  --ttft-slo "${TTFT_SLO:-1.0}" --e2e-slo "${E2E_SLO:-0}" \
   --json-out "portfolio-lab/06-validation-reports/evidence/inference-$(date +%Y%m%d-%H%M%S).json"

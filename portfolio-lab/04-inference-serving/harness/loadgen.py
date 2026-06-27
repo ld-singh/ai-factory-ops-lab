@@ -59,8 +59,13 @@ def build_prompt(approx_tokens):
     return "Summarize this note in one short sentence: " + " ".join(words)
 
 
-def stream_request(base_url, model, ttft_slo_s, max_tokens, prompt):
-    """Fire one streaming chat completion; return per-request metrics."""
+def stream_request(base_url, model, ttft_slo_s, max_tokens, prompt, e2e_slo_s=0):
+    """Fire one streaming chat completion; return per-request metrics.
+
+    A request counts toward goodput if its TTFT meets ttft_slo_s AND (when e2e_slo_s > 0)
+    its end-to-end time meets e2e_slo_s. The e2e gate is what catches throughput
+    saturation - under continuous batching TTFT can stay low while total time degrades.
+    """
     url = base_url.rstrip("/") + "/v1/chat/completions"
     body = json.dumps({
         "model": model,
@@ -90,10 +95,11 @@ def stream_request(base_url, model, ttft_slo_s, max_tokens, prompt):
         end = time.perf_counter()
         n_tokens = max(len(token_times), 1)
         tpot = ((end - start) - (ttft or 0)) / max(n_tokens - 1, 1)
+        e2e = end - start
+        met = (ttft is not None and ttft <= ttft_slo_s) and (e2e_slo_s <= 0 or e2e <= e2e_slo_s)
         return {
-            "ok": True, "ttft": ttft if ttft is not None else (end - start),
-            "e2e": end - start, "tpot": tpot, "tokens": n_tokens,
-            "met_slo": (ttft is not None and ttft <= ttft_slo_s),
+            "ok": True, "ttft": ttft if ttft is not None else e2e,
+            "e2e": e2e, "tpot": tpot, "tokens": n_tokens, "met_slo": met,
         }
     except Exception as e:  # noqa: BLE001 - record, don't crash the sweep
         return {"ok": False, "error": str(e), "e2e": time.perf_counter() - start}
@@ -127,12 +133,12 @@ def summarize(results, wall):
     }
 
 
-def run_level(base_url, model, concurrency, requests, ttft_slo_s, max_tokens, prompt):
+def run_level(base_url, model, concurrency, requests, ttft_slo_s, max_tokens, prompt, e2e_slo_s=0):
     """Run `requests` requests at a fixed concurrency; return one summary row."""
     results = []
     wall_start = time.perf_counter()
     with ThreadPoolExecutor(max_workers=concurrency) as pool:
-        futs = [pool.submit(stream_request, base_url, model, ttft_slo_s, max_tokens, prompt)
+        futs = [pool.submit(stream_request, base_url, model, ttft_slo_s, max_tokens, prompt, e2e_slo_s)
                 for _ in range(requests)]
         for f in as_completed(futs):
             results.append(f.result())
@@ -176,28 +182,32 @@ def do_sweep(args):
         "input": "'in_tok' = approx PROMPT length. Bigger prompt = more prefill work.",
         "output": "'out_tok' = OUTPUT length cap. More tokens = more decode steps.",
     }[axis]
-    print(f"Target: {args.url}  model={args.model}  mode=sweep:{axis}  TTFT-SLO={args.ttft_slo}s")
+    slo = f"TTFT-SLO={args.ttft_slo}s" + (f" + e2e-SLO={args.e2e_slo}s" if args.e2e_slo > 0 else "")
+    print(f"Target: {args.url}  model={args.model}  mode=sweep:{axis}  {slo}")
     print(f"Reading: {intro}\n")
     print_header({"concurrency": "conc", "input": "in_tok", "output": "out_tok"}[axis])
 
+    e2e = args.e2e_slo
     all_rows = []
     if axis == "concurrency":
         prompt = build_prompt(first(inputs)); mt = first(outputs)
         for c in conc:
-            row = run_level(args.url, args.model, c, args.requests_per_level,
-                            args.ttft_slo, mt, prompt)
+            # Each level must fire at least `c` requests, or the pool never reaches concurrency
+            # c and the row is meaningless (you'd be testing min(requests, c) in flight).
+            reqs = max(args.requests_per_level, c)
+            row = run_level(args.url, args.model, c, reqs, args.ttft_slo, mt, prompt, e2e)
             row["axis"] = c; all_rows.append(row); print_row(c, row)
     elif axis == "input":
         c = first(conc); mt = first(outputs)
         for n in inputs:
             row = run_level(args.url, args.model, c, args.requests_per_level,
-                            args.ttft_slo, mt, build_prompt(n))
+                            args.ttft_slo, mt, build_prompt(n), e2e)
             row["axis"] = n; all_rows.append(row); print_row(n, row)
     else:  # output
         c = first(conc); prompt = COUNT_PROMPT  # forces generation up to the token cap
         for mt in outputs:
             row = run_level(args.url, args.model, c, args.requests_per_level,
-                            args.ttft_slo, mt, prompt)
+                            args.ttft_slo, mt, prompt, e2e)
             row["axis"] = mt; all_rows.append(row); print_row(mt, row)
 
     takeaway = {
@@ -277,6 +287,9 @@ def main():
     ap.add_argument("--max-tokens", default="128", help="comma list of output tokens (sweep=output)")
     ap.add_argument("--requests-per-level", type=int, default=16)
     ap.add_argument("--ttft-slo", type=float, default=1.0, help="TTFT SLO in seconds for goodput")
+    ap.add_argument("--e2e-slo", type=float, default=0.0,
+                    help="optional end-to-end latency SLO (s); 0 = off. Add this to make goodput "
+                         "reflect throughput saturation, which TTFT alone misses.")
     # mixed-mode knobs:
     ap.add_argument("--concurrency-mixed", type=int, default=2, help="short-request concurrency (mixed)")
     ap.add_argument("--short-tokens", type=int, default=32, help="output tokens for short requests (mixed)")

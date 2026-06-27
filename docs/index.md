@@ -6,6 +6,8 @@ hide:
 
 # AI Factory Operations Lab
 
+![AI Factory Operations Lab](assets/social-preview.svg){ width="820" }
+
 **A hands-on course in AI/HPC GPU infrastructure operations.** You do not read this
 course, you run it: stand things up, break them on purpose, diagnose them the way you
 would on a real cluster, and capture the evidence. Most of it needs **no GPU at all**;

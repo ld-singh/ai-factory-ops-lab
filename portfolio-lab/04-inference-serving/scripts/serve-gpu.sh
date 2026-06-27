@@ -11,7 +11,8 @@
 set -euo pipefail
 
 export KUBECONFIG="${KUBECONFIG:-/etc/rancher/k3s/k3s.yaml}"
-MODEL="${MODEL:-Qwen/Qwen2.5-0.5B-Instruct}"   # small + ungated; fits any entry GPU.
+MODEL="${MODEL:-Qwen/Qwen2.5-7B-Instruct}"     # ~15GB, fits a 24GB+ card. Override with any HF
+                                               # model that fits your VRAM (see the lab for variants).
 SERVED_NAME="${SERVED_NAME:-local}"            # the name the harness passes as MODEL=
 NS="inference"
 

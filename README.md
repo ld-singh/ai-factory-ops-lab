@@ -1,7 +1,23 @@
-# AI Factory Operations Lab - A Hands-On Course
+<div align="center">
 
-📖 **Read it as a website: https://ld-singh.github.io/ai-factory-ops-lab/**
-(built with MkDocs Material; the lesson markdown below is the source).
+<img src="docs/assets/social-preview.svg" alt="AI Factory Operations Lab" width="820">
+
+# AI Factory Operations Lab
+
+**Hands-on GPU/HPC infrastructure operations — learn it free on your laptop, prove it on one cheap GPU.**
+
+[![Read the course](https://img.shields.io/badge/course-read%20online-2ea043?style=flat-square&logo=readthedocs&logoColor=white)](https://ld-singh.github.io/ai-factory-ops-lab/)
+[![Start free](https://img.shields.io/badge/start-%240%20%C2%B7%20no%20GPU-22c55e?style=flat-square)](#what-this-course-costs)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-k3s%20%C2%B7%20kind-326ce5?style=flat-square&logo=kubernetes&logoColor=white)](#)
+[![NVIDIA GPU](https://img.shields.io/badge/NVIDIA-GPU%20Operator%20%C2%B7%20DCGM-76b900?style=flat-square&logo=nvidia&logoColor=white)](#)
+[![vLLM](https://img.shields.io/badge/inference-vLLM-ff6f61?style=flat-square)](#)
+[![Slurm](https://img.shields.io/badge/HPC-Slurm-1f6feb?style=flat-square)](#)
+
+[**📖 Read the course online →**](https://ld-singh.github.io/ai-factory-ops-lab/)
+
+</div>
+
+---
 
 A guided, learn-by-doing course in **AI/HPC infrastructure operations**: NVIDIA GPU
 infrastructure concepts, Kubernetes GPU scheduling, Slurm GPU workload management,
@@ -274,9 +290,9 @@ contains real captured output.
 | 1C | GPU sharing & fractional GPUs with HAMi | Sim validates HAMi's scheduling *decisions* (fractional placement, Pending rejection, `FilteringSucceed`). GPU *sharing* + memory-cap *isolation* are real-GPU only → done in Lesson 6 |
 | 2 | Slurm GPU workload management | Complete (runnable; validated with captured output) |
 | 3 | Observability | Complete (runnable; metrics/alerts/dashboards validated) |
-| 4 | Inference serving | Harness runnable + validated; real benchmark in Lesson 6 |
+| 4 | Inference serving | Harness runnable + validated; real GPU benchmark validated in Lesson 6 Part C (RTX A6000) |
 | 5 | BCM-style cluster lifecycle (conceptual + drill) | Drill runnable + validated; BCM specifics conceptual |
-| 6 | Real GPU (capstone: runtime path, real DCGM, HAMi isolation, Slurm GRES, inference) | **Parts A & B validated on real hardware.** Part A - runtime path + real `DCGM_FI_*` telemetry ([real-gpu-validation-report.md](./portfolio-lab/06-validation-reports/real-gpu-validation-report.md)). Part B - HAMi GPU sharing: two pods on one card with the slice enforced by HAMi-core ([hami-isolation-validation.md](./portfolio-lab/06-validation-reports/hami-isolation-validation.md)). **Part C (inference benchmark) is runnable** - serve a model with vLLM (`make phase5-serve-gpu`) and run the Lesson 4 drills to capture the numbers. **Part D (Slurm real GRES, optional) is planned.** |
+| 6 | Real GPU (capstone: runtime path, real DCGM, HAMi isolation, Slurm GRES, inference) | **Parts A, B & C validated on real hardware.** Part A - runtime path + real `DCGM_FI_*` telemetry ([real-gpu-validation-report.md](./portfolio-lab/06-validation-reports/real-gpu-validation-report.md)). Part B - HAMi GPU sharing: two pods on one card with the slice enforced by HAMi-core ([hami-isolation-validation.md](./portfolio-lab/06-validation-reports/hami-isolation-validation.md)). Part C - inference benchmark: throughput scaling + the saturation knee on an RTX A6000 ([inference-benchmark-report.md](./portfolio-lab/06-validation-reports/inference-benchmark-report.md)). **Part D (Slurm real GRES, optional) is planned.** |
 
 ## Documentation site
 

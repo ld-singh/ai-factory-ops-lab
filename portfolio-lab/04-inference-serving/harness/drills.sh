@@ -47,7 +47,7 @@ case "$drill" in
     #   CONCURRENCY=32,64,128,256,512 MAX_TOKENS=512 REQUESTS_PER_LEVEL=64 make phase5-overload
     exec python3 "$LG" --url "$URL" --model "$MODEL" --mode sweep --sweep concurrency \
       --concurrency "${CONCURRENCY:-1,2,4,8,16,32}" --max-tokens "${MAX_TOKENS:-128}" \
-      --ttft-slo "${TTFT_SLO:-1.0}" --requests-per-level "$REQS"
+      --ttft-slo "${TTFT_SLO:-1.0}" --e2e-slo "${E2E_SLO:-0}" --requests-per-level "$REQS"
     ;;
   *)
     echo "usage: drills.sh {batching|prefill|decode|overload}" >&2

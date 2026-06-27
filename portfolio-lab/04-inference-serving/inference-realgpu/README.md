@@ -4,22 +4,33 @@
 > counterpart is [Lesson 4 - Inference Serving](../README.md) · Course home:
 > [AI Factory Operations Lab](../../../README.md)
 
-> 🟡 **STATUS: RUNNABLE.** You learned the method for free in [Lesson 4](../README.md) -
+> ✅ **STATUS: VALIDATED** on a real RTX A6000 - see
+> [`inference-benchmark-report.md`](../../06-validation-reports/inference-benchmark-report.md)
+> for the captured run. You learned the method for free in [Lesson 4](../README.md) -
 > serving SLOs, the prefill/decode split, the goodput cliff, capacity planning. Here you run
 > the **same drills** against a model served on a real GPU, so the numbers are real. Capture
 > them into [`inference-benchmark-report.md`](../../06-validation-reports/inference-benchmark-report.md).
 
-## What this adds over the sim lesson
+## Same drills, real hardware - and why that's the deeper lesson
 
-[Lesson 4](../README.md) teaches you to *read* an inference server - on CPU, where the
-**shape** of every curve is the same as on a GPU. What CPU can't give you is throughput
-*numbers* for a specific card: how many tokens/sec an L4 or A6000 actually serves, and where
-*that* card saturates. That's this part.
+This is **not a new lesson** - it's the *same* drills from [Lesson 4](../README.md), pointed at
+a real GPU. The concepts are identical: the SLOs, the prefill/decode split, batching contention,
+the saturation knee, the capacity math. You learned to *read* an inference server for free; here
+you read the same things on a real card - and that's where they become true instead of
+illustrative.
 
-| Claim | Where it's shown |
-|---|---|
-| How to read serving SLOs; prefill vs decode; the goodput cliff; capacity math | ✅ [Lesson 4](../README.md) - on CPU, free |
-| Real tokens/sec, real latency, and the saturation knee **for an actual GPU** | 🟥 Here - vLLM on one rented card |
+What a real GPU reveals that CPU can only approximate:
+
+| Concept (the same on both) | The free CPU tier showed you... | The real GPU reveals... |
+|---|---|---|
+| **Continuous batching** | the *contention* it exists to fix (an interactive request stalls behind long ones) | the fix **working** - TTFT stays flat under heavy load while the running batch absorbs it |
+| **The saturation knee** | a crude, early cliff (CPU has little parallelism, so TTFT spikes fast) | the real shape - `tok/s` plateaus and `e2e` climbs while TTFT holds; gate goodput on `e2e` to catch it |
+| **Throughput / latency** | shape only (the numbers are meaningless on CPU) | real tokens/sec and latency for *this* card - what you provision and budget against |
+| **Right-sizing** | (can't show it) | that a big GPU is **wasted** on a tiny model - the cost lever that actually matters |
+
+So the real-GPU run isn't a different syllabus - it's the same one, where continuous batching,
+the throughput ceiling, and model↔GPU fit stop being words and start being numbers. That's the
+"greater" part, and it's worth the few dollars.
 
 Single GPU by design, like the rest of Lesson 6 - so it does not cover multi-replica routing,
 multi-node scale, or NVLink/topology effects.
@@ -71,9 +82,22 @@ make phase5-serve-gpu
 
 This runs [`../scripts/serve-gpu.sh`](../scripts/serve-gpu.sh), which deploys vLLM as a pod
 (image `vllm/vllm-openai:latest`, `runtimeClassName: nvidia`, requesting `nvidia.com/gpu: 1`)
-serving `Qwen/Qwen2.5-0.5B-Instruct` by default - swap to a 7B on a 24 GB+ card with
-`MODEL=Qwen/Qwen2.5-7B-Instruct make phase5-serve-gpu`. It waits for the pod to pull the image
-and load the model (a few minutes the first time), then prints the next two commands.
+serving **`Qwen/Qwen2.5-7B-Instruct`** by default - a real-sized model that actually exercises
+the card. It waits for the pod to pull the image and load the model (a few minutes the first
+time), then prints the next two commands.
+
+> 🧪 **Serve any model you like - testing variants is part of the learning.** `MODEL=` takes any
+> Hugging Face model id that fits your VRAM. The easy set to compare is the ungated **Qwen2.5**
+> family - `Qwen/Qwen2.5-0.5B-Instruct`, `-1.5B-`, `-3B-`, `-7B-`, `-14B-Instruct` - so you can
+> watch tok/s, latency, and GPU memory change with model size on the *same* card:
+> ```bash
+> MODEL=Qwen/Qwen2.5-14B-Instruct make phase5-serve-gpu     # bigger: lower tok/s, more VRAM
+> ```
+> Other families (Llama, Mistral) work too if you have access to them on Hugging Face (set
+> `HF_TOKEN` for gated models). Rule of thumb: a ~7B in fp16 needs ~15 GB; a 14B ~28 GB.
+
+> 🔁 **Switching models?** A model is already deployed - remove it first so the new one loads
+> cleanly: `kubectl delete namespace inference` then re-run `make phase5-serve-gpu`.
 
 ✅ **Gate:** `kubectl -n inference get pods` shows the `vllm` pod `Running` and `1/1` ready.
 
@@ -88,21 +112,147 @@ kubectl -n inference port-forward svc/vllm 8000:8000
 
 Your endpoint is now **`http://localhost:8000`** (the model is served under the name `local`).
 
-## Step 3 - Run the same drills, now with real numbers
+## Step 3 - Run the drills (with real example output)
 
-In a **second terminal on the VM** (the port-forward keeps running in the first):
+In a **second terminal on the VM** (the port-forward keeps running in the first). Each drill is
+one command. The harness is the same one you used on CPU - only the hardware behind the endpoint
+changed.
+
+> 📊 **The outputs below are example runs** (one RTX A6000 (48 GB) serving Qwen2.5-7B-Instruct),
+> shown so you have a reference for the *shape* and what "right" looks like. **Your numbers will
+> be different** - they depend on the card, the model, the vLLM version, and even run-to-run
+> variation. Read the *trend* (what rises, what flattens, where it cliffs), not the exact values.
+
+> ⚠️ **`REQUESTS_PER_LEVEL` must be ≥ your highest concurrency.** Each level fires that many
+> requests; if it's smaller than the concurrency the pool never fills, so you're secretly testing
+> a *lower* concurrency and the rows look flat. Match it to your top concurrency - and skip tiny
+> levels, since thousands of requests at conc8 take minutes to drain.
+
+### a) Baseline sweep
 
 ```bash
-MODEL=local ENDPOINT=http://localhost:8000 make phase5-bench       # concurrency sweep
-MODEL=local ENDPOINT=http://localhost:8000 make phase5-overload    # find the knee
+MODEL=local ENDPOINT=http://localhost:8000 make phase5-bench
 ```
+```
+ conc  reqs  err  gen  ttft_p50  ttft_p95  tpot_p50  e2e_p95  e2e_p99   tok/s  goodput%
+    1    12    0   53     0.047     1.121    0.0219    2.261    2.640    42.3    100.0
+    2    12    0   51     0.067     0.068    0.0220    1.378    1.423    84.0    100.0
+    4    12    0   51     0.067     0.068    0.0221    1.316    1.335   153.1    100.0
+    8    12    0   51     0.171     0.177    0.0223    1.357    1.381   240.4    100.0
+```
+`tok/s` climbs cleanly (42 → 240) with goodput pinned at 100% - the card has plenty of headroom
+at this load. (The conc-1 `ttft_p95` blip is first-request warmup; ignore it.)
 
-Any Lesson 4 drill works the same way (`phase5-batching`, `phase5-prefill`, `phase5-decode`).
-The harness is identical to the CPU tier - it doesn't care whether a CPU or a GPU is behind the
-endpoint - so the only thing that changed is that the numbers now mean something for this card.
+### b) Find the knee - push past saturation (the headline)
 
-✅ **Gate:** the concurrency sweep shows `tok/s` climbing while `ttft_p95` / `e2e_p99` degrade,
-and `goodput%` holding until the knee - the same shape you saw on CPU, at real GPU speeds.
+```bash
+MODEL=local ENDPOINT=http://localhost:8000 \
+  CONCURRENCY=64,128,256,512 REQUESTS_PER_LEVEL=512 make phase5-bench
+```
+```
+ conc  reqs  err  gen  ttft_p50  ttft_p95  tpot_p50  e2e_p95  e2e_p99    tok/s  goodput%
+   64   512    0   51     0.087     0.163    0.0275    1.678    1.792   2127.6    100.0
+  128   512    0   52     0.126     0.325    0.0360    2.291    2.421   3138.1    100.0
+  256   512    0   52     0.299     0.517    0.0531    3.535    3.784   4039.9    100.0
+  512   512    0   52     1.043     3.564    0.0564    5.828    5.946   3896.1     50.0
+```
+**This is the whole lesson in one table.** `tok/s` climbs to ~4040 at conc256, then *stops* -
+conc512 runs 2x the load for **less** throughput (3896) because the batch is saturated. `ttft_p95`
+holds low (0.16 → 0.52s) while continuous batching keeps up, then **spikes to 3.56s** at conc512,
+so `goodput` cliffs to **50%**. **Capacity ≈ conc256** (~4000 tok/s at 100% goodput); past it you
+serve more requests, all of them worse. (`phase5-overload` is the same sweep with a wider default
+range - this cranked command is the GPU version of it.)
+
+### c) Batching - the benefit you could only *describe* on CPU
+
+```bash
+MODEL=local ENDPOINT=http://localhost:8000 make phase5-batching
+```
+```
+   phase  reqs  err  gen  ttft_p50  ttft_p95  tpot_p50  e2e_p95  e2e_p99   tok/s  goodput%
+ A-alone    12    0   17     0.035     0.053    0.0209    0.386    0.392    45.8    100.0
+B-loaded    12    0   17     0.036     0.069    0.0209    0.415    0.417    44.7    100.0
+=> short-request ttft_p95 went 0.053s -> 0.069s (1.3x) when the server filled with long requests.
+```
+On CPU this exact drill inflated a short request's TTFT by **~50x** (requests queued behind the
+long ones). On the GPU it's **1.3x** - continuous batching admits the short request *into* the
+running batch instead of making it wait. That ratio, CPU vs GPU, *is* the value of continuous
+batching - measured, not described.
+
+### d) Prefill - input length drives TTFT
+
+```bash
+MODEL=local ENDPOINT=http://localhost:8000 make phase5-prefill
+```
+```
+ in_tok  reqs  err  gen  ttft_p50  ttft_p95  tpot_p50  e2e_p95  e2e_p99   tok/s  goodput%
+     16    12    0   45     0.047     0.049    0.0218    1.213    1.215    44.6    100.0
+    128    12    0   29     0.047     0.055    0.0216    0.710    0.731    44.5    100.0
+    512    12    0   34     0.048     0.130    0.0217    1.024    1.056    44.2    100.0
+   1024    12    0   41     0.049     0.150    0.0219    1.185    1.207    44.1    100.0
+```
+`ttft_p95` rises with prompt length (0.049 → 0.150s) - the model must read the whole prompt before
+the first token. `tpot` stays flat (~0.022s): **input length is a TTFT cost**, not a per-token one.
+
+### e) Decode - output length drives total time
+
+```bash
+MODEL=local ENDPOINT=http://localhost:8000 make phase5-decode
+```
+```
+ out_tok  reqs  err  gen  ttft_p50  ttft_p95  tpot_p50  e2e_p95  e2e_p99   tok/s  goodput%
+      32    12    0   33     0.036     0.048    0.0216    0.739    0.743    45.3    100.0
+      64    12    0   55     0.047     0.047    0.0219    1.454    1.454    44.8    100.0
+     128    12    0   56     0.047     0.049    0.0220    2.557    2.731    44.7    100.0
+     256    12    0   57     0.047     0.047    0.0220    2.220    2.290    44.6    100.0
+```
+Watch `gen` (tokens actually generated) and `e2e` grow together while `tpot` (~0.022s) and `ttft`
+stay flat. **Output length is a duration cost**: `e2e ≈ ttft + tpot × gen`. (`gen` caps around 57
+here - this model answers in ~57 tokens regardless of the higher caps, which is why 128 and 256
+look similar.)
+
+### f) Optional - make goodput itself reflect the knee
+
+The `b)` sweep cliffs goodput only at *hard* saturation (when TTFT finally spikes). To catch the
+degradation *earlier* - the moment end-to-end latency crosses your promise - gate goodput on `e2e`:
+
+```bash
+MODEL=local ENDPOINT=http://localhost:8000 \
+  CONCURRENCY=64,128,256,512 REQUESTS_PER_LEVEL=512 E2E_SLO=1.0 make phase5-bench
+```
+The header will show `+ e2e-SLO=1.0s`, and `goodput%` drops as soon as `e2e_p95` crosses 1s (from
+the `b)` table, that's already by conc64) - giving you an earlier, latency-honest capacity signal.
+
+💡 Watch it happen: `watch -n1 nvidia-smi` in another terminal - GPU-Util climbs as you push.
+
+✅ **Gate:** point at the row where `tok/s` stops scaling and `goodput` drops, name it as this
+card's capacity for this model, and explain *why* (the batch saturated). That explanation, in real
+numbers, **is** the lesson.
+
+## Study it - things to try (and what each teaches)
+
+> ⚠️ **Don't expect CPU-scale load to do anything here.** A GPU is *vastly* more capable than
+> the laptop CPU tier - the concurrency that choked Ollama (conc 4-8) won't even warm an A6000.
+> Two levers actually move the needle: **much higher load** (see "Find the knee" above) and the
+> **model size** (a 7B is the default; a 14B saturates sooner, a 1.5B much later).
+
+Work through these - each isolates a different idea (set `REQUESTS_PER_LEVEL` ≥ top concurrency):
+
+Set `REQUESTS_PER_LEVEL` ≥ your top concurrency in every one (or high-concurrency rows go flat):
+
+| Try this | What you're studying |
+|---|---|
+| `watch -n1 nvidia-smi` in another terminal during any sweep | the actual GPU-Util and memory - *is the card even busy?* On a tiny model it sits near idle; on a 7B under load it climbs |
+| `CONCURRENCY=64,128,256,512 REQUESTS_PER_LEVEL=512 make phase5-bench` | find where `tok/s` **stops scaling** and `goodput` cliffs - the card's real limit for this model |
+| `CONCURRENCY=64,128,256,512 REQUESTS_PER_LEVEL=512 E2E_SLO=1.0 make phase5-bench` | the goodput cliff gated on end-to-end latency - catches the knee *earlier* than TTFT does |
+| `make phase5-prefill` then `make phase5-decode` | real prefill vs decode cost - `tpot` is now a true per-token time for this card |
+| `make phase5-batching` | continuous batching's benefit: even with long requests in flight, a short request's TTFT barely moves - the opposite of what you saw on CPU |
+| Serve a few sizes (`1.5B`, `7B`, `14B`) and run the same sweep on each | **right-sizing**: a small model wastes the card (huge tok/s, idle GPU, lower quality); a bigger one uses it (lower tok/s, more VRAM, better quality). Matching model→GPU is the cost lever |
+
+💡 **The headline you'll be able to defend:** *"On this card, throughput saturates at conc N
+(~X tok/s); past that, latency rises with no throughput gain. TTFT stays flat because continuous
+batching admits requests into the running batch - so I size capacity on tok/s + e2e, not TTFT
+alone, and I right-size the model to the GPU."* That sentence is worth the rental.
 
 ## Step 4 - Capture evidence, then tear down
 

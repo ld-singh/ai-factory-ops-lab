@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="640" viewBox="0 0 1280 640" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0a0f1a"/>
+      <stop offset="0.55" stop-color="#0b1512"/>
+      <stop offset="1" stop-color="#08110d"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22c55e"/>
+      <stop offset="1" stop-color="#2dd4bf"/>
+    </linearGradient>
+    <linearGradient id="title" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#c7f9e6"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.82" cy="0.22" r="0.5">
+      <stop offset="0" stop-color="#10b981" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#10b981" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- background -->
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <rect width="1280" height="640" fill="url(#glow)"/>
+
+  <!-- GPU-array motif (top-right grid of "dies") -->
+  <g opacity="0.5">
+    <g fill="none" stroke="#2dd4bf" stroke-opacity="0.18" stroke-width="1.5">
+      <rect x="892" y="70" width="74" height="50" rx="6"/>
+      <rect x="978" y="70" width="74" height="50" rx="6"/>
+      <rect x="1064" y="70" width="74" height="50" rx="6"/>
+      <rect x="1150" y="70" width="74" height="50" rx="6"/>
+      <rect x="892" y="132" width="74" height="50" rx="6"/>
+      <rect x="978" y="132" width="74" height="50" rx="6"/>
+      <rect x="1064" y="132" width="74" height="50" rx="6"/>
+      <rect x="1150" y="132" width="74" height="50" rx="6"/>
+    </g>
+    <g fill="#22c55e">
+      <circle cx="929" cy="95" r="3" opacity="0.9"/>
+      <circle cx="1015" cy="157" r="3" opacity="0.7"/>
+      <circle cx="1187" cy="95" r="3" opacity="0.8"/>
+      <circle cx="1101" cy="95" r="3" opacity="0.5"/>
+      <circle cx="1187" cy="157" r="3" opacity="0.9"/>
+    </g>
+  </g>
+
+  <!-- eyebrow -->
+  <g transform="translate(80,128)">
+    <rect x="0" y="-18" width="34" height="34" rx="8" fill="none" stroke="url(#accent)" stroke-width="2"/>
+    <rect x="9" y="-9" width="16" height="16" rx="3" fill="url(#accent)"/>
+    <text x="52" y="6" fill="#5eead4" font-size="20" font-weight="600" letter-spacing="3">HANDS-ON GPU / HPC INFRASTRUCTURE OPS</text>
+  </g>
+
+  <!-- title -->
+  <text x="78" y="248" fill="url(#title)" font-size="84" font-weight="800" letter-spacing="-1">AI Factory</text>
+  <text x="78" y="338" fill="url(#title)" font-size="84" font-weight="800" letter-spacing="-1">Operations Lab</text>
+
+  <!-- accent underline -->
+  <rect x="82" y="366" width="150" height="6" rx="3" fill="url(#accent)"/>
+
+  <!-- tagline -->
+  <text x="80" y="424" fill="#cbd5e1" font-size="27" font-weight="500">Stand up real GPU infra — K8s scheduling, GPU sharing, Slurm,</text>
+  <text x="80" y="462" fill="#cbd5e1" font-size="27" font-weight="500">observability &amp; vLLM inference. Break it. Diagnose it. Prove it.</text>
+
+  <!-- feature pills -->
+  <g font-size="18" font-weight="600" fill="#a7f3d0">
+    <g transform="translate(80,506)">
+      <rect width="168" height="40" rx="20" fill="#ffffff" fill-opacity="0.05" stroke="#2dd4bf" stroke-opacity="0.35"/>
+      <text x="84" y="26" text-anchor="middle">K8s GPU scheduling</text>
+    </g>
+    <g transform="translate(260,506)">
+      <rect width="150" height="40" rx="20" fill="#ffffff" fill-opacity="0.05" stroke="#2dd4bf" stroke-opacity="0.35"/>
+      <text x="75" y="26" text-anchor="middle">HAMi GPU sharing</text>
+    </g>
+    <g transform="translate(422,506)">
+      <rect width="132" height="40" rx="20" fill="#ffffff" fill-opacity="0.05" stroke="#2dd4bf" stroke-opacity="0.35"/>
+      <text x="66" y="26" text-anchor="middle">Slurm GRES</text>
+    </g>
+    <g transform="translate(566,506)">
+      <rect width="158" height="40" rx="20" fill="#ffffff" fill-opacity="0.05" stroke="#2dd4bf" stroke-opacity="0.35"/>
+      <text x="79" y="26" text-anchor="middle">DCGM observability</text>
+    </g>
+    <g transform="translate(736,506)">
+      <rect width="140" height="40" rx="20" fill="#ffffff" fill-opacity="0.05" stroke="#2dd4bf" stroke-opacity="0.35"/>
+      <text x="70" y="26" text-anchor="middle">vLLM inference</text>
+    </g>
+  </g>
+
+  <!-- bottom strip -->
+  <rect x="0" y="592" width="1280" height="48" fill="#06100c"/>
+  <rect x="0" y="592" width="1280" height="2" fill="url(#accent)" opacity="0.5"/>
+  <text x="80" y="622" fill="#34d399" font-size="19" font-weight="700">$0 to start on your laptop</text>
+  <text x="333" y="622" fill="#64748b" font-size="19">·  real-GPU capstone from ~$5–10</text>
+  <text x="1200" y="622" text-anchor="end" fill="#94a3b8" font-size="19" font-weight="600">simulation + real · scope always explicit</text>
+</svg>

@@ -140,7 +140,15 @@ is a lie; you're serving more people *worse*.
 second replica (Step 5) rather than overloading this one. That single decision - "find the
 highest load that still keeps the promise" - is the whole point of the sweep.
 
-(Raw results write to `06-validation-reports/evidence/`.)
+> 🧠 **Read this carefully - it's the concept, and it's subtle.** The *universal* law is:
+> **past a server's capacity, more load adds latency, not throughput, and goodput drops.** What
+> is **not** universal is *where* the latency lands. This CPU server has little parallelism, so
+> extra requests **queue** - and a queued request's *first* token is what's delayed, so **TTFT**
+> rises. That's head-of-line blocking. A real GPU server with **continuous batching** admits new
+> requests into the running batch instead of queueing them, so it keeps **TTFT flat** and the
+> cost shows up in per-token speed and end-to-end latency instead. **Same trade-off, different
+> symptom** - don't memorize "load raises TTFT" as a law; you'll watch a real card protect TTFT
+> in [Part C](./inference-realgpu/README.md). That contrast is the point.
 
 ### Step 2 - Watch in-flight load steal an interactive request's latency
 
@@ -183,16 +191,25 @@ mental model the whole step builds: **`e2e ≈ ttft + tpot × gen`** - prefill s
 term, decode multiplies the last. Knowing which half you're paying for is how you tune a
 server.
 
-### Step 4 - Find the knee (the goodput cliff)
+### Step 4 - Find the knee (where more load stops helping)
 
 ```bash
 make phase5-overload
 ```
 
-Climbs concurrency `1…32`. **What you're seeing:** `tok/s` keeps rising even as
-`goodput%` falls off a cliff and `err` climbs - because throughput counts tokens, goodput
-counts *requests that met the SLO*. The lesson: a server can look "faster" (more tok/s)
-while serving everyone worse. Goodput is the number you defend; tok/s alone is marketing.
+Climbs concurrency well past what the server can use. **What you're seeing:** the *knee* -
+the point where **`tok/s` stops climbing** (the server is saturated) while **latency keeps
+rising**. Past it you serve more requests but every one of them worse. `goodput%` (requests
+meeting the SLO) is the honest scorecard: `tok/s` alone is marketing - a server can report
+more tokens/sec while blowing everyone's latency.
+
+On this CPU server the knee is brutal and early: it has little real parallelism, so requests
+queue, `ttft_p95` spikes, and goodput collapses. **A real GPU behaves differently - and that's
+the point of [Part C](./inference-realgpu/README.md).** With **continuous batching**, the card
+keeps first-token latency low under load, so saturation shows up as a *throughput ceiling and
+rising end-to-end latency* rather than a TTFT cliff. **Same drill, fuller picture** - you read
+the same metrics, but on real hardware you watch continuous batching actually protect TTFT, and
+you gate goodput on end-to-end latency (`E2E_SLO=...`) to see the knee.
 
 ### Step 5 - Turn it into a capacity plan
 
@@ -258,8 +275,8 @@ were the decision framework for *placing* these three shapes.
   (concurrency / input / output axis) and `mixed` (the batching drill).
 - [`harness/drills.sh`](./harness/drills.sh) - the four $0 drills (`batching` / `prefill` /
   `decode` / `overload`) behind the `make phase5-*` targets.
-- [`harness/run-bench.sh`](./harness/run-bench.sh) - the concurrency sweep wrapper that
-  writes raw results to the evidence tree. Override `ENDPOINT` / `MODEL` / `CONCURRENCY`.
+- [`harness/run-bench.sh`](./harness/run-bench.sh) - the concurrency sweep wrapper. Override
+  `ENDPOINT` / `MODEL` / `CONCURRENCY` / `TTFT_SLO` / `E2E_SLO`.
 - [`harness/capacity-plan.py`](./harness/capacity-plan.py) - the Little's-Law + $/1M-tokens
   capacity exercise.
 - [`scripts/serve-cpu.sh`](./scripts/serve-cpu.sh) - the $0 Ollama-on-CPU server;

@@ -12,14 +12,14 @@ lifecycle). This is the **one lesson that needs real hardware**. It gathers ever
 piece into a single rental so you **rent once, prove what a simulation cannot, capture
 evidence, and tear down**.
 
-You run these on one cheap card, in order. **A and B are validated; C is runnable (run it
-and capture evidence on your rental); D is a planned optional add-on:**
+You run these on one cheap card, in order. **A, B, and C are validated; D is a planned optional
+add-on:**
 
 | Part | What it proves | Counterpart sim lesson | Status |
 |---|---|---|---|
 | **A - Runtime path + telemetry** | a CUDA pod actually executes on the GPU; real `DCGM_FI_*` metrics | Lessons 1 / 3 | ✅ validated |
 | **B - HAMi sharing** | two pods share one card with an **enforced** memory cap | Lesson 1C sim | ✅ validated |
-| **C - Inference** | real tokens/sec and latency under load | Lesson 4 CPU tier | 🟡 runnable |
+| **C - Inference** | real tokens/sec and latency under load | Lesson 4 CPU tier | ✅ validated |
 | **D - Slurm GRES** | `--gres=gpu` actually confines a job to its device | Lesson 2 fake GRES | 🚧 planned (optional) |
 
 > The steps below stand up the runtime path (Part A) on a fresh VM, then carry straight on to
@@ -32,7 +32,7 @@ and capture evidence on your rental); D is a planned optional add-on:**
 2. Pull *real* DCGM telemetry - the hardware counterpart of Lesson 3's synthetic stream. ✅
 3. Share one physical GPU between pods with HAMi and prove the memory cap is enforced. ✅
 4. Produce real inference benchmark numbers - serve a model with vLLM and run the Lesson 4
-   drills against it. 🟡 *runnable (Part C)*
+   drills against it. ✅ *validated (Part C)*
 5. Enforce real `--gres=gpu` in Slurm - the hardware counterpart of Lesson 2's fake GRES.
    🚧 *planned (Part D, optional)*
 6. State precisely what one real GPU proves, and what still needs scale/topology.
@@ -158,7 +158,7 @@ deliberately cannot prove.
 Pending `CardInsufficientMemory` from the oversubscribe exercise - into the lab notebook,
 **separate** from Part A (they back different claims).
 
-### Part C - Real inference benchmark · 🟡 runnable
+### Part C - Real inference benchmark · ✅ validated
 
 Serve a model with vLLM on the GPU (as a k3s pod - no Docker needed), then run the same drills
 you practised for free in Lesson 4 - now with real numbers. On the VM:
@@ -205,13 +205,13 @@ from "pending hardware run" to Complete:
 
 - [x] [`real-gpu-validation-report.md`](../06-validation-reports/real-gpu-validation-report.md) - runtime path + DCGM (Part A)
 - [x] [`hami-isolation-validation.md`](../06-validation-reports/hami-isolation-validation.md) - co-residency, virtualized `nvidia-smi`, allocation refusal, real-HW exhaustion, mechanism (Part B)
-- [ ] [`inference-benchmark-report.md`](../06-validation-reports/inference-benchmark-report.md) - the concurrency sweep (Part C — **runnable now**; serve vLLM and run the drills to capture it)
+- [x] [`inference-benchmark-report.md`](../06-validation-reports/inference-benchmark-report.md) - the concurrency sweep + saturation knee (Part C)
 - 🚧 [`slurm-gres-validation.md`](../06-validation-reports/slurm-gres-validation.md) - the real `--gres=gpu` enforcement section (Part D — **planned future update, optional**)
 
 🔬 **What this session covers.** Parts A, B, and C give you the real single-node serving
 path: a CUDA pod executing, real DCGM telemetry, enforced GPU sharing, and real inference
-benchmarks. (A and B are validated with captured evidence; C is runnable - the numbers are
-yours to capture on the rental.) Part D - enforced Slurm GRES - is a planned optional add-on.
+benchmarks - all three validated with captured output. Part D - enforced Slurm GRES - is a
+planned optional add-on.
 None of this covers NCCL/NVLink/MIG/GPUDirect-RDMA, multi-node scale, or sharing-performance
 under sustained load. Full ledger:
 [`fake-vs-real-limitations.md`](../06-validation-reports/fake-vs-real-limitations.md).
