@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # install-gpu-operator.sh - install the GPU layer that makes the cluster advertise
 # nvidia.com/gpu, then smoke-test it with a CUDA pod. Run AFTER host-setup.sh, with a
-# working kubeconfig (from your laptop after fetch-kubeconfig.sh, or on the VM).
-# Needs helm + kubectl on PATH and KUBECONFIG pointing at the cluster.
+# working kubeconfig (on the VM that's KUBECONFIG=/etc/rancher/k3s/k3s.yaml).
+# Needs kubectl + a reachable cluster; helm is auto-installed if missing.
 #
 # This is Lesson 6 Part A's install, wired for k3s. Two modes:
 #
@@ -26,9 +26,21 @@ MODE="${MODE:-operator}"
 log() { printf '\n=== %s ===\n' "$*"; }
 die() { echo "ERROR: $*" >&2; exit 1; }
 
-command -v helm >/dev/null    || die "helm not found on PATH"
-command -v kubectl >/dev/null || die "kubectl not found on PATH"
-kubectl get nodes >/dev/null  || die "kubectl can't reach the cluster - set KUBECONFIG (see fetch-kubeconfig.sh)"
+# helm: install it if missing (official installer; needs root/sudo to write /usr/local/bin).
+if ! command -v helm >/dev/null; then
+  log "helm not found - installing it (https://helm.sh/docs/intro/install/)"
+  SUDO=""; [[ $EUID -ne 0 ]] && command -v sudo >/dev/null && SUDO="sudo"
+  curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | $SUDO bash \
+    || die "helm install failed - install it manually then re-run."
+fi
+command -v kubectl >/dev/null || die "kubectl not found on PATH (run host-setup.sh first - it installs k3s)"
+
+# On the VM, default to the k3s kubeconfig so kubectl/helm don't fall back to localhost:8080.
+if [[ -z "${KUBECONFIG:-}" && -r /etc/rancher/k3s/k3s.yaml ]]; then
+  export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+  echo "Using KUBECONFIG=/etc/rancher/k3s/k3s.yaml"
+fi
+kubectl get nodes >/dev/null  || die "kubectl can't reach the cluster - on the VM set KUBECONFIG=/etc/rancher/k3s/k3s.yaml"
 
 case "$MODE" in
   operator)
@@ -89,8 +101,14 @@ spec:
         limits:
           nvidia.com/gpu: 1
 YAML
-kubectl wait --for=condition=Ready pod/cuda-smoke --timeout=180s 2>/dev/null || true
-sleep 3
+# cuda-smoke runs nvidia-smi and exits, so it reaches phase Succeeded - it never becomes
+# "Ready" (that's for long-running pods). Poll for it to finish, don't wait on Ready.
+echo "waiting for the cuda-smoke pod to finish..."
+for _ in $(seq 1 60); do
+  phase="$(kubectl get pod cuda-smoke -o jsonpath='{.status.phase}' 2>/dev/null || true)"
+  [[ "$phase" == "Succeeded" || "$phase" == "Failed" ]] && break
+  sleep 3
+done
 echo "--- cuda-smoke logs (expect an nvidia-smi table) ---"
 kubectl logs cuda-smoke || echo "(no logs yet - 'kubectl logs cuda-smoke' once it completes)"
 
@@ -98,10 +116,10 @@ cat <<EOF
 
 === GPU layer ready (mode: ${MODE}) ===
 nvidia.com/gpu is advertised and a CUDA pod ran on the real GPU. That is Lesson 6
-Phase A's core artifact. Capture it (self-contained - writes a tarball here):
-    ./capture-evidence.sh
+Part A's core artifact. Capture it (from the repo root, writes a tarball):
+    portfolio-lab/real-gpu-session/scripts/capture-evidence.sh
 Then scp the gpu-evidence-*.tgz off this VM before teardown - it's the deliverable -
 and record it in portfolio-lab/06-validation-reports/real-gpu-validation-report.md.
 Clean up the test pod: kubectl delete pod cuda-smoke
-Then continue with Lesson 6 Part B (HAMi) and Part C (Slurm GRES).
+Then continue with Lesson 6 Part B (HAMi) and Part C (inference benchmark).
 EOF

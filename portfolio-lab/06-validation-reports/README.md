@@ -24,7 +24,7 @@ Each time you finish a runnable lesson:
 | [slurm-gres-validation.md](./slurm-gres-validation.md) | [2 - Slurm](../02-slurm-gpu-platform/README.md) | 🟦 Sim (+ real GRES in Lesson 6) | *Phase 3* |
 | [real-gpu-validation-report.md](./real-gpu-validation-report.md) | [6 - Real GPU](../real-gpu-session/README.md) (Part A) | 🟥 Real | The Lesson 6 hardware run ✅ |
 | [hami-isolation-validation.md](./hami-isolation-validation.md) | [6 - Real GPU](../real-gpu-session/README.md) (Part B - HAMi) | 🟥 Real | The Lesson 6 Part B run ✅ |
-| [inference-benchmark-report.md](./inference-benchmark-report.md) | [6 - Real GPU](../real-gpu-session/README.md) (Part C - inference) | 🟥 Real | 🚧 Planned — coming in a future update |
+| [inference-benchmark-report.md](./inference-benchmark-report.md) | [6 - Real GPU](../real-gpu-session/README.md) (Part C - inference) | 🟥 Real | ✅ Validated — RTX A6000, 7B (concurrency sweep + saturation knee) |
 
 ## The limitations ledger - read this to grade your own claims
 

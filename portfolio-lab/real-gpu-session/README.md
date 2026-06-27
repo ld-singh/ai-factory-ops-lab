@@ -12,28 +12,27 @@ lifecycle). This is the **one lesson that needs real hardware**. It gathers ever
 piece into a single rental so you **rent once, prove what a simulation cannot, capture
 evidence, and tear down**.
 
-You run these on one cheap card, in order. **Parts A & B are live; C & D are planned
-additions coming in future updates:**
+You run these on one cheap card, in order. **A, B, and C are validated; D is a planned optional
+add-on:**
 
 | Part | What it proves | Counterpart sim lesson | Status |
 |---|---|---|---|
 | **A - Runtime path + telemetry** | a CUDA pod actually executes on the GPU; real `DCGM_FI_*` metrics | Lessons 1 / 3 | ✅ validated |
 | **B - HAMi sharing** | two pods share one card with an **enforced** memory cap | Lesson 1C sim | ✅ validated |
-| **C - Inference** | real tokens/sec and latency under load | Lesson 4 CPU tier | 🚧 planned |
+| **C - Inference** | real tokens/sec and latency under load | Lesson 4 CPU tier | ✅ validated |
 | **D - Slurm GRES** | `--gres=gpu` actually confines a job to its device | Lesson 2 fake GRES | 🚧 planned (optional) |
 
-> ✅ **Part A is already validated** - captured on a **Hyperstack RTX A6000** (2026-06-22):
-> [`real-gpu-validation-report.md`](../06-validation-reports/real-gpu-validation-report.md).
-> The steps below re-stand it on a fresh VM, then carry on to Part B. Parts C & D are
-> planned additions coming in future updates.
+> The steps below stand up the runtime path (Part A) on a fresh VM, then carry straight on to
+> Parts B and C. Part D is a planned optional add-on.
 
-🎯 **After this lesson you can** (items 1–3 are live today; 4–5 land with Parts C & D):
+🎯 **After this lesson you can:**
 
 1. Stand up the full GPU runtime path on one node and run a CUDA pod (driver → toolkit →
    device plugin → kubelet → scheduler → container). ✅
 2. Pull *real* DCGM telemetry - the hardware counterpart of Lesson 3's synthetic stream. ✅
 3. Share one physical GPU between pods with HAMi and prove the memory cap is enforced. ✅
-4. Produce real inference benchmark numbers (the real tier of Lesson 4). 🚧 *planned (Part C)*
+4. Produce real inference benchmark numbers - serve a model with vLLM and run the Lesson 4
+   drills against it. ✅ *validated (Part C)*
 5. Enforce real `--gres=gpu` in Slurm - the hardware counterpart of Lesson 2's fake GRES.
    🚧 *planned (Part D, optional)*
 6. State precisely what one real GPU proves, and what still needs scale/topology.
@@ -52,9 +51,9 @@ defensible without it; this is where "I simulated it" becomes "I ran it on hardw
 
 | | |
 |---|---|
-| **Hardware** | One entry-level NVIDIA card. **Validated on a Hyperstack RTX A6000 (48 GB)**; an L4 (24 GB) or L40/L40S works just as well. None of these support MIG - which is exactly HAMi's use case. Never an A100/H100. |
+| **Hardware** | One entry-level NVIDIA card - an **RTX A6000 (48 GB)**, **L4 (24 GB)**, or **L40/L40S** all work. None of these support MIG - which is exactly HAMi's use case. Never an A100/H100. |
 | **Time** | A focused session - roughly 1–2 hours including setup. |
-| **Money** | A few dollars. Tear down the moment you're done. |
+| **Money** | About $5-10 for the session. Tear down the moment you're done. |
 
 > ⚠️ **GPUs are scarce - stay flexible.** Entry GPUs sell out constantly: the exact card
 > you want is often out of stock in your region, comes back minutes later, or only appears
@@ -80,9 +79,10 @@ defensible without it; this is where "I simulated it" becomes "I ran it on hardw
    [Slurm](../02-slurm-gpu-platform/README.md).
 2. **Do the free simulation halves first** so you arrive knowing what hardware adds - the
    [HAMi scheduling sim](../01-k8s-gpu-platform/hami/hami-scheduling-sim/README.md) and
-   [Lesson 4's $0 CPU harness tier](../04-inference-serving/README.md#the-loop-run-this).
-3. **Get the scripts ready.** Everything is in [`scripts/`](./scripts/README.md) - read it
-   first. The private-repo path is `scp -r scripts <user>@<vm>:~/lesson6-scripts`.
+   [Lesson 4's $0 CPU harness tier](../04-inference-serving/README.md#the-learning-path-run-these-in-order).
+3. **Get the lab onto the VM.** On the VM:
+   `git clone https://github.com/ld-singh/ai-factory-ops-lab.git && cd ai-factory-ops-lab`,
+   then run from the repo root. Setup scripts are in [`scripts/`](./scripts/README.md).
 4. **Pick a "deep learning / GPU" image** with the NVIDIA driver pre-installed - it removes
    the slowest, most error-prone step.
 
@@ -95,20 +95,21 @@ defensible without it; this is where "I simulated it" becomes "I ran it on hardw
 The shared foundation every part builds on; do it a single time.
 
 ```bash
-# 1. ON YOUR LAPTOP - copy the scripts onto the VM (private repo)
-scp -r scripts <user>@<vm-ip>:~/lesson6-scripts
+# 1. ON THE GPU VM - clone the repo
+git clone https://github.com/ld-singh/ai-factory-ops-lab.git
+cd ai-factory-ops-lab
 ```
 
 ```bash
-# 2. ON THE GPU VM (SSH in as a sudo user, then: sudo su -)
-sudo PUBLIC_IP=<vm-ip> bash host-setup.sh            # NVIDIA toolkit + k3s + API cert
+# 2. ON THE GPU VM - set up the host (run from the repo root, as a sudo user)
+sudo PUBLIC_IP=<vm-ip> bash portfolio-lab/real-gpu-session/scripts/host-setup.sh   # NVIDIA toolkit + k3s + API cert
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 ```
 
-```bash
-# 3. BACK ON YOUR LAPTOP (open TCP 6443 to the VM first)
-./fetch-kubeconfig.sh <ssh-user>@<vm-ip> --key <ssh-key>   # writes ./kubeconfig-gpuvm
-export KUBECONFIG=$PWD/kubeconfig-gpuvm
-```
+Run the rest of Lesson 6 from this repo root on the VM. (Prefer to drive `kubectl` from your
+laptop? Open TCP 6443 and use `portfolio-lab/real-gpu-session/scripts/fetch-kubeconfig.sh
+<user>@<vm-ip> --key <key>`, then `export KUBECONFIG=$PWD/kubeconfig-gpuvm` - but running on the
+VM avoids a flaky laptop↔API link.)
 
 Hyperstack/Lambda/hyperscaler bare GPU VMs work; marketplace *containers* (Vast.ai/RunPod
 pods) do **not** - they can't install the toolkit + k3s. Details and the by-hand fallback:
@@ -121,9 +122,9 @@ pods) do **not** - they can't install the toolkit + k3s. Details and the by-hand
 Install the GPU layer and run a CUDA pod:
 
 ```bash
-./install-gpu-operator.sh        # GPU Operator (incl. DCGM) + a CUDA smoke pod
-# capture (run on the VM): writes a tarball you scp back
-./capture-evidence.sh
+# from the repo root on the VM:
+portfolio-lab/real-gpu-session/scripts/install-gpu-operator.sh   # GPU Operator (incl. DCGM) + a CUDA smoke pod
+portfolio-lab/real-gpu-session/scripts/capture-evidence.sh       # writes a tarball you scp back to your laptop
 ```
 
 📸 **Capture:** [`scripts/capture-evidence.sh`](./scripts/capture-evidence.sh) into
@@ -151,25 +152,32 @@ deliberately cannot prove.
 > `helm uninstall gpu-operator`): `host-setup.sh`, then set nvidia as the default runtime
 > and install HAMi (no `install-gpu-operator.sh`). The lab's
 > [How to run it](../01-k8s-gpu-platform/hami/hami-isolation-realgpu/README.md#how-to-run-it-scripts)
-> covers the fresh-VM steps, file transfer, and which directory to run from.
+> covers the fresh-VM steps (clone, setup, install HAMi) and which directory to run from.
 
 📸 **Capture:** the in-pod virtualized `nvidia-smi`, the allocation-refusal line, and the
 Pending `CardInsufficientMemory` from the oversubscribe exercise - into the lab notebook,
 **separate** from Part A (they back different claims).
 
-### Part C - Real inference benchmark · 🚧 planned
+### Part C - Real inference benchmark · ✅ validated
 
-> 🚧 **Coming in a future update.** This lab is on the roadmap, not yet built out. The plan
-> below is the intended shape.
+Serve a model with vLLM on the GPU (as a k3s pod - no Docker needed), then run the same drills
+you practised for free in Lesson 4 - now with real numbers. On the VM:
 
-Serve a small model with vLLM and point the (already-validated) harness at it:
-[Lesson 4 → real benchmark tier](../04-inference-serving/README.md#the-loop-run-this).
+```bash
+make phase5-serve-gpu                                          # deploy vLLM as a k3s pod
+kubectl -n inference port-forward svc/vllm 8000:8000           # one terminal: expose :8000
+MODEL=local ENDPOINT=http://localhost:8000 make phase5-bench   # another terminal: the drills
+```
+
+Full lab (URL details, laptop vs VM, model choice, evidence):
+[**Part C - Real inference benchmark**](../04-inference-serving/inference-realgpu/README.md).
 
 📸 **Capture:** the concurrency-sweep table (tokens/sec climbing while ttft_p95 / e2e_p99
 degrade) into
-[`inference-benchmark-report.md`](../06-validation-reports/inference-benchmark-report.md).
-Optional high-value tie-in to Part B: two replicas sharing one card via HAMi slices vs one
-dedicated replica - measuring what sharing costs in p99.
+[`inference-benchmark-report.md`](../06-validation-reports/inference-benchmark-report.md) -
+that captured output is what flips this from runnable to **validated**. Optional high-value
+tie-in to Part B: two replicas sharing one card via HAMi slices vs one dedicated replica -
+measuring what sharing costs in p99.
 
 ### Part D - Slurm real GRES (enforcement on hardware) · 🚧 planned (optional)
 
@@ -195,16 +203,17 @@ Confirm your evidence tarballs are on your laptop, then **destroy the VM and its
 After teardown these reports should hold **real captured output**, flipping their status
 from "pending hardware run" to Complete:
 
-- [x] [`real-gpu-validation-report.md`](../06-validation-reports/real-gpu-validation-report.md) - runtime path + DCGM (Part A) — **done, RTX A6000, 2026-06-22**
-- [x] [`hami-isolation-validation.md`](../06-validation-reports/hami-isolation-validation.md) - co-residency, virtualized `nvidia-smi`, allocation refusal, real-HW exhaustion, mechanism (Part B) — **done, RTX A6000, 2026-06-23**
-- 🚧 [`inference-benchmark-report.md`](../06-validation-reports/inference-benchmark-report.md) - the concurrency sweep (Part C — **planned, coming in a future update**)
+- [x] [`real-gpu-validation-report.md`](../06-validation-reports/real-gpu-validation-report.md) - runtime path + DCGM (Part A)
+- [x] [`hami-isolation-validation.md`](../06-validation-reports/hami-isolation-validation.md) - co-residency, virtualized `nvidia-smi`, allocation refusal, real-HW exhaustion, mechanism (Part B)
+- [x] [`inference-benchmark-report.md`](../06-validation-reports/inference-benchmark-report.md) - the concurrency sweep + saturation knee (Part C)
 - 🚧 [`slurm-gres-validation.md`](../06-validation-reports/slurm-gres-validation.md) - the real `--gres=gpu` enforcement section (Part D — **planned future update, optional**)
 
-🔬 **What this session proves - and does not.** Today (Parts A & B) it proves the real,
-single-node runtime path: execution, real telemetry, and enforced GPU sharing. Real
-benchmarks (Part C) and enforced Slurm GRES (Part D) are planned additions, not yet
-delivered. Even complete, it does **not** prove NCCL/NVLink/MIG/GPUDirect-RDMA, multi-node
-scale, or sharing-performance under sustained load. Full ledger:
+🔬 **What this session covers.** Parts A, B, and C give you the real single-node serving
+path: a CUDA pod executing, real DCGM telemetry, enforced GPU sharing, and real inference
+benchmarks - all three validated with captured output. Part D - enforced Slurm GRES - is a
+planned optional add-on.
+None of this covers NCCL/NVLink/MIG/GPUDirect-RDMA, multi-node scale, or sharing-performance
+under sustained load. Full ledger:
 [`fake-vs-real-limitations.md`](../06-validation-reports/fake-vs-real-limitations.md).
 
 ➡️ **Next:** [★ Your lab notebook](../06-validation-reports/) - confirm every lesson you

@@ -113,12 +113,30 @@ phase4-down: ## Remove the observability stack (keeps the kind cluster)
 # $0 harness tier runs against a CPU-served model; numbers are NOT a benchmark.
 # Real benchmark numbers require the Lesson 6 GPU machine.
 # ---------------------------------------------------------------------------
-.PHONY: phase5-serve-cpu phase5-bench phase5-down
-phase5-serve-cpu: ## [$0] Serve a tiny model on CPU to validate the load harness
+.PHONY: phase5-serve-cpu phase5-serve-gpu phase5-bench phase5-batching phase5-prefill phase5-decode phase5-overload phase5-capacity phase5-down
+phase5-serve-cpu: ## [$0] Serve a tiny model on CPU to study serving behaviour
 	$(LAB4)/scripts/serve-cpu.sh
 
-phase5-bench: ## Run the load harness against $ENDPOINT (default: local CPU server)
+phase5-serve-gpu: ## [Lesson 6 GPU VM] Deploy vLLM on the k3s GPU cluster (OpenAI API on :8000)
+	$(LAB4)/scripts/serve-gpu.sh
+
+phase5-bench: ## Run the concurrency sweep against $ENDPOINT (default: local CPU server)
 	$(LAB4)/harness/run-bench.sh
+
+phase5-batching: ## [$0 drill] Make continuous batching visible (short requests behind long ones)
+	$(LAB4)/harness/drills.sh batching
+
+phase5-prefill: ## [$0 drill] Input-length sweep -> TTFT (prefill cost)
+	$(LAB4)/harness/drills.sh prefill
+
+phase5-decode: ## [$0 drill] Output-length sweep -> e2e/TPOT (decode cost)
+	$(LAB4)/harness/drills.sh decode
+
+phase5-overload: ## [$0 drill] Push past the knee -> goodput collapses, errors climb
+	$(LAB4)/harness/drills.sh overload
+
+phase5-capacity: ## [$0] Capacity-planning exercise (Little's Law + $/1M tokens); pass ARGS="--..."
+	python3 $(LAB4)/harness/capacity-plan.py $(ARGS)
 
 phase5-down: ## Stop the local CPU model server
 	$(LAB4)/scripts/down.sh
@@ -138,9 +156,11 @@ phase6-drill: ## Run the node provision -> health-gate -> patch -> retire lifecy
 export NO_MKDOCS_2_WARNING := true
 
 .PHONY: docs-serve docs-build
-docs-serve: ## Sync lesson markdown and serve the docs site locally at http://localhost:8000
+# Port 8001 (not mkdocs' default 8000) so the docs preview can run alongside the
+# Lesson 4 inference server, which serves on the conventional OpenAI/vLLM port 8000.
+docs-serve: ## Sync lesson markdown and serve the docs site locally at http://localhost:8001
 	./scripts/sync-docs.sh
-	mkdocs serve
+	mkdocs serve --dev-addr 127.0.0.1:8001
 
 docs-build: ## Sync lesson markdown and build the static site into site/
 	./scripts/sync-docs.sh

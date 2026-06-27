@@ -1,11 +1,7 @@
 #!/usr/bin/env bash
-# serve-cpu.sh - start a tiny OpenAI-compatible model server on CPU, purely to
-# validate that the load harness works end to end. $0, no GPU.
-#
-# SCOPE NOTE: numbers from this server are NOT a benchmark - CPU inference of
-# a tiny model tells you nothing about GPU serving. This tier exists so you can
-# build and debug the harness for free, then point it at a real GPU server
-# (Lesson 6) where the numbers actually mean something.
+# serve-cpu.sh - start a tiny OpenAI-compatible model server on CPU so you can run
+# the Lesson 4 serving drills on your laptop, free, no GPU. Point the same harness
+# at a real GPU server (Lesson 6) when you want throughput numbers for a card.
 #
 # Uses Ollama in Docker (exposes an OpenAI-compatible /v1 endpoint). If you prefer
 # llama.cpp's server or vLLM-CPU, any OpenAI-compatible /v1/chat/completions works.
@@ -43,6 +39,4 @@ Run the harness against it:
 
 Stop it when done:
   make phase5-down
-
-Remember: these are HARNESS-VALIDATION numbers, not a GPU benchmark.
 EOF

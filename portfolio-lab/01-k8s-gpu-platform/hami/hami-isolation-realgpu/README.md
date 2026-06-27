@@ -79,51 +79,34 @@ GPU and a memory slice and therefore both land on the one card.
 
 > 🆕 **Start a fresh GPU VM for this lab.** Because HAMi can't coexist with the GPU
 > Operator, Part B does **not** share Part A's cluster - rent a **new** GPU VM (any non-MIG
-> card) and run the sequence below on it. Part A's evidence is already captured on its own
-> run, so nothing is lost.
+> card) and run the sequence below on it. Each part captures its own evidence, so running
+> Part B on a separate VM loses nothing.
 
-You drive most of the lab **from your laptop** (where you have this repo, `helm`, and a
-kubeconfig); only two scripts run **on the VM as root**.
+Run the whole lab **on the VM** (SSH in). That keeps helm/kubectl talking to k3s over
+localhost - no flaky remote link - and `install-hami.sh` auto-installs `helm` and picks up the
+k3s kubeconfig itself.
 
-**Step A - get the two VM-side scripts onto the new VM.** You only need `host-setup.sh` and
-`set-default-runtime.sh` there. Either:
+**Step A - clone the lab onto the new VM:**
 
 ```bash
-# public repo: clone on the VM
-git clone <repo-url> && cd <repo>/portfolio-lab
-
-# private repo (no git on the VM): scp the two scripts from your laptop
-scp -i <key> real-gpu-session/scripts/host-setup.sh \
-             01-k8s-gpu-platform/hami/hami-isolation-realgpu/scripts/set-default-runtime.sh \
-             <user>@<vm-ip>:~
+git clone https://github.com/ld-singh/ai-factory-ops-lab.git
+cd ai-factory-ops-lab
 ```
 
-**Step B - on the VM (root):** bring up the cluster and set the default runtime.
+**Step B - bring up the cluster (run from the repo root, as root):**
 
 ```bash
-sudo PUBLIC_IP=<vm-ip> bash host-setup.sh        # toolkit + k3s + nvidia RuntimeClass + gpu=on
-sudo bash set-default-runtime.sh                  # make nvidia the DEFAULT containerd runtime
+sudo PUBLIC_IP=<vm-ip> bash portfolio-lab/real-gpu-session/scripts/host-setup.sh   # toolkit + k3s + nvidia RuntimeClass + gpu=on
+sudo bash portfolio-lab/01-k8s-gpu-platform/hami/hami-isolation-realgpu/scripts/set-default-runtime.sh   # nvidia = DEFAULT runtime
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
 #  ↳ do NOT run install-gpu-operator.sh - HAMi brings its own device plugin
 ```
 
-**Step C - on your laptop.** Fetch the kubeconfig:
-
-```bash
-real-gpu-session/scripts/fetch-kubeconfig.sh <user>@<vm-ip> --key <ssh-key>   # writes ./kubeconfig-gpuvm
-export KUBECONFIG=$PWD/kubeconfig-gpuvm
-kubectl get nodes -o wide          # reachable (needs TCP 6443 open to your laptop) + Ready
-```
-
-Move into **this lab directory** so the scripts' relative paths (`scripts/`, `manifests/`)
-resolve:
+**Step C - install HAMi.** Move into this lab directory so the script's relative paths
+(`scripts/`, `manifests/`) resolve, then run it:
 
 ```bash
 cd portfolio-lab/01-k8s-gpu-platform/hami/hami-isolation-realgpu
-```
-
-Install HAMi and wait for the node to advertise shareable memory:
-
-```bash
 ./scripts/install-hami.sh
 ```
 
@@ -132,25 +115,12 @@ is done. (HAMi advertises only `nvidia.com/gpu` in allocatable; the shareable me
 in that annotation, not in `nvidia.com/gpumem`.) Now work [the exercises](#the-exercises)
 **one at a time**.
 
-> ⚠️ **Install interrupted? (flaky laptop↔API link).** Driving a remote k3s API over an
-> unstable connection can drop helm mid-install (`http2: client connection lost`) and leave
-> a half-written release. Clear it and re-run - both are safe to repeat:
+> ⚠️ **Install interrupted?** If helm leaves a half-written release, clear it and re-run -
+> both are safe to repeat:
 > ```bash
 > helm -n kube-system uninstall hami 2>/dev/null || true
 > ./scripts/install-hami.sh        # auto-clears a stuck release, then reinstalls
 > ```
-> **If it keeps dropping, run the whole lab on the VM** so helm/kubectl talk to k3s over
-> localhost (no remote link). Copy the lab over, then run it there - `install-hami.sh`
-> auto-installs `helm` and picks up the k3s kubeconfig itself:
-> ```bash
-> # from your laptop:
-> scp -i <ssh-key> -r portfolio-lab/01-k8s-gpu-platform/hami/hami-isolation-realgpu \
->   <user>@<vm-ip>:~/hami-lab
-> # on the VM:
-> cd ~/hami-lab && ./scripts/install-hami.sh
-> ```
-> Run the [exercises](#the-exercises) on the VM too (the `kubectl exec` probes would hit the
-> same flaky link from your laptop).
 
 > Read each script before running it - the host-level steps are version-sensitive.
 > [`scripts/setup-notes.md`](scripts/setup-notes.md) is the same setup by hand, with the

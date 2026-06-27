@@ -99,14 +99,18 @@ kubectl label node "$node" gpu=on --overwrite
 cat <<EOF
 
 === host setup done ===
-Cluster is up on this VM. Public IP for remote access: ${PUBLIC_IP}
+Cluster is up on this VM.
 
-Next, from your LAPTOP:
-  1. Make sure TCP 6443 is reachable on this VM (open it in your provider's networking /
-     firewall settings if it isn't).
-  2. Fetch the kubeconfig and rewrite it to the public IP:
-       ./fetch-kubeconfig.sh <ssh-user>@${PUBLIC_IP}
-  3. Install the GPU layer (Lesson 6 Part A):
-       KUBECONFIG=./kubeconfig-gpuvm ./install-gpu-operator.sh
-Then work through Lesson 6's phases. Tear the VM down when evidence is captured.
+Next, RIGHT HERE ON THIS VM (recommended - everything runs over localhost):
+  1. Point kubectl/helm at the cluster:
+       export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+  2. Install the GPU layer (Lesson 6 Part A), from the repo root:
+       portfolio-lab/real-gpu-session/scripts/install-gpu-operator.sh
+Then work through Lesson 6's phases on the VM. Tear the VM down when evidence is captured.
+
+(Optional - prefer to drive kubectl from your LAPTOP instead? Open TCP 6443 to this VM
+[public IP ${PUBLIC_IP}], then on your laptop:
+   portfolio-lab/real-gpu-session/scripts/fetch-kubeconfig.sh <ssh-user>@${PUBLIC_IP}
+   KUBECONFIG=./kubeconfig-gpuvm portfolio-lab/real-gpu-session/scripts/install-gpu-operator.sh
+Running on the VM avoids a flaky laptop<->API link.)
 EOF

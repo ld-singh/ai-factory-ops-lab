@@ -10,10 +10,9 @@ This is the **real-hardware foundation** of the course. In Lesson 1 you delibera
 not prove anything below the kubelet. Here you prove the whole thing - the complete GPU
 path to a running pod - on actual silicon, and capture the evidence.
 
-> ✅ **Validated.** Captured on a **Hyperstack RTX A6000** (driver 535.183.06, k3s v1.35,
-> GPU Operator) on 2026-06-22 - see
+> ✅ **Validated on real hardware** - the captured run is in
 > [`real-gpu-validation-report.md`](../../06-validation-reports/real-gpu-validation-report.md).
-> The steps below reproduce it on a fresh VM.
+> The steps below reproduce it on a fresh GPU VM.
 
 🎯 **After this part you can:**
 
@@ -32,7 +31,7 @@ on** (Hyperstack, Lambda, hyperscaler) or a local GPU box. An L4 (24 GB) or RTX 
 don't work - they can't install the toolkit + k3s.
 
 📋 **Prerequisites:** [Lesson 1](../README.md) done (you know what the simulation did and
-didn't prove), and a budget of a few dollars for the VM.
+didn't prove), and a budget of $5-10 for the VM.
 
 > **The iron rule: tear the VM down the moment evidence is captured.** The evidence
 > directory is the deliverable; the VM has no residual value. Delete the boot/storage
@@ -66,14 +65,21 @@ If you haven't set the host up yet, the
 [`real-gpu-session/scripts/`](../../real-gpu-session/scripts/README.md) directory automates
 it (read [`scripts/README.md`](../../real-gpu-session/scripts/README.md) first):
 
+Run it all **on the GPU VM** (SSH in). Clone the repo, then run from the repo root:
+
 ```bash
-# same commands as the Lesson 6 setup - SKIP if you already ran them
-scp -i <key> -r portfolio-lab/real-gpu-session/scripts <user>@<vm-ip>:~/lesson6-scripts
-sudo PUBLIC_IP=<vm-ip> bash host-setup.sh      # on the VM: NVIDIA toolkit + k3s + API cert
-./fetch-kubeconfig.sh <ssh-user>@<vm-ip> --key <ssh-key>   # on your laptop (open TCP 6443 first)
-export KUBECONFIG=$PWD/kubeconfig-gpuvm
-./install-gpu-operator.sh                       # GPU Operator + DCGM + a CUDA smoke pod
+# same as the Lesson 6 setup - SKIP if you already ran them
+git clone https://github.com/ld-singh/ai-factory-ops-lab.git
+cd ai-factory-ops-lab
+sudo PUBLIC_IP=<vm-ip> bash portfolio-lab/real-gpu-session/scripts/host-setup.sh   # NVIDIA toolkit + k3s + API cert
+export KUBECONFIG=/etc/rancher/k3s/k3s.yaml
+portfolio-lab/real-gpu-session/scripts/install-gpu-operator.sh                     # GPU Operator + DCGM + a CUDA smoke pod
 ```
+
+> Prefer to drive `kubectl` from your laptop instead? Open TCP 6443 to the VM and run
+> `portfolio-lab/real-gpu-session/scripts/fetch-kubeconfig.sh <user>@<vm-ip> --key <key>`,
+> then `export KUBECONFIG=$PWD/kubeconfig-gpuvm`. Running on the VM (above) avoids a flaky
+> laptop↔API link.
 
 ### Capture evidence
 
@@ -81,8 +87,9 @@ Whether the operator went up just now or during setup, this is all Part A still 
 Run on the VM - it writes a tarball you scp back:
 
 ```bash
-./capture-evidence.sh
-# from your laptop:
+# on the VM, from the repo root:
+portfolio-lab/real-gpu-session/scripts/capture-evidence.sh
+# then from your laptop, pull the tarball back:
 scp -i <key> <user>@<vm-ip>:~/gpu-evidence-*.tgz \
   ./portfolio-lab/06-validation-reports/evidence/
 ```

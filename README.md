@@ -1,7 +1,23 @@
-# AI Factory Operations Lab - A Hands-On Course
+<div align="center">
 
-📖 **Read it as a website: https://ld-singh.github.io/ai-factory-ops-lab/**
-(built with MkDocs Material; the lesson markdown below is the source).
+<img src="docs/assets/social-preview.svg" alt="AI Factory Operations Lab" width="820">
+
+# AI Factory Operations Lab
+
+**Hands-on GPU/HPC infrastructure operations — learn it free on your laptop, prove it on one cheap GPU.**
+
+[![Read the course](https://img.shields.io/badge/course-read%20online-2ea043?style=flat-square&logo=readthedocs&logoColor=white)](https://ld-singh.github.io/ai-factory-ops-lab/)
+[![Start free](https://img.shields.io/badge/start-%240%20%C2%B7%20no%20GPU-22c55e?style=flat-square)](#what-this-course-costs)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-k3s%20%C2%B7%20kind-326ce5?style=flat-square&logo=kubernetes&logoColor=white)](#)
+[![NVIDIA GPU](https://img.shields.io/badge/NVIDIA-GPU%20Operator%20%C2%B7%20DCGM-76b900?style=flat-square&logo=nvidia&logoColor=white)](#)
+[![vLLM](https://img.shields.io/badge/inference-vLLM-ff6f61?style=flat-square)](#)
+[![Slurm](https://img.shields.io/badge/HPC-Slurm-1f6feb?style=flat-square)](#)
+
+[**📖 Read the course online →**](https://ld-singh.github.io/ai-factory-ops-lab/)
+
+</div>
+
+---
 
 A guided, learn-by-doing course in **AI/HPC infrastructure operations**: NVIDIA GPU
 infrastructure concepts, Kubernetes GPU scheduling, Slurm GPU workload management,
@@ -12,18 +28,23 @@ break it on purpose, diagnose it the way you would on a real cluster, and captur
 the evidence. Most of the course needs **no GPU at all**; one lesson uses a single
 rented GPU VM and is clearly marked.
 
-> **Read this first - what the course claims, and what it doesn't**
+> **Read this first - how the course works**
 >
-> This course teaches production cloud/Kubernetes/DevOps operational discipline
-> applied to the NVIDIA GPU stack. It does **not** pretend a laptop is a GPU
-> datacenter.
+> The best part: **you learn most of this course on your laptop, for free.** The
+> operational discipline of running the NVIDIA GPU stack - GPU scheduling, queueing,
+> sharing decisions, observability, Slurm, cluster lifecycle - is all taught on
+> simulations that reproduce the real control-plane behaviour, no GPU and no cloud bill
+> required. That's the majority of the skills, and you can run every bit of it today.
 >
-> Every lesson declares one of two **modes** (simulation vs real GPU) and states
-> exactly what it proves and what it does not. The boundary between "I simulated
-> the control plane" and "I validated real GPU hardware" is kept explicit in every
-> lesson and documented in
-> [`portfolio-lab/06-validation-reports/fake-vs-real-limitations.md`](./portfolio-lab/06-validation-reports/fake-vs-real-limitations.md).
-> Knowing exactly where that line sits is itself one of the skills this course teaches.
+> When you want to feel real hardware, the **real-GPU lessons** put those same skills on
+> an actual NVIDIA card - the driver-to-pod path, enforced GPU sharing, real telemetry,
+> real benchmarks - for a **budget of $5-10**: you rent a GPU VM for an hour or two and
+> tear it down when you're done.
+>
+> Every lesson tells you which **mode** it's in (simulation or real GPU) and exactly what
+> it demonstrates. Knowing precisely where "I simulated the control plane" ends and "I ran
+> it on real hardware" begins is itself one of the skills this course teaches - mapped in
+> [`fake-vs-real-limitations.md`](./portfolio-lab/06-validation-reports/fake-vs-real-limitations.md).
 
 ---
 
@@ -102,9 +123,9 @@ Designed to be as close to free as is practical. The cost ladder:
 | Tier | Lessons | What you pay | What you get |
 |---|---|---|---|
 | **$0 - simulation** | 0, 1, 1B, 1C, 2, 3, 4, 5 | Nothing - a laptop runs it | All scheduling, queueing, sharing-*decision*, triage, observability-design, and lifecycle skills. This is the whole numbered course. |
-| **~$5 - one GPU session** | 6 (the capstone) | A few hours on one rented entry-level NVIDIA GPU VM | The real runtime path, enforced GPU sharing, real DCGM telemetry, real Slurm GRES, and real inference benchmarks |
+| **$5-10 - one GPU session** | 6 (the capstone) | A few hours on one rented entry-level NVIDIA GPU VM | The real runtime path, enforced GPU sharing, real DCGM telemetry, real Slurm GRES, and real inference benchmarks |
 
-Three habits keep the paid tier at a few dollars:
+Three habits keep the paid tier at $5-10:
 
 1. **It's already one rental session.** Lesson 6 is the only real-GPU lesson by design:
    it runs the GPU runtime path, HAMi sharing, Slurm GRES, and the inference benchmark
@@ -269,9 +290,9 @@ contains real captured output.
 | 1C | GPU sharing & fractional GPUs with HAMi | Sim validates HAMi's scheduling *decisions* (fractional placement, Pending rejection, `FilteringSucceed`). GPU *sharing* + memory-cap *isolation* are real-GPU only → done in Lesson 6 |
 | 2 | Slurm GPU workload management | Complete (runnable; validated with captured output) |
 | 3 | Observability | Complete (runnable; metrics/alerts/dashboards validated) |
-| 4 | Inference serving | Harness runnable + validated; real benchmark in Lesson 6 |
+| 4 | Inference serving | Harness runnable + validated; real GPU benchmark validated in Lesson 6 Part C (RTX A6000) |
 | 5 | BCM-style cluster lifecycle (conceptual + drill) | Drill runnable + validated; BCM specifics conceptual |
-| 6 | Real GPU (capstone: runtime path, real DCGM, HAMi isolation, Slurm GRES, inference) | **Parts A & B validated on an RTX A6000.** Part A - runtime path + real `DCGM_FI_*` telemetry ([real-gpu-validation-report.md](./portfolio-lab/06-validation-reports/real-gpu-validation-report.md), 2026-06-22). Part B - HAMi GPU sharing: two pods on one card, slice enforced by HAMi-core (CUDA `malloc` refused at 8 GB while 40 GB free), `CardInsufficientMemory` oversubscribe ([hami-isolation-validation.md](./portfolio-lab/06-validation-reports/hami-isolation-validation.md), 2026-06-23). **Parts C (inference benchmark) and D (Slurm real GRES, optional) are planned additions coming in future updates.** |
+| 6 | Real GPU (capstone: runtime path, real DCGM, HAMi isolation, Slurm GRES, inference) | **Parts A, B & C validated on real hardware.** Part A - runtime path + real `DCGM_FI_*` telemetry ([real-gpu-validation-report.md](./portfolio-lab/06-validation-reports/real-gpu-validation-report.md)). Part B - HAMi GPU sharing: two pods on one card with the slice enforced by HAMi-core ([hami-isolation-validation.md](./portfolio-lab/06-validation-reports/hami-isolation-validation.md)). Part C - inference benchmark: throughput scaling + the saturation knee on an RTX A6000 ([inference-benchmark-report.md](./portfolio-lab/06-validation-reports/inference-benchmark-report.md)). **Part D (Slurm real GRES, optional) is planned.** |
 
 ## Documentation site
 
@@ -286,7 +307,7 @@ Preview locally:
 
 ```bash
 pip install -r requirements-docs.txt   # use a venv if your Python is externally managed
-make docs-serve                        # http://localhost:8000
+make docs-serve                        # http://localhost:8001
 ```
 
 One-time setup to publish: in the GitHub repo, **Settings -> Pages -> Build and
