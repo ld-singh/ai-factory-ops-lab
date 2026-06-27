@@ -6,6 +6,7 @@
 
 **Hands-on GPU/HPC infrastructure operations — learn it free on your laptop, prove it on one cheap GPU.**
 
+[![GitHub stars](https://img.shields.io/github/stars/ld-singh/ai-factory-ops-lab?style=flat-square&logo=github&color=f9c513)](https://github.com/ld-singh/ai-factory-ops-lab/stargazers)
 [![Read the course](https://img.shields.io/badge/course-read%20online-2ea043?style=flat-square&logo=readthedocs&logoColor=white)](https://ld-singh.github.io/ai-factory-ops-lab/)
 [![Start free](https://img.shields.io/badge/start-%240%20%C2%B7%20no%20GPU-22c55e?style=flat-square)](#what-this-course-costs)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-k3s%20%C2%B7%20kind-326ce5?style=flat-square&logo=kubernetes&logoColor=white)](#)
@@ -14,6 +15,8 @@
 [![Slurm](https://img.shields.io/badge/HPC-Slurm-1f6feb?style=flat-square)](#)
 
 [**📖 Read the course online →**](https://ld-singh.github.io/ai-factory-ops-lab/)
+
+### ⭐ Star this repo if it helps you — it makes the work visible and helps other engineers find it.
 
 </div>
 
@@ -319,3 +322,16 @@ All third-party tools (kind, KWOK, run.ai fake-gpu-operator, NVIDIA GPU Operator
 Scheduler, HAMi, Slurm, Triton, vLLM, Prometheus, Grafana) belong to their respective
 projects; this repo
 only contains configuration, automation and documentation written for this course.
+
+---
+
+## ⭐ Found this useful?
+
+If this course helped you get hands-on with GPU/HPC infrastructure, **[give it a star](https://github.com/ld-singh/ai-factory-ops-lab/stargazers)** — it takes a second, makes the work visible, and helps other engineers find it. Issues, ideas, and PRs are welcome too.
+
+## 👤 Author
+
+**Lovedeep Singh** — Cloud Infrastructure Architect · AWS, Azure, Kubernetes & DevSecOps · building secure, governed cloud platforms.
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-connect-0a66c2?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/lovedeep-singh-cloud-infra/)
+[![GitHub](https://img.shields.io/badge/GitHub-ld--singh-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/ld-singh)
