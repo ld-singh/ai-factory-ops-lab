@@ -1,4 +1,4 @@
-<div align="center">
+<div align="center" markdown="1">
 
 <img src="docs/assets/social-preview.svg" alt="AI Factory Operations Lab" width="820">
 
