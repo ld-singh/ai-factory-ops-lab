@@ -28,6 +28,9 @@ done
 # link to it as some chain of ../ ending in README.md; rewrite those to course.md.
 # (A single ../README.md is a PARENT-lesson link, not the root, so it is left alone.)
 cp README.md "$DEST/course.md"
+# The README hero image path is repo-root-relative (docs/assets/...) for GitHub; on the
+# published course page the asset lives at the site root, so point it there.
+sed -i 's|src="docs/assets/|src="/ai-factory-ops-lab/assets/|g' "$DEST/course.md"
 find "$DEST/portfolio-lab" "$DEST/runbooks" "$DEST/diagrams" "$DEST/control-plane" -name '*.md' \
   -exec sed -i 's|\.\./\.\./README\.md|../../course.md|g' {} +
 
