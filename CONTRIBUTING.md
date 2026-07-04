@@ -18,7 +18,7 @@ more complete are very welcome.
 Most of the course needs **no GPU**:
 
 ```bash
-make check          # verify docker, kind, kubectl, helm, jq
+make check          # verify docker, kind, kubectl, helm, kwok, jq
 make phase1-up      # a fake GPU fleet on kind + KWOK
 make phase1-demo    # schedulable + intentionally-Pending GPU workloads
 make phase1-down    # tear it down
