@@ -2,7 +2,12 @@
 
 > Course home: [AI Factory Operations Lab](../../../README.md) · Previous:
 > [Lesson 1B - KAI Scheduler](../kai-scheduler/README.md) · Next:
-> [Lesson 2 - Slurm GPU Workload Management](../../02-slurm-gpu-platform/README.md)
+> [Scheduling simulation lab](./hami-scheduling-sim/README.md) (the hands-on part of this lesson)
+
+> 🧪 **Want to run it? Jump straight to the hands-on labs:**
+> **[▶ Scheduling simulation](./hami-scheduling-sim/README.md)** (free, no GPU) ·
+> **[▶ Isolation on a real GPU](./hami-isolation-realgpu/README.md)** (validated on an RTX A6000).
+> The rest of this page is the concepts behind them.
 
 So far you've requested a GPU as an indivisible integer: a pod asks for
 `nvidia.com/gpu: 1` and gets a whole device. Lesson 1's default scheduler can do nothing
@@ -39,11 +44,10 @@ This lesson matters doubly for this course's mission of learning cheaply:
    enforcement that only real hardware can prove.
 5. Say precisely which sharing claims belong on which side of the fake/real line.
 
-🧭 **Mode:** 🟦 Simulation. Parts 1–2 are concepts (free) and the runnable scheduling
-sim is no-GPU. The real isolation half (Part 3) is **executed as part of
+🧭 **Mode:** 🟦 Simulation. The concepts and the runnable scheduling sim are free and no-GPU.
+The real isolation half is **executed as part of
 [Lesson 6 - Real GPU](../../real-gpu-session/README.md)** in your one rental session -
-it is described here, next to the concepts it proves, but run there. Part 4 is an
-optional simulation-side experiment.
+it is described here, next to the concepts it proves, but run there.
 
 📋 **Prerequisites:** [Lesson 1](../README.md) (mental model). The real isolation half
 needs the [Lesson 6](../../real-gpu-session/README.md) host set up (driver, toolkit,
@@ -78,7 +82,7 @@ Kubernetes) - all part of that one rental session.
 
 ---
 
-## Part 1 - The GPU-sharing landscape (free)
+## The GPU-sharing landscape
 
 One physical GPU, many workloads. Four mainstream ways to slice it:
 
@@ -143,7 +147,7 @@ isolation doesn't matter. (MIG / HAMi / time-slicing.)
 
 ---
 
-## Part 2 - The fractional resource model (free)
+## The fractional resource model
 
 With HAMi installed, a pod can ask for a *slice* instead of a whole device:
 
@@ -172,66 +176,25 @@ combine a queue layer with a sharing layer.
 
 ---
 
-## Part 3 - 🟥 Share one real GPU between pods (do this during your Lesson 6 rental)
+## Sharing on a real GPU (the enforcement half)
 
-**Goal:** two or more pods Running on one physical GPU at the same time, each seeing
-only its own memory slice.
+Everything above is the *decision* side, and you study it for free. The other half - HAMi
+actually holding the cap inside a running container - is the one thing only a real GPU can
+prove.
 
-### Step 1 - Install HAMi
+On one cheap card, HAMi runs two pods on a single physical GPU, each capped at its own memory
+slice. Inside a capped pod, `nvidia-smi` reports only the slice (not the card's full memory),
+and a CUDA `malloc` past the cap **fails even with plenty of memory free elsewhere on the
+device**. That allocation failure is the single artifact that separates *enforced isolation*
+from *bookkeeping*.
 
-On the Lesson 6 machine (driver + container toolkit + Kubernetes already set up):
+🔬 **Proved on real hardware:** concurrent multi-pod sharing of one device, and software-enforced
+memory isolation at the CUDA API level. **Not proved:** hardware-grade isolation (that's MIG),
+performance interference under sustained load, or fleet-scale behaviour.
 
-```bash
-# ILLUSTRATIVE - confirm the current repo URL, chart name, and values in the
-# HAMi install docs before running.
-helm repo add hami-charts https://project-hami.github.io/HAMi/
-helm repo update
-helm install hami hami-charts/hami -n kube-system
-# HAMi's device plugin targets nodes labelled for GPU management (the default
-# selector is documented in the chart) - label your GPU node accordingly, e.g.:
-kubectl label node <your-gpu-node> gpu=on
-```
-
-> HAMi replaces/wraps the device-plugin role. If you installed the GPU Operator in
-> Lesson 6, check the HAMi docs for how to coexist with or disable the operator's
-> own device plugin first - running two device plugins for the same resource name
-> is a classic self-inflicted outage (and a good thing to understand *why*).
-
-✅ **Checkpoint:** HAMi's scheduler and device-plugin pods are Running
-(`kubectl get pods -n kube-system | grep -i hami`), and the node now advertises the
-fractional resources (`kubectl describe node <node>` shows `nvidia.com/gpumem` etc.).
-
-### Step 2 - Run two pods on one GPU
-
-Apply two pods, each requesting `nvidia.com/gpu: 1` with a small `gpumem` slice
-(e.g. 2000 MiB each on a 16 GiB T4), each running `nvidia-smi` and then sleeping.
-
-✅ **Checkpoint:** both pods are **Running simultaneously** on the single-GPU node -
-something stock Kubernetes can never do, since the whole device would be allocated
-to the first pod.
-
-### Step 3 - Prove the memory cap is real
-
-```bash
-kubectl exec <pod-a> -- nvidia-smi
-```
-
-**Pass criteria:** `nvidia-smi` *inside the pod* reports the slice (≈2000 MiB
-total), not the physical device's full memory. For the strongest evidence, run a
-small CUDA program that tries to allocate beyond the cap and capture the allocation
-failure - that failure is the single artifact that distinguishes *enforced
-isolation* from *bookkeeping*.
-
-🔬 **Proved on real hardware:** concurrent multi-pod sharing of one device, and
-software-enforced memory isolation at the CUDA API level. **Not proved:**
-hardware-grade isolation (that's MIG), performance interference characteristics
-under sustained load, or behaviour at fleet scale.
-
-### Step 4 - Capture evidence
-
-Record in your [lab notebook](../../06-validation-reports/README.md): the chart
-version, the node's advertised resources, `kubectl get pods -o wide` showing
-co-residency, and the in-pod `nvidia-smi` / allocation-failure output.
+▶ **This is a full, runnable lab** - the install steps, manifests, pinned versions, and captured
+evidence live in **[Isolation on a real GPU](./hami-isolation-realgpu/README.md)**. Run it during
+your one Lesson 6 rental (validated on an RTX A6000).
 
 ---
 
@@ -266,10 +229,10 @@ proves the placement decision, the real-GPU lesson proves enforcement.
 
 | Capability | Where it's learnable | Why |
 |---|---|---|
-| Sharing-mechanism trade-offs (time-slicing/MPS/MIG/HAMi) | ✅ Free (Part 1) | Concepts |
-| Fractional resource model & scheduling arithmetic | ✅ Free (Part 2; 1B for quota math) | Control-plane bookkeeping |
-| Multi-pod co-residency on one device | 🟥 Real GPU (Part 3) | Needs a real device plugin path |
-| **Memory-cap enforcement inside the container** | 🟥 Real GPU (Part 3) | HAMi-core intercepts real CUDA calls |
+| Sharing-mechanism trade-offs (time-slicing/MPS/MIG/HAMi) | ✅ Free (concepts) | Concepts |
+| Fractional resource model & scheduling arithmetic | ✅ Free (the sim lab; 1B for quota math) | Control-plane bookkeeping |
+| Multi-pod co-residency on one device | 🟥 Real GPU (isolation lab) | Needs a real device plugin path |
+| **Memory-cap enforcement inside the container** | 🟥 Real GPU (isolation lab) | HAMi-core intercepts real CUDA calls |
 | Compute throttling accuracy / interference under load | ❌ Out of scope | Needs sustained real workloads + measurement |
 | MIG hardware partitioning | ❌ Out of scope | Needs a MIG-capable card (A100/A30, H100/H200, Blackwell) - not Ada Lovelace |
 
@@ -289,7 +252,9 @@ proves the placement decision, the real-GPU lesson proves enforcement.
 [device-plugin-not-advertising-gpus.md](../../../runbooks/device-plugin-not-advertising-gpus.md),
 [gpu-memory-pressure.md](../../../runbooks/gpu-memory-pressure.md).
 
-➡️ **Next:** [Lesson 2 - Slurm GPU Workload Management](../../02-slurm-gpu-platform/README.md).
+➡️ **Next:** run the hands-on lab - [HAMi scheduling simulation](./hami-scheduling-sim/README.md)
+(free, no GPU). Then continue to
+[Lesson 2 - Slurm GPU Workload Management](../../02-slurm-gpu-platform/README.md).
 The real isolation half of this lesson is run later, in
 [Lesson 6 - Real GPU](../../real-gpu-session/README.md), alongside the other
 real-hardware work - one rental, everything at once.
