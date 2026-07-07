@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script>
+  // Links ending in .md / README.md / index.md 404 on the site, because pages are served
+  // at directory URLs (e.g. .../hami/). This rewrites such a URL to the correct page and
+  // redirects, so shared markdown links (common when the repo README is linked) still land.
+  (function () {
+    var p = window.location.pathname;
+    var target = null;
+    if (/\/(README|index)\.md\/?$/i.test(p)) {
+      target = p.replace(/\/(README|index)\.md\/?$/i, "/");
+    } else if (/\.md\/?$/i.test(p)) {
+      target = p.replace(/\.md\/?$/i, "/");
+    }
+    if (target && target !== p) {
+      window.location.replace(target + window.location.search + window.location.hash);
+    }
+  })();
+</script>
+
+<h1>Page not found</h1>
+
+<p>If you followed a link that ended in <code>.md</code>, you should be redirected
+automatically. If not, head to the
+<a href="{{ '/' | url }}">course home</a> or browse the lessons from the navigation.</p>
+{% endblock %}

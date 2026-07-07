@@ -178,3 +178,6 @@ sharing and isolation, go to [`../hami-isolation-realgpu/`](../hami-isolation-re
 [device-plugin-not-advertising-gpus.md](../../../../runbooks/device-plugin-not-advertising-gpus.md),
 [gpu-memory-pressure.md](../../../../runbooks/gpu-memory-pressure.md),
 [cuda-visible-devices-debugging.md](../../../../runbooks/cuda-visible-devices-debugging.md).
+
+➡️ **Next:** [Lesson 2 - Slurm GPU Workload Management](../../../02-slurm-gpu-platform/README.md).
+(The real-GPU isolation half of HAMi runs later, in [Lesson 6](../../../real-gpu-session/README.md).)
