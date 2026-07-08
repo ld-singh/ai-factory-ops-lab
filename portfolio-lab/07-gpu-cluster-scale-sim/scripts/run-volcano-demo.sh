@@ -101,7 +101,7 @@ spec:
       value: fake
       effect: NoSchedule
   nodeSelector:
-    type: kwok
+    ai-factory-ops-lab/scale-sim: "true"
 YAML
     if [[ -n "$selector_key" ]]; then
       cat >> "$tmp" <<YAML
