@@ -111,7 +111,8 @@ nav:
           - "Part B - HAMi isolation (real GPU)": portfolio-lab/01-k8s-gpu-platform/hami/hami-isolation-realgpu/README.md
           - "Part C - Inference benchmark (real GPU)": portfolio-lab/04-inference-serving/inference-realgpu/README.md
           - "Part D - Slurm real GRES": portfolio-lab/02-slurm-gpu-platform/slurm-realgpu/README.md
-      - "7 - Security (planned)": portfolio-lab/07-security/README.md
+      - "7 - GPU fleet scale simulation": portfolio-lab/07-gpu-cluster-scale-sim/README.md
+      - "Security (planned)": portfolio-lab/07-security/README.md
   - Deep dives:
       - kind (local cluster): portfolio-lab/01-k8s-gpu-platform/kind/README.md
       - KWOK (fake nodes): portfolio-lab/01-k8s-gpu-platform/kwok/README.md

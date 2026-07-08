@@ -2,6 +2,12 @@
 set -euo pipefail
 
 TOPOLOGY="${TOPOLOGY:-${1:-topology/small.json}}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+LESSON_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
+
+if [[ "$TOPOLOGY" != /* && ! -f "$TOPOLOGY" && -f "${LESSON_DIR}/${TOPOLOGY}" ]]; then
+  TOPOLOGY="${LESSON_DIR}/${TOPOLOGY}"
+fi
 
 if [[ ! -f "$TOPOLOGY" ]]; then
   echo "Topology file not found: $TOPOLOGY" >&2
@@ -100,6 +106,10 @@ fi
 
 if [[ "$ok" -ne 1 ]]; then
   echo
-  echo "WARN: not every scale node has nvidia.com/gpu yet."
+  echo "ERROR: not every scale node has nvidia.com/gpu yet."
   echo "Check: kubectl -n gpu-operator get pods"
+  echo "Set ALLOW_PARTIAL_GPU_ADVERTISE=1 to keep going for debugging."
+  if [[ "${ALLOW_PARTIAL_GPU_ADVERTISE:-0}" != "1" ]]; then
+    exit 1
+  fi
 fi

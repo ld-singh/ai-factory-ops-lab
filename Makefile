@@ -156,13 +156,13 @@ phase6-drill: ## Run the node provision -> health-gate -> patch -> retire lifecy
 .PHONY: phase7-up phase7-volcano phase7-demo phase7-status phase7-evidence phase7-down
 phase7-up: ## Create a topology-driven KWOK fake GPU fleet; pass TOPOLOGY=...
 	$(LAB7)/scripts/check-scale-prereqs.sh
-	CLUSTER_NAME=$(CLUSTER_NAME) TOPOLOGY=$${TOPOLOGY:-topology/small.json} $(LAB7)/scripts/up.sh
+	CLUSTER_NAME=$(CLUSTER_NAME) TOPOLOGY=$${TOPOLOGY:-$(LAB7)/topology/small.json} $(LAB7)/scripts/up.sh
 
 phase7-volcano: ## Install Volcano scheduler for queue/gang scheduling drills
 	VOLCANO_VERSION=$${VOLCANO_VERSION:-v1.10.0} $(LAB7)/scripts/install-volcano.sh
 
 phase7-demo: ## Run Volcano Queue/PodGroup GPU scale scheduling scenarios
-	TOPOLOGY=$${TOPOLOGY:-topology/small.json} $(LAB7)/scripts/run-volcano-demo.sh
+	TOPOLOGY=$${TOPOLOGY:-$(LAB7)/topology/small.json} $(LAB7)/scripts/run-volcano-demo.sh
 
 phase7-status: ## Show Lesson 7 fake fleet and Volcano scheduling state
 	$(LAB7)/scripts/status.sh

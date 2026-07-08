@@ -3,6 +3,12 @@ set -euo pipefail
 
 TOPOLOGY="${TOPOLOGY:-${1:-topology/small.json}}"
 OUT="${OUT:-generated/fake-gpu-operator-values.yaml}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+LESSON_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
+
+if [[ "$TOPOLOGY" != /* && ! -f "$TOPOLOGY" && -f "${LESSON_DIR}/${TOPOLOGY}" ]]; then
+  TOPOLOGY="${LESSON_DIR}/${TOPOLOGY}"
+fi
 
 if [[ ! -f "$TOPOLOGY" ]]; then
   echo "Topology file not found: $TOPOLOGY" >&2

@@ -297,6 +297,7 @@ contains real captured output.
 | 4 | Inference serving | Harness runnable + validated; real GPU benchmark validated in Lesson 6 Part C (RTX A6000) |
 | 5 | BCM-style cluster lifecycle (conceptual + drill) | Drill runnable + validated; BCM specifics conceptual |
 | 6 | Real GPU (capstone: runtime path, real DCGM, HAMi isolation, Slurm GRES, inference) | **Parts A, B & C validated on real hardware.** Part A - runtime path + real `DCGM_FI_*` telemetry ([real-gpu-validation-report.md](./portfolio-lab/06-validation-reports/real-gpu-validation-report.md)). Part B - HAMi GPU sharing: two pods on one card with the slice enforced by HAMi-core ([hami-isolation-validation.md](./portfolio-lab/06-validation-reports/hami-isolation-validation.md)). Part C - inference benchmark: throughput scaling + the saturation knee on an RTX A6000 ([inference-benchmark-report.md](./portfolio-lab/06-validation-reports/inference-benchmark-report.md)). **Part D (Slurm real GRES, optional) is planned.** |
+| 7 | GPU fleet scale simulation with Volcano | Runnable simulation harness; validates topology-driven fake fleet scale, Volcano scheduler handoff, Queue/PodGroup control-plane behaviour, and gang scheduling success/failure paths |
 
 ## Documentation site
 

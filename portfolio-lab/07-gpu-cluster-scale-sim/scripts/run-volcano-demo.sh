@@ -2,9 +2,26 @@
 set -euo pipefail
 
 NS="${NS:-gpu-scale}"
-FIT_REPLICAS="${FIT_REPLICAS:-16}"
-OVERFLOW_REPLICAS="${OVERFLOW_REPLICAS:-120}"
+TOPOLOGY="${TOPOLOGY:-topology/small.json}"
 B200_REPLICAS="${B200_REPLICAS:-4}"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+LESSON_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
+
+if [[ "$TOPOLOGY" != /* && ! -f "$TOPOLOGY" && -f "${LESSON_DIR}/${TOPOLOGY}" ]]; then
+  TOPOLOGY="${LESSON_DIR}/${TOPOLOGY}"
+fi
+
+if [[ ! -f "$TOPOLOGY" ]]; then
+  echo "Topology file not found: $TOPOLOGY" >&2
+  exit 1
+fi
+
+TOTAL_GPUS="$(jq '[.pools[] | (.nodes * .gpusPerNode)] | add' "$TOPOLOGY")"
+FIT_REPLICAS="${FIT_REPLICAS:-16}"
+if [[ "$FIT_REPLICAS" -gt "$TOTAL_GPUS" ]]; then
+  FIT_REPLICAS="$TOTAL_GPUS"
+fi
+OVERFLOW_REPLICAS="${OVERFLOW_REPLICAS:-$((TOTAL_GPUS + 1))}"
 
 kubectl get ns volcano-system >/dev/null 2>&1 || {
   echo "Volcano is not installed. Run: make volcano-up" >&2
@@ -14,7 +31,9 @@ kubectl get ns volcano-system >/dev/null 2>&1 || {
 kubectl create ns "$NS" --dry-run=client -o yaml | kubectl apply -f -
 
 echo "Creating Volcano queues..."
-kubectl apply -f - <<YAML
+queue_manifest="$(mktemp)"
+trap 'rm -f "$queue_manifest" "${tmp:-}"' EXIT
+cat > "$queue_manifest" <<YAML
 apiVersion: scheduling.volcano.sh/v1beta1
 kind: Queue
 metadata:
@@ -31,6 +50,16 @@ spec:
   weight: 1
   reclaimable: true
 YAML
+for attempt in $(seq 1 10); do
+  if kubectl apply -f "$queue_manifest"; then
+    break
+  fi
+  if [[ "$attempt" -eq 10 ]]; then
+    exit 1
+  fi
+  echo "Volcano admission webhook is not ready yet; retrying queue creation..."
+  sleep 3
+done
 
 create_podgroup() {
   local name="$1" replicas="$2" queue="$3"
@@ -62,7 +91,7 @@ metadata:
   labels:
     app: ${name}
   annotations:
-    scheduling.volcano.sh/group-name: ${name}
+    scheduling.k8s.io/group-name: ${name}
 spec:
   schedulerName: volcano
   restartPolicy: Never
@@ -100,7 +129,7 @@ echo "Scenario 1: fit-gang (${FIT_REPLICAS} pods x 1 GPU)"
 create_gpu_pods fit-gang "$FIT_REPLICAS" team-a
 
 echo
-echo "Scenario 2: overflow-gang (${OVERFLOW_REPLICAS} pods x 1 GPU)"
+echo "Scenario 2: overflow-gang (${OVERFLOW_REPLICAS} pods x 1 GPU; topology has ${TOTAL_GPUS} fake GPUs)"
 create_gpu_pods overflow-gang "$OVERFLOW_REPLICAS" team-b
 
 echo

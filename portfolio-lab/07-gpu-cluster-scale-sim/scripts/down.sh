@@ -6,6 +6,9 @@ REMOVE_VOLCANO="${REMOVE_VOLCANO:-0}"
 echo "Deleting Lesson 7 workload namespace..."
 kubectl delete ns gpu-scale --ignore-not-found=true
 
+echo "Deleting Lesson 7 Volcano queues..."
+kubectl delete queue team-a team-b --ignore-not-found=true
+
 echo "Deleting Lesson 7 fake scale nodes..."
 kubectl delete node -l ai-factory-ops-lab/scale-sim=true --ignore-not-found=true
 

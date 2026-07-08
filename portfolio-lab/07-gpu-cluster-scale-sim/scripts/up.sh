@@ -9,6 +9,21 @@ LESSON_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 REPO_ROOT="$(cd -- "${LESSON_DIR}/../.." && pwd)"
 LAB1="${REPO_ROOT}/portfolio-lab/01-k8s-gpu-platform"
 
+if [[ "$TOPOLOGY" != /* ]]; then
+  if [[ -f "$TOPOLOGY" ]]; then
+    TOPOLOGY="$(realpath "$TOPOLOGY")"
+  elif [[ -f "${LESSON_DIR}/${TOPOLOGY}" ]]; then
+    TOPOLOGY="$(realpath "${LESSON_DIR}/${TOPOLOGY}")"
+  else
+    echo "Topology file not found: $TOPOLOGY" >&2
+    echo "Tried current directory and lesson directory: ${LESSON_DIR}" >&2
+    exit 1
+  fi
+elif [[ ! -f "$TOPOLOGY" ]]; then
+  echo "Topology file not found: $TOPOLOGY" >&2
+  exit 1
+fi
+
 cd "$LESSON_DIR"
 
 echo "Using topology: $TOPOLOGY"
