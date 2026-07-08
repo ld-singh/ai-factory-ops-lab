@@ -25,6 +25,7 @@ Each time you finish a runnable lesson:
 | [real-gpu-validation-report.md](./real-gpu-validation-report.md) | [6 - Real GPU](../real-gpu-session/README.md) (Part A) | 🟥 Real | The Lesson 6 hardware run ✅ |
 | [hami-isolation-validation.md](./hami-isolation-validation.md) | [6 - Real GPU](../real-gpu-session/README.md) (Part B - HAMi) | 🟥 Real | The Lesson 6 Part B run ✅ |
 | [inference-benchmark-report.md](./inference-benchmark-report.md) | [6 - Real GPU](../real-gpu-session/README.md) (Part C - inference) | 🟥 Real | ✅ Validated — RTX A6000, 7B (concurrency sweep + saturation knee) |
+| [gpu-scale-sim-validation.md](./gpu-scale-sim-validation.md) | [7 - GPU fleet scale simulation](../07-gpu-cluster-scale-sim/README.md) | 🟦 Sim | `make up/volcano-up/demo/evidence` in the lesson dir ✅ |
 
 ## The limitations ledger - read this to grade your own claims
 
