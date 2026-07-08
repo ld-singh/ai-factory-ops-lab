@@ -110,12 +110,13 @@ optional **Lesson 6** at the end.
 | **4** | [Inference serving](./portfolio-lab/04-inference-serving/README.md) | 🟦 Sim/harness | No | Run the $0 CPU load harness for TTFT/p95-p99/tokens-per-sec; real benchmark numbers come in Lesson 6 |
 | **5** | [BCM-style cluster lifecycle](./portfolio-lab/05-bcm-style-cluster-lifecycle/README.md) | 🟨 Concept+drill | No | Run a provision→health-gate→patch→retire node-lifecycle drill; map it to BCM |
 | **6** | [Real GPU (one-rental capstone)](./portfolio-lab/real-gpu-session/README.md) | 🟥 Real | Opt (1) | The **only** real-GPU lesson: in one rental, prove the GPU runtime path + real DCGM, HAMi sharing, Slurm GRES, and the inference benchmark - then tear down |
+| **7** | [GPU fleet scale simulation - Volcano](./portfolio-lab/07-gpu-cluster-scale-sim/README.md) | 🟦 Sim | No | Scale fake GPU fleets from topology JSON, create queue pressure, and validate Volcano Queue/PodGroup scheduling behaviour |
 | **★** | [Your lab notebook](./portfolio-lab/06-validation-reports/) | - | - | Capture evidence; a lesson is only "done" when its report holds real output |
 
-> **Lessons 1–5 run entirely on a laptop with no GPU.** The only real hardware is the
+> **Lessons 1–5 and 7 run entirely on a laptop with no GPU.** The only real hardware is the
 > optional Lesson 6, which consolidates every GPU step into a single cheap rental.
 > Lessons 2, 3 and 5 stand up real clusters/stacks against *fake* GPUs; Lesson 4 ships
-> a $0 CPU harness tier. The status table is at the bottom of this file.
+> a $0 CPU harness tier; Lesson 7 scales the fake fleet and adds Volcano queue/gang scheduling drills. The status table is at the bottom of this file.
 
 ---
 
@@ -125,7 +126,7 @@ Designed to be as close to free as is practical. The cost ladder:
 
 | Tier | Lessons | What you pay | What you get |
 |---|---|---|---|
-| **$0 - simulation** | 0, 1, 1B, 1C, 2, 3, 4, 5 | Nothing - a laptop runs it | All scheduling, queueing, sharing-*decision*, triage, observability-design, and lifecycle skills. This is the whole numbered course. |
+| **$0 - simulation** | 0, 1, 1B, 1C, 2, 3, 4, 5, 7 | Nothing - a laptop runs it | All scheduling, queueing, sharing-*decision*, triage, observability-design, lifecycle, and scale-simulation skills. |
 | **$5-10 - one GPU session** | 6 (the capstone) | A few hours on one rented entry-level NVIDIA GPU VM | The real runtime path, enforced GPU sharing, real DCGM telemetry, real Slurm GRES, and real inference benchmarks |
 
 Three habits keep the paid tier at $5-10:
@@ -335,3 +336,13 @@ If this course helped you get hands-on with GPU/HPC infrastructure, **[give it a
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-connect-0a66c2?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/lovedeep-singh-cloud-infra/)
 [![GitHub](https://img.shields.io/badge/GitHub-ld--singh-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/ld-singh)
+
+
+## Lesson 7 quick reference
+
+```bash
+# Lesson 7 - GPU fleet scale simulation with Volcano
+make phase7-up TOPOLOGY=portfolio-lab/07-gpu-cluster-scale-sim/topology/small.json
+make phase7-volcano && make phase7-demo
+make phase7-evidence && make phase7-down
+```
