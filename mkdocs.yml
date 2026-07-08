@@ -144,4 +144,5 @@ nav:
       - Slurm GRES validation: portfolio-lab/06-validation-reports/slurm-gres-validation.md
       - Real GPU validation: portfolio-lab/06-validation-reports/real-gpu-validation-report.md
       - Inference benchmark: portfolio-lab/06-validation-reports/inference-benchmark-report.md
+      - GPU scale simulation (Volcano): portfolio-lab/06-validation-reports/gpu-scale-sim-validation.md
   - About: about.md

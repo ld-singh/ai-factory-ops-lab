@@ -230,6 +230,9 @@ make phase5-serve-cpu && make phase5-bench && make phase5-down
 make phase6-drill
 
 # Lesson 6 - Real GPU (one rental): guided, no make loop - see portfolio-lab/real-gpu-session/README.md
+
+# Lesson 7 - GPU fleet scale simulation with Volcano (topology-driven fake fleet)
+make phase7-up && make phase7-volcano && make phase7-demo && make phase7-evidence && make phase7-down
 ```
 
 Each lesson walks its loop with expected output and checkpoints.
@@ -247,6 +250,7 @@ portfolio-lab/
   04-inference-serving/       Lesson 4 - harness/ (loadgen) + scripts/ (CPU serve) [sim]; real bench in Lesson 6
   05-bcm-style-cluster-lifecycle/  Lesson 5 - scripts/ lifecycle drill + conceptual BCM mapping
   real-gpu-session/           Lesson 6 - the one-rental real-GPU capstone (runtime path, HAMi, Slurm GRES, inference)
+  07-gpu-cluster-scale-sim/   Lesson 7 - topology-driven fake fleet at scale + Volcano gang scheduling [sim]
   06-validation-reports/      Your lab notebook - what you ran, observed, and proved
 control-plane/                Small FastAPI app unifying K8s + Slurm inventory views
 runbooks/                     Operational runbooks for GPU/Slurm/K8s failure modes
@@ -297,7 +301,7 @@ contains real captured output.
 | 4 | Inference serving | Harness runnable + validated; real GPU benchmark validated in Lesson 6 Part C (RTX A6000) |
 | 5 | BCM-style cluster lifecycle (conceptual + drill) | Drill runnable + validated; BCM specifics conceptual |
 | 6 | Real GPU (capstone: runtime path, real DCGM, HAMi isolation, Slurm GRES, inference) | **Parts A, B & C validated on real hardware.** Part A - runtime path + real `DCGM_FI_*` telemetry ([real-gpu-validation-report.md](./portfolio-lab/06-validation-reports/real-gpu-validation-report.md)). Part B - HAMi GPU sharing: two pods on one card with the slice enforced by HAMi-core ([hami-isolation-validation.md](./portfolio-lab/06-validation-reports/hami-isolation-validation.md)). Part C - inference benchmark: throughput scaling + the saturation knee on an RTX A6000 ([inference-benchmark-report.md](./portfolio-lab/06-validation-reports/inference-benchmark-report.md)). **Part D (Slurm real GRES, optional) is planned.** |
-| 7 | GPU fleet scale simulation with Volcano | Runnable simulation harness; validates topology-driven fake fleet scale, Volcano scheduler handoff, Queue/PodGroup control-plane behaviour, and gang scheduling success/failure paths |
+| 7 | GPU fleet scale simulation with Volcano | Complete (runnable; topology-driven fleet, Volcano scheduler handoff, Queue/PodGroup behaviour, and gang all-or-nothing admission validated with captured output - [gpu-scale-sim-validation.md](./portfolio-lab/06-validation-reports/gpu-scale-sim-validation.md)) |
 
 ## Documentation site
 
@@ -337,13 +341,3 @@ If this course helped you get hands-on with GPU/HPC infrastructure, **[give it a
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-connect-0a66c2?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/lovedeep-singh-cloud-infra/)
 [![GitHub](https://img.shields.io/badge/GitHub-ld--singh-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/ld-singh)
-
-
-## Lesson 7 quick reference
-
-```bash
-# Lesson 7 - GPU fleet scale simulation with Volcano
-make phase7-up TOPOLOGY=portfolio-lab/07-gpu-cluster-scale-sim/topology/small.json
-make phase7-volcano && make phase7-demo
-make phase7-evidence && make phase7-down
-```

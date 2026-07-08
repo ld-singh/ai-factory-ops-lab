@@ -113,6 +113,12 @@ This creates or reuses the kind cluster, installs KWOK, renders a
 fake-gpu-operator topology values file, installs the fake GPU layer, and creates
 KWOK fake GPU nodes.
 
+> ⚠️ **Shared with Lesson 1:** this upgrades the same `gpu-operator` Helm release
+> that Lesson 1 installs, replacing its topology values with the rendered ones
+> from this lesson. The pool names match (`a100`/`h100`/`l40s` on `small.json`),
+> so Lesson 1 nodes keep advertising GPUs - but if you customised Lesson 1's
+> topology, re-run its install script afterwards to restore it.
+
 Verify the fleet:
 
 ```bash
@@ -145,6 +151,19 @@ Override it when you want to test another release:
 VOLCANO_VERSION=v1.11.0 make volcano-up
 ```
 
+**Checkpoint** - the script waits for the admission webhook, then prints the
+`volcano-system` pods. Expected output:
+
+```text
+NAME                                   READY   STATUS      RESTARTS   AGE
+volcano-admission-69947d8b7d-5b8sw     1/1     Running     0          60s
+volcano-admission-init-xlbsf           0/1     Completed   0          60s
+volcano-controllers-58c76fbdd7-txrzw   1/1     Running     0          60s
+volcano-scheduler-58b5974944-rp46l     1/1     Running     0          60s
+```
+
+`volcano-admission-init` is a one-shot Job; `Completed` is its healthy state.
+
 ## Step 3 - Run the scale demo
 
 ```bash
@@ -159,6 +178,10 @@ The demo creates three scenarios in the `gpu-scale` namespace:
 | `overflow-gang` | A gang job larger than available GPUs | Pending |
 | `needs-b200` | A job targeting a missing pool | Pending due to selector/fleet mismatch |
 
+The demo pods carry a `ai-factory-ops-lab/scale-sim: "true"` nodeSelector, so
+they only target this lesson's fleet - Lesson 1 fake nodes on the same cluster
+cannot absorb the overflow and skew the scenarios.
+
 Inspect the result:
 
 ```bash
@@ -166,6 +189,25 @@ kubectl get podgroups -n gpu-scale
 kubectl get pods -n gpu-scale -o wide
 kubectl get events -n gpu-scale --sort-by=.lastTimestamp | tail -40
 ```
+
+**Checkpoint** - on `small.json` the PodGroups settle like this:
+
+```text
+NAME            STATUS    MINMEMBER   RUNNINGS   AGE
+fit-gang        Running   16          16         25s
+needs-b200      Inqueue   4                      24s
+overflow-gang   Inqueue   33                     25s
+```
+
+The line worth reading twice is in the overflow-gang Events:
+
+```text
+pod group is not ready, 33 Pending, 33 minAvailable; Pending: 16 Schedulable, 17 Unschedulable
+```
+
+16 pods *could* start, and **none did** - that all-or-nothing refusal is gang
+scheduling. The default scheduler (Lesson 1's queue-pressure demo) would have
+started the 16 and stranded the rest.
 
 ## Step 4 - Capture evidence
 
@@ -179,7 +221,20 @@ This writes a timestamped evidence directory under:
 portfolio-lab/06-validation-reports/evidence/
 ```
 
-The evidence includes nodes, queues, PodGroups, Pods, and recent events.
+**Checkpoint** - expected output, and what lands in the directory:
+
+```text
+Evidence written to: .../portfolio-lab/06-validation-reports/evidence/gpu-scale-20260708-235359
+```
+
+```text
+events.txt  fake-gpu-operator-pods.txt  nodes-wide.txt  nodes.yaml
+podgroups.yaml  pods-wide.txt  pods.yaml  README.txt
+volcano-pods.txt  volcano-queues.yaml
+```
+
+The captured run for this lesson is written up in the validation report:
+[`gpu-scale-sim-validation.md`](../06-validation-reports/gpu-scale-sim-validation.md).
 
 ## Step 5 - Tear down
 
