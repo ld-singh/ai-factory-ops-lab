@@ -8,6 +8,7 @@ portfolio-lab/06-validation-reports/evidence/*
 
 .DS_Store
 *.swp
+.vscode/
 __pycache__/
 *.pyc
 .venv/
