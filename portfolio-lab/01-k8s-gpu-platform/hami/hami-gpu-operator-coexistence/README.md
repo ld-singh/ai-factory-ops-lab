@@ -212,12 +212,30 @@ allocatable, which surprises people the first time.
 
 ### Step 5: Prove it works end to end
 
-Run a fractional pod. This lab ships its own, sized small so it fits any card in the course:
-[`manifests/fractional-pod.yaml`](./manifests/fractional-pod.yaml).
+Run **two** pods that share one physical GPU. That is the stronger proof: a single pod only
+shows a slice was allocated, while two co-resident pods show HAMi genuinely subdividing the card
+*while the Operator runs beside it*. This lab ships its own manifest, sized so two 4000 MiB
+slices fit any card in the course: [`manifests/share-two-pods.yaml`](./manifests/share-two-pods.yaml).
 
 ```bash
-kubectl apply -f portfolio-lab/01-k8s-gpu-platform/hami/hami-gpu-operator-coexistence/manifests/fractional-pod.yaml
-kubectl get pod hami-coexist-fractional -o wide
+kubectl apply -f portfolio-lab/01-k8s-gpu-platform/hami/hami-gpu-operator-coexistence/manifests/share-two-pods.yaml
+kubectl wait --for=condition=Ready pod/hami-coexist-a pod/hami-coexist-b --timeout=300s
+kubectl get pods -o wide | grep hami-coexist
+```
+
+✅ **Co-residency:** both pods **Running** on the one node, and allocated the **same** physical
+GPU. Check the HAMi allocation annotation on each (the GPU UUID matches):
+
+```bash
+kubectl get pod hami-coexist-a -o jsonpath='{.metadata.annotations.hami\.io/vgpu-devices-allocated}'; echo
+kubectl get pod hami-coexist-b -o jsonpath='{.metadata.annotations.hami\.io/vgpu-devices-allocated}'; echo
+```
+
+✅ **Each sees only its slice:** in-pod `nvidia-smi` reports ~4000 MiB, not the full card. That
+is HAMi-core, injected because `nvidia` is the default runtime (Step 2):
+
+```bash
+kubectl exec hami-coexist-a -- nvidia-smi
 ```
 
 > 📎 **Do not apply [`../examples/`](../examples/README.md).** Those are **illustrative**
@@ -227,9 +245,9 @@ kubectl get pod hami-coexist-fractional -o wide
 > [`hami-isolation-realgpu/manifests/`](../hami-isolation-realgpu/manifests/share-two-pods.yaml).
 
 > ⚠️ **Wait for the HAMi scheduler before creating any GPU pod.** HAMi's mutating webhook is
-> what rewrites your pod's `schedulerName` to `hami-scheduler`, and it is registered
+> what rewrites each pod's `schedulerName` to `hami-scheduler`, and it is registered
 > **`failurePolicy: Ignore`**. If the webhook cannot be reached (typically because the
-> scheduler is still rolling out), your pod is admitted **unmutated** rather than rejected, so
+> scheduler is still rolling out), the pod is admitted **unmutated** rather than rejected, so
 > the **default** scheduler takes it and fails with:
 >
 > ```
@@ -244,17 +262,16 @@ kubectl get pod hami-coexist-fractional -o wide
 >
 > ```bash
 > kubectl -n kube-system rollout status deploy/hami-scheduler --timeout=180s
-> kubectl get pod hami-coexist-fractional -o jsonpath='{.spec.schedulerName}'; echo
+> kubectl get pod hami-coexist-a -o jsonpath='{.spec.schedulerName}'; echo
 > # want: hami-scheduler   |   got default-scheduler? the webhook missed it
 > ```
 >
 > The webhook only fires on **CREATE**, so waiting does not repair an existing pod. **Delete
-> and re-apply it.** `capture-evidence.sh` gates on this and fails loudly rather than leaving
-> you a mysterious Pending pod.
+> and re-apply.** `capture-evidence.sh` gates on this and fails loudly rather than leaving you
+> mysterious Pending pods.
 
-✅ **Gate (the whole point of this part):** a pod requesting a *fraction* of the card is
-Running, HAMi scheduled it, and the Operator's DCGM Exporter is still reporting real counters
-for the same physical GPU.
+✅ **Gate (the whole point of this part):** two pods share the one card under HAMi, and the
+Operator's DCGM Exporter is still reporting real counters for the same physical GPU.
 
 ```bash
 kubectl -n gpu-operator port-forward svc/nvidia-dcgm-exporter 9400:9400 &
@@ -304,7 +321,7 @@ tarball you scp back before teardown:
 bash portfolio-lab/01-k8s-gpu-platform/hami/hami-gpu-operator-coexistence/scripts/capture-evidence.sh
 ```
 
-It applies the fractional pod itself and captures six artifacts:
+It applies the two share pods itself and captures six artifacts:
 
 | # | Artifact | What it backs |
 |---|---|---|
@@ -312,7 +329,7 @@ It applies the fractional pod itself and captures six artifacts:
 | 2 | `2-operator-helm-values.txt` | `devicePlugin.enabled=false` in the released values (the disabling was deliberate, not an accident) |
 | 3 | `3-hami-pods.txt`, `3-node-allocatable.txt` | HAMi owns the plugin: virtual `nvidia.com/gpu` count + the register annotation |
 | 4 | `4-default-runtime.txt` | `default_runtime_name = "nvidia"` |
-| 5 | `5-fractional-pod.txt`, `5-fractional-in-pod-smi.txt`, `5-fractional-hami-core.txt` | a fractional pod placed by the HAMi scheduler, with the slice enforced in-pod |
+| 5 | `5-share-pods.txt`, `5-in-pod-smi-*.txt`, `5-hami-core.txt` | two pods co-resident on one GPU, placed by the HAMi scheduler, each seeing its slice in-pod |
 | 6 | `6-dcgm-metrics.txt` | DCGM still reporting physical counters beside HAMi |
 
 Then record the results in

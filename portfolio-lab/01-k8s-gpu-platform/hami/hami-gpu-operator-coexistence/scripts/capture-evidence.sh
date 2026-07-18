@@ -9,10 +9,11 @@
 #   2 the disabling proof  - devicePlugin.enabled=false in the released helm values
 #   3 hami owns the plugin - HAMi pods Running; nvidia.com/gpu at HAMi's virtual count
 #   4 default runtime      - 'nvidia' is the node's DEFAULT containerd runtime
-#   5 fractional placement - a fractional pod Running, scheduled by the HAMi scheduler
+#   5 fractional sharing   - TWO pods co-resident on one GPU, scheduled by the HAMi scheduler,
+#                            each seeing its slice (the stronger proof: sharing, not just one slice)
 #   6 dcgm unaffected      - DCGM Exporter still reports PHYSICAL counters beside HAMi
 #
-# Read-only except the lab's own fractional pod.
+# Read-only except the lab's own two share pods.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -20,7 +21,7 @@ LAB_DIR="$(dirname "$SCRIPT_DIR")"
 OUT="hami-coexist-evidence-$(date +%Y%m%d-%H%M%S)"
 OPERATOR_NS="${OPERATOR_NS:-gpu-operator}"
 HAMI_NS="${HAMI_NS:-kube-system}"
-POD=hami-coexist-fractional
+PODS=(hami-coexist-a hami-coexist-b)
 mkdir -p "$OUT"
 
 log() { printf '\n=== %s ===\n' "$*"; }
@@ -86,11 +87,11 @@ cap 4-default-runtime.txt bash -c "
   kubectl get runtimeclass 2>/dev/null
 "
 
-log "Artifact 5: fractional placement - a fractional pod Running under HAMi"
+log "Artifact 5: fractional sharing - two pods co-resident on one GPU under HAMi"
 # The HAMi webhook rewrites schedulerName, and it is registered failurePolicy: Ignore. If it
-# cannot be reached, the pod is admitted UNMUTATED, lands on the default scheduler, and fails
+# cannot be reached, a pod is admitted UNMUTATED, lands on the default scheduler, and fails
 # with "Insufficient nvidia.com/gpumem" (gpumem/gpucores are never in node allocatable). The
-# webhook only fires on CREATE, so gate BEFORE creating the pod rather than retrying after.
+# webhook only fires on CREATE, so gate BEFORE creating the pods rather than retrying after.
 kubectl -n "$HAMI_NS" rollout status deploy/hami-scheduler --timeout=180s || true
 for _ in $(seq 1 30); do
   eps="$(kubectl -n "$HAMI_NS" get endpoints hami-scheduler -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null || true)"
@@ -99,51 +100,60 @@ for _ in $(seq 1 30); do
 done
 [[ -n "${eps:-}" ]] || echo "WARNING: hami-scheduler has no endpoints; the webhook may not fire."
 
-kubectl delete pod "$POD" --ignore-not-found >/dev/null 2>&1 || true
-kubectl apply -f "$LAB_DIR/manifests/fractional-pod.yaml" >/dev/null
+kubectl delete pod "${PODS[@]}" --ignore-not-found >/dev/null 2>&1 || true
+kubectl apply -f "$LAB_DIR/manifests/share-two-pods.yaml" >/dev/null
 
-# Fail loudly on the silent-webhook case instead of leaving a confusing Pending pod.
+# Fail loudly on the silent-webhook case instead of leaving confusing Pending pods.
 sleep 3
-sched="$(kubectl get pod "$POD" -o jsonpath='{.spec.schedulerName}' 2>/dev/null || true)"
-echo "pod schedulerName = ${sched:-<unknown>}"
-if [[ "$sched" != "hami-scheduler" ]]; then
-  cap 5-fractional-pod.txt bash -c "
-    echo 'schedulerName = ${sched:-<unknown>}  (expected: hami-scheduler)';
-    echo;
-    kubectl get pod '$POD' -o wide;
-    echo;
-    kubectl describe pod '$POD' | sed -n '/Events:/,\$p' | head -20
-  "
-  echo "ERROR: the HAMi webhook did not route this pod (schedulerName='$sched')."
-  echo "It is registered failurePolicy: Ignore, so an unreachable webhook fails silently."
-  echo "Check:  kubectl -n $HAMI_NS get pods | grep hami"
-  echo "        kubectl -n $HAMI_NS logs deploy/hami-scheduler -c vgpu-scheduler-extender --tail=50"
-  echo "Then DELETE and re-apply the pod (the webhook only fires on CREATE)."
+for p in "${PODS[@]}"; do
+  sched="$(kubectl get pod "$p" -o jsonpath='{.spec.schedulerName}' 2>/dev/null || true)"
+  echo "  $p schedulerName = ${sched:-<unknown>}"
+  if [[ "$sched" != "hami-scheduler" ]]; then
+    cap 5-share-pods.txt bash -c "
+      echo '$p schedulerName = ${sched:-<unknown>}  (expected: hami-scheduler)';
+      echo;
+      kubectl get pods -o wide;
+      echo;
+      kubectl describe pod '$p' | sed -n '/Events:/,\$p' | head -20
+    "
+    echo "ERROR: the HAMi webhook did not route $p (schedulerName='$sched')."
+    echo "It is registered failurePolicy: Ignore, so an unreachable webhook fails silently."
+    echo "Check:  kubectl -n $HAMI_NS get pods | grep hami"
+    echo "        kubectl -n $HAMI_NS logs deploy/hami-scheduler -c vgpu-scheduler-extender --tail=50"
+    echo "Then DELETE and re-apply the pods (the webhook only fires on CREATE)."
+    exit 1
+  fi
+done
+
+if ! kubectl wait --for=condition=Ready "pod/${PODS[0]}" "pod/${PODS[1]}" --timeout=300s; then
+  cap 5-share-pods.txt bash -c "kubectl get pods -o wide; echo; kubectl describe pod ${PODS[*]} | sed -n '/Events:/,\$p' | head -30"
+  echo "ERROR: the share pods didn't both become Ready - status captured to $OUT/5-share-pods.txt"
+  echo "Check: kubectl describe pod ${PODS[*]}"
   exit 1
 fi
-if ! kubectl wait --for=condition=Ready "pod/$POD" --timeout=300s; then
-  cap 5-fractional-pod.txt bash -c "kubectl get pod '$POD' -o wide; echo; kubectl describe pod '$POD' | sed -n '/Events:/,\$p' | head -20"
-  echo "ERROR: $POD didn't become Ready - status captured to $OUT/5-fractional-pod.txt"
-  echo "Check: kubectl describe pod $POD"
-  exit 1
-fi
-cap 5-fractional-pod.txt bash -c "
-  kubectl get pod '$POD' -o wide;
+
+# Co-residency is the point: both pods Running, and (from the annotations) on the SAME GPU UUID.
+cap 5-share-pods.txt bash -c "
+  echo '--- both share pods Running on one node ---';
+  kubectl get pods -o wide | grep -E 'NAME|hami-coexist';
   echo;
-  echo '--- HAMi allocation annotations on the pod ---';
-  kubectl get pod '$POD' -o jsonpath='{.metadata.annotations}' | tr ',' '\n';
-  echo;
+  for p in ${PODS[*]}; do
+    echo \"--- HAMi allocation annotations: \$p (note the GPU UUID - same card for both) ---\";
+    kubectl get pod \"\$p\" -o jsonpath='{.metadata.annotations.hami\.io/vgpu-devices-allocated}'; echo;
+  done;
   echo;
   echo '--- scheduler events (expect the HAMi scheduler, not default-scheduler) ---';
-  kubectl describe pod '$POD' | sed -n '/Events:/,\$p' | head -12
+  kubectl describe pod ${PODS[0]} | sed -n '/Events:/,\$p' | head -12
 "
-# The in-pod view is the payoff: HAMi-core rewrites the card size to the requested slice.
-cap 5-fractional-in-pod-smi.txt bash -c "kubectl exec '$POD' -- nvidia-smi"
-cap 5-fractional-hami-core.txt  bash -c "
-  echo '--- HAMi-core injection (env + library) ---';
-  kubectl exec '$POD' -- bash -c 'env | grep -iE \"CUDA_DEVICE_MEMORY_LIMIT|CUDA_DEVICE_SM_LIMIT|NVIDIA_VISIBLE_DEVICES|LD_PRELOAD\"' 2>&1;
+# The in-pod view is the payoff: HAMi-core rewrites each card to the 4000 MiB slice.
+for p in "${PODS[@]}"; do
+  cap "5-in-pod-smi-$p.txt" bash -c "kubectl exec '$p' -- nvidia-smi"
+done
+cap 5-hami-core.txt bash -c "
+  echo '--- HAMi-core injection in ${PODS[0]} (env + library) ---';
+  kubectl exec '${PODS[0]}' -- bash -c 'env | grep -iE \"CUDA_DEVICE_MEMORY_LIMIT|CUDA_DEVICE_SM_LIMIT|NVIDIA_VISIBLE_DEVICES|LD_PRELOAD\"' 2>&1;
   echo;
-  kubectl exec '$POD' -- bash -c 'ls -l /usr/local/vgpu/libvgpu.so 2>/dev/null || echo \"(libvgpu.so not at /usr/local/vgpu - check the path for your HAMi version)\"' 2>&1
+  kubectl exec '${PODS[0]}' -- bash -c 'ls -l /usr/local/vgpu/libvgpu.so 2>/dev/null || echo \"(libvgpu.so not at /usr/local/vgpu - check the path for your HAMi version)\"' 2>&1
 "
 
 log "Artifact 6: DCGM Exporter still reports PHYSICAL counters"

@@ -39,7 +39,7 @@ Fill from `0-versions.txt` and `2-operator-helm-values.txt`.
 | 2 | The device plugin is disabled deliberately | `devicePlugin.enabled=false` in the released helm values / ClusterPolicy | *(pending)* | `2-operator-helm-values.txt` |
 | 3 | HAMi owns the device-plugin role | HAMi pods Running; `nvidia.com/gpu` allocatable at HAMi's **virtual** count; `hami.io/node-nvidia-register` present | *(pending)* | `3-hami-pods.txt`, `3-node-allocatable.txt` |
 | 4 | nvidia is the **default** containerd runtime | `default_runtime_name = "nvidia"` in the generated containerd config | *(pending)* | `4-default-runtime.txt` |
-| 5 | A fractional pod is placed and enforced | pod Running; scheduled by the **HAMi scheduler**; in-pod `nvidia-smi` shows the **slice**, not the full card | *(pending)* | `5-fractional-pod.txt`, `5-fractional-in-pod-smi.txt`, `5-fractional-hami-core.txt` |
+| 5 | Two pods share one GPU, enforced | both pods Running on the **same** card; scheduled by the **HAMi scheduler**; each pod's in-pod `nvidia-smi` shows its **slice**, not the full card | *(pending)* | `5-share-pods.txt`, `5-in-pod-smi-*.txt`, `5-hami-core.txt` |
 | 6 | DCGM is unaffected by HAMi | DCGM Exporter still reports **physical** `DCGM_FI_*` counters alongside HAMi | *(pending)* | `6-dcgm-metrics.txt` |
 
 ### The two results that matter most
@@ -48,10 +48,10 @@ Fill from `0-versions.txt` and `2-operator-helm-values.txt`.
   card reported as `deviceSplitCount`, default 10) rather than `1`, then HAMi's device plugin
   won the role and the Operator's is genuinely out of the way. A value of `1` means the
   Operator's plugin is still running and the setup is wrong.
-- **Artifact 5** is the proof it is not merely cosmetic. A fractional pod Running is the
-  scheduler half; the in-pod `nvidia-smi` showing the slice instead of the full card is the
-  enforcement half, and it only happens if the default runtime is `nvidia` so HAMi-core was
-  injected.
+- **Artifact 5** is the proof it is not merely cosmetic. Two pods co-resident on one card is
+  the sharing half (stock Kubernetes hands the whole device to the first pod); each pod's
+  in-pod `nvidia-smi` showing its slice instead of the full card is the enforcement half, and
+  it only happens if the default runtime is `nvidia` so HAMi-core was injected.
 
 ## The reboot behaviour
 
@@ -64,7 +64,7 @@ Fill from `0-versions.txt` and `2-operator-helm-values.txt`.
 | Configuration tested (Operator-managed driver, or driver from image?) | *(pending)* |
 | Did HAMi's device-plugin pod CrashLoopBackOff after a reboot? | *(pending)* |
 | If yes, did it clear on its own once the driver daemonset was Ready? | *(pending)* |
-| Time from boot to a working fractional pod | *(pending)* |
+| Time from boot to the share pods Running | *(pending)* |
 | Any readiness gate needed to make it deterministic | *(pending)* |
 
 Upstream context: [HAMi #136](https://github.com/Project-HAMi/HAMi/issues/136),

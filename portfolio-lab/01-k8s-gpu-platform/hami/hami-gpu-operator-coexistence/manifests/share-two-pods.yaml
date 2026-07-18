@@ -1,0 +1,59 @@
+# Two pods, each taking a ~4000 MiB slice of ONE physical GPU, on a node where the NVIDIA
+# GPU Operator is installed but its device plugin is disabled and HAMi owns the device-plugin
+# role. Both land on the same card and run concurrently - something stock Kubernetes cannot
+# do, since it hands the whole device to the first pod.
+#
+# This is the coexistence proof, and a stronger one than a single pod: it shows HAMi's
+# scheduler + device plugin + HAMi-core all working (two pods co-resident, each seeing its
+# 4000 MiB slice) WHILE the Operator still runs the rest of the GPU stack (DCGM, GFD, NFD,
+# validator) beside them, with neither side fighting over nvidia.com/gpu.
+#
+#   nvidia.com/gpumem: 4000   per-pod GPU memory in MiB (1 unit = 1 MiB). Two 4000 MiB slices
+#                             fit any card in the course (24 GB or 48 GB) with room to spare.
+#
+# Same resource conventions as the validated Part B manifest, which is the reference:
+#   ../../hami-isolation-realgpu/manifests/share-two-pods.yaml
+#
+# gpumem only, deliberately. HAMi also supports nvidia.com/gpucores (percent of compute), but
+# Part B's real-GPU run did not exercise it (its captured evidence shows CUDA_DEVICE_SM_LIMIT=0,
+# i.e. no core limit), so this part keeps to the memory dimension the course has actually
+# proven on hardware. Add gpucores only if you intend to validate it.
+#
+# The pods set NO runtimeClassName on purpose: they rely on 'nvidia' being the node's DEFAULT
+# containerd runtime (Step 2 of the lab). If the default runtime is wrong, they still run but
+# the in-pod nvidia-smi shows the FULL card rather than the 4000 MiB slice, because HAMi-core
+# was never injected. That contrast is the check.
+#
+# They set NO schedulerName: HAMi's mutating webhook is supposed to rewrite it to
+# 'hami-scheduler'. If you see "Insufficient nvidia.com/gpumem" from default-scheduler, the
+# webhook did not fire (it is failurePolicy: Ignore, so it fails silently). See the lab's
+# Step 5 note; delete and re-apply the pods once hami-scheduler is Ready.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hami-coexist-a
+spec:
+  restartPolicy: Never
+  containers:
+    - name: cuda
+      image: nvidia/cuda:12.4.1-base-ubuntu22.04
+      command: ["bash", "-c", "nvidia-smi; sleep infinity"]
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+          nvidia.com/gpumem: 4000
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hami-coexist-b
+spec:
+  restartPolicy: Never
+  containers:
+    - name: cuda
+      image: nvidia/cuda:12.4.1-base-ubuntu22.04
+      command: ["bash", "-c", "nvidia-smi; sleep infinity"]
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+          nvidia.com/gpumem: 4000
