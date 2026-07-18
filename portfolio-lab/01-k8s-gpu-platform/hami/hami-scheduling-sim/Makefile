@@ -12,11 +12,19 @@
 SHELL := /bin/bash
 
 # Pinned versions. K8S_VERSION feeds BOTH the kind node image AND HAMi's
-# scheduler.kubeScheduler.imageTag, so the two cannot drift (a top HAMi failure mode).
+# scheduler.kubeScheduler.image.tag, so the two cannot drift (a top HAMi failure mode).
 # Override on the command line, e.g. make up K8S_VERSION=v1.30.4
 K8S_VERSION  ?= v1.31.0
 HAMI_VERSION ?= 2.9.0
 FGO_VERSION  ?= 0.0.59
+
+# HAMi's chart defaults its kube-scheduler sidecar to an Aliyun (China) registry, which
+# times out from many networks outside China. Point it at the upstream registry instead.
+# In China, override: make up KUBE_SCHEDULER_REGISTRY=registry.cn-hangzhou.aliyuncs.com \
+#                             KUBE_SCHEDULER_REPOSITORY=google_containers/kube-scheduler
+# NOT global.imageRegistry - that rewrites every image, including projecthami/hami.
+KUBE_SCHEDULER_REGISTRY   ?= registry.k8s.io
+KUBE_SCHEDULER_REPOSITORY ?= kube-scheduler
 
 CLUSTER    ?= hami-sim
 KIND_IMAGE := kindest/node:$(K8S_VERSION)
@@ -60,7 +68,9 @@ hami: ## Install HAMi: device plugin OFF (it needs NVML); scheduler tag pinned t
 	  -n kube-system \
 	  --set devicePlugin.enabled=false \
 	  --set mockDevicePlugin.enabled=false \
-	  --set scheduler.kubeScheduler.imageTag=$(K8S_VERSION) \
+	  --set scheduler.kubeScheduler.image.tag=$(K8S_VERSION) \
+	  --set scheduler.kubeScheduler.image.registry=$(KUBE_SCHEDULER_REGISTRY) \
+	  --set scheduler.kubeScheduler.image.repository=$(KUBE_SCHEDULER_REPOSITORY) \
 	  --wait --timeout 5m
 	kubectl -n kube-system get pods | grep -i hami
 

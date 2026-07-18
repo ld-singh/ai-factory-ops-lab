@@ -1,4 +1,4 @@
-# Real inference benchmark on a real GPU (Lesson 6, Part C)
+# Real inference benchmark on a real GPU (Lesson 6, Part D)
 
 > Part of [Lesson 6 - Real GPU](../../real-gpu-session/README.md) · The simulation
 > counterpart is [Lesson 4 - Inference Serving](../README.md) · Course home:
@@ -48,8 +48,8 @@ git clone https://github.com/ld-singh/ai-factory-ops-lab.git
 cd ai-factory-ops-lab
 ```
 
-Part C needs a k3s cluster with the `nvidia.com/gpu` device plugin - which is **exactly the
-Part A setup**. So the simplest path is to do Part C on the **same VM as Part A**: the GPU
+Part D needs a k3s cluster with the `nvidia.com/gpu` device plugin - which is **exactly the
+Part A setup**. So the simplest path is to do Part D on the **same VM as Part A**: the GPU
 runtime is already there and the whole card is free, so you can skip straight to Step 1.
 
 Starting on a fresh VM? Run the two Part A setup steps first (from the repo root):

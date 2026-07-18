@@ -1,0 +1,41 @@
+# One pod asking for a FRACTION of the card, on a node where the NVIDIA GPU Operator is
+# installed but its device plugin is disabled and HAMi owns the device-plugin role.
+#
+# This is the coexistence proof: if this pod reaches Running with a virtualized in-pod
+# nvidia-smi, then HAMi's scheduler + device plugin + HAMi-core are all working while the
+# Operator still runs the rest of the GPU stack (DCGM, GFD, NFD, validator) beside them.
+#
+#   nvidia.com/gpumem: 4000   per-pod GPU memory in MiB (1 unit = 1 MiB).
+#                             Small on purpose so it fits any card in the course (24 or 48 GB).
+#
+# Same resource conventions as the validated Part B manifest, which is the reference:
+#   ../../hami-isolation-realgpu/manifests/share-two-pods.yaml
+#
+# gpumem only, deliberately. HAMi also supports nvidia.com/gpucores (percent of compute), but
+# Part B's real-GPU run did not exercise it (the captured evidence shows CUDA_DEVICE_SM_LIMIT=0,
+# i.e. no core limit), so this part keeps to the memory dimension the course has actually
+# proven on hardware. Add gpucores only if you intend to validate it.
+#
+# The pod sets NO runtimeClassName on purpose: it relies on 'nvidia' being the node's
+# DEFAULT containerd runtime (Step 2 of the lab). If the default runtime is wrong, this pod
+# still runs but the in-pod nvidia-smi will show the FULL card rather than the 4000 MiB
+# slice, because HAMi-core was never injected. That contrast is the check.
+#
+# It also sets NO schedulerName: HAMi's mutating webhook is supposed to rewrite it to
+# 'hami-scheduler'. If you see "Insufficient nvidia.com/gpumem" from default-scheduler, the
+# webhook did not fire (it is failurePolicy: Ignore, so it fails silently). See the lab's
+# Step 5 note; delete and re-apply the pod once hami-scheduler is Ready.
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hami-coexist-fractional
+spec:
+  restartPolicy: Never
+  containers:
+    - name: cuda
+      image: nvidia/cuda:12.4.1-base-ubuntu22.04
+      command: ["bash", "-c", "nvidia-smi; sleep infinity"]
+      resources:
+        limits:
+          nvidia.com/gpu: 1
+          nvidia.com/gpumem: 4000

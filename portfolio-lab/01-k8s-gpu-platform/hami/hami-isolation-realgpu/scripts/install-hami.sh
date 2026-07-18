@@ -11,6 +11,17 @@
 #
 # The HAMi scheduler runs a kube-scheduler sidecar whose image tag must match the
 # cluster's Kubernetes SERVER version - the #1 HAMi failure. This auto-detects it.
+# (Chart 2.9.0 also resolves the tag from .Capabilities.KubeVersion when image.tag is
+# empty; we still set it explicitly so IMAGE_TAG= stays an honest override.)
+#
+# That sidecar's image defaults to an ALIYUN (China) registry in the chart, which times out
+# from most VMs outside China:
+#     Failed to pull image "registry.cn-hangzhou.aliyuncs.com/google_containers/kube-scheduler:vX.Y.Z"
+#     read tcp ...:80: read: connection timed out
+# So we point it at the upstream registry instead. Override with KUBE_SCHEDULER_REGISTRY=
+# (e.g. back to the Aliyun mirror if you ARE in China).
+# NOTE: do NOT use global.imageRegistry for this - it rewrites EVERY image, including
+# docker.io/projecthami/hami, which then 404s.
 #
 # VERSION-SENSITIVE - confirm against upstream before trusting:
 #   HAMi install:  https://project-hami.io/docs/get-started/deploy-with-helm
@@ -18,10 +29,14 @@
 #
 # Usage:
 #   ./install-hami.sh
-#   HAMI_VERSION=2.9.0 IMAGE_TAG=v1.31.5 ./install-hami.sh   # pin explicitly
+#   HAMI_VERSION=2.9.0 IMAGE_TAG=v1.31.5 ./install-hami.sh                    # pin explicitly
+#   KUBE_SCHEDULER_REGISTRY=registry.cn-hangzhou.aliyuncs.com \
+#     KUBE_SCHEDULER_REPOSITORY=google_containers/kube-scheduler ./install-hami.sh   # in China
 set -euo pipefail
 
 HAMI_VERSION="${HAMI_VERSION:-2.9.0}"
+KUBE_SCHEDULER_REGISTRY="${KUBE_SCHEDULER_REGISTRY:-registry.k8s.io}"
+KUBE_SCHEDULER_REPOSITORY="${KUBE_SCHEDULER_REPOSITORY:-kube-scheduler}"
 log() { printf '\n=== %s ===\n' "$*"; }
 die() { echo "ERROR: $*" >&2; exit 1; }
 
@@ -73,22 +88,49 @@ if helm -n kube-system list -a --filter '^hami$' -o json 2>/dev/null | grep -qiE
 fi
 
 # --- install HAMi ------------------------------------------------------------
-log "Installing HAMi $HAMI_VERSION (kube-scheduler image tag $IMAGE_TAG)"
+log "Installing HAMi $HAMI_VERSION (kube-scheduler: $KUBE_SCHEDULER_REGISTRY/$KUBE_SCHEDULER_REPOSITORY:$IMAGE_TAG)"
 helm repo add hami-charts https://project-hami.github.io/HAMi >/dev/null
 helm repo update hami-charts >/dev/null
 helm upgrade --install hami hami-charts/hami \
   --version "$HAMI_VERSION" \
   -n kube-system \
-  --set scheduler.kubeScheduler.imageTag="$IMAGE_TAG" \
+  --set scheduler.kubeScheduler.image.tag="$IMAGE_TAG" \
+  --set scheduler.kubeScheduler.image.registry="$KUBE_SCHEDULER_REGISTRY" \
+  --set scheduler.kubeScheduler.image.repository="$KUBE_SCHEDULER_REPOSITORY" \
   --wait --timeout 5m \
   || die "helm install failed. Inspect what went wrong:
        helm -n kube-system status hami
        kubectl -n kube-system get pods | grep -i hami
-       Then fix the cause (often a scheduler imageTag mismatch) and re-run - this script
-       auto-clears the failed release on the next run."
+       kubectl -n kube-system describe pod -l app.kubernetes.io/component=hami-scheduler | tail -25
+       Common causes: a scheduler image tag mismatch, or the kube-scheduler image failing to
+       pull. Fix the cause and re-run - this script auto-clears the failed release next run."
 
 log "HAMi pods"
 kubectl -n kube-system get pods | grep -i hami || echo "(no hami pods yet - check 'kubectl -n kube-system get pods')"
+
+# --- gate on the mutating webhook actually being able to serve -----------------
+# HAMi's webhook rewrites schedulerName to 'hami-scheduler'. It is registered with
+# failurePolicy: Ignore, so if it CANNOT be reached the pod is admitted UNMUTATED and lands
+# on the default scheduler, which sees no nvidia.com/gpumem|gpucores in allocatable and
+# reports "Insufficient nvidia.com/gpumem". That failure is silent and looks like a HAMi
+# bug, so gate on the webhook's Service having endpoints before creating any GPU pod.
+# The webhook only fires on CREATE, so a pod made too early stays broken until recreated.
+log "Waiting for the HAMi scheduler + webhook endpoint to be ready"
+kubectl -n kube-system rollout status deploy/hami-scheduler --timeout=180s || true
+eps=""
+for _ in $(seq 1 30); do
+  eps="$(kubectl -n kube-system get endpoints hami-scheduler -o jsonpath='{.subsets[*].addresses[*].ip}' 2>/dev/null || true)"
+  [[ -n "$eps" ]] && break
+  sleep 4
+done
+if [[ -n "$eps" ]]; then
+  echo "OK: hami-scheduler endpoints ready ($eps) - the webhook can be reached."
+else
+  echo "WARNING: hami-scheduler has no endpoints yet. Because the webhook is failurePolicy:"
+  echo "Ignore, GPU pods created now would SILENTLY land on the default scheduler and fail"
+  echo "with 'Insufficient nvidia.com/gpumem'. Wait for the scheduler pod, then verify with:"
+  echo "  kubectl get pod <your-pod> -o jsonpath='{.spec.schedulerName}'   # want: hami-scheduler"
+fi
 
 # --- verify HAMi registered the GPU -----------------------------------------
 # HAMi advertises nvidia.com/gpu (= physical GPUs x deviceSplitCount, default 10) and

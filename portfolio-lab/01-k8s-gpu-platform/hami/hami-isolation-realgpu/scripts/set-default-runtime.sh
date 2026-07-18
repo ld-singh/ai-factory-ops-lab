@@ -7,6 +7,12 @@
 #
 # Run ON THE VM as root, AFTER host-setup.sh, BEFORE installing HAMi.
 #
+# Shared by two Lesson 6 parts, and the NEXT step differs between them:
+#   Part B (hami-isolation-realgpu)        - HAMi only, no GPU Operator. Next: ./install-hami.sh
+#   Part C (hami-gpu-operator-coexistence) - GPU Operator FIRST with devicePlugin.enabled=false,
+#                                            then HAMi. Do NOT run install-hami.sh straight after.
+# This script itself is identical for both; only what follows it changes.
+#
 # Why: HAMi pods don't set runtimeClassName, so HAMi-core only gets injected if the DEFAULT
 # runtime is nvidia. See https://project-hami.io/docs/v2.4.1/installation/prerequisites
 # k3s flag reference (--default-runtime): https://docs.k3s.io/advanced
@@ -66,6 +72,17 @@ fi
 cat <<'EOF'
 
 === default runtime set ===
-Next (from your laptop, where helm + KUBECONFIG are set up, or here with helm installed):
-    ./install-hami.sh
+This script is shared by two Lesson 6 parts. Continue with the one you are running:
+
+  Part B - HAMi isolation (no GPU Operator):
+      ./install-hami.sh
+      Run it from this scripts/ directory, with helm + KUBECONFIG set up (here, or from
+      your laptop).
+
+  Part C - HAMi + GPU Operator coexistence:
+      Do NOT run install-hami.sh yet. Install the GPU Operator FIRST with its device plugin
+      disabled (devicePlugin.enabled=false), then HAMi. Installing HAMi now would leave the
+      Operator's device plugin owning nvidia.com/gpu, which is the conflict that part exists
+      to avoid. Steps 3 and 4 of:
+      portfolio-lab/01-k8s-gpu-platform/hami/hami-gpu-operator-coexistence/README.md
 EOF

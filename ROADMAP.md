@@ -22,7 +22,7 @@ Tracked as issues on the board. Themes:
 | Security | Lesson 7: Security for GPU/AI infrastructure | [#10](https://github.com/ld-singh/ai-factory-ops-lab/issues/10) |
 | Cost | Lesson 8: Cost & autoscaling for GPU platforms | [#11](https://github.com/ld-singh/ai-factory-ops-lab/issues/11) |
 | Scale | Concepts: the multi-node boundary (NCCL, NVLink, GPUDirect RDMA, InfiniBand) | [#12](https://github.com/ld-singh/ai-factory-ops-lab/issues/12) |
-| Real GPU | Lesson 6 Part D: Slurm real GRES enforcement on hardware | [#13](https://github.com/ld-singh/ai-factory-ops-lab/issues/13) |
+| Real GPU | Lesson 6 Part E: Slurm real GRES enforcement on hardware | [#13](https://github.com/ld-singh/ai-factory-ops-lab/issues/13) |
 | Concepts | MIG (hardware partitioning) vs HAMi (software sharing) | [#14](https://github.com/ld-singh/ai-factory-ops-lab/issues/14) |
 | Project | CI: mkdocs build + markdown lint on PRs | [#15](https://github.com/ld-singh/ai-factory-ops-lab/issues/15) |
 | Docs | asciinema / GIF of a lab running in the README | [#16](https://github.com/ld-singh/ai-factory-ops-lab/issues/16) |
