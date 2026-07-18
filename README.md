@@ -293,9 +293,9 @@ contains real captured output.
 | 1C | GPU sharing & fractional GPUs with HAMi | Sim validates HAMi's scheduling *decisions* (fractional placement, Pending rejection, `FilteringSucceed`). GPU *sharing* + memory-cap *isolation* are real-GPU only → done in Lesson 6 |
 | 2 | Slurm GPU workload management | Complete (runnable; validated with captured output) |
 | 3 | Observability | Complete (runnable; metrics/alerts/dashboards validated) |
-| 4 | Inference serving | Harness runnable + validated; real GPU benchmark validated in Lesson 6 Part C (RTX A6000) |
+| 4 | Inference serving | Harness runnable + validated; real GPU benchmark validated in Lesson 6 Part D (RTX A6000) |
 | 5 | BCM-style cluster lifecycle (conceptual + drill) | Drill runnable + validated; BCM specifics conceptual |
-| 6 | Real GPU (capstone: runtime path, real DCGM, HAMi isolation, Slurm GRES, inference) | **Parts A, B & C validated on real hardware.** Part A - runtime path + real `DCGM_FI_*` telemetry ([real-gpu-validation-report.md](./portfolio-lab/06-validation-reports/real-gpu-validation-report.md)). Part B - HAMi GPU sharing: two pods on one card with the slice enforced by HAMi-core ([hami-isolation-validation.md](./portfolio-lab/06-validation-reports/hami-isolation-validation.md)). Part C - inference benchmark: throughput scaling + the saturation knee on an RTX A6000 ([inference-benchmark-report.md](./portfolio-lab/06-validation-reports/inference-benchmark-report.md)). **Part D (Slurm real GRES, optional) is planned.** |
+| 6 | Real GPU (capstone: runtime path, real DCGM, HAMi isolation, Slurm GRES, inference) | **Parts A, B & D validated on real hardware.** Part A - runtime path + real `DCGM_FI_*` telemetry ([real-gpu-validation-report.md](./portfolio-lab/06-validation-reports/real-gpu-validation-report.md)). Part B - HAMi GPU sharing: two pods on one card with the slice enforced by HAMi-core ([hami-isolation-validation.md](./portfolio-lab/06-validation-reports/hami-isolation-validation.md)). Part D - inference benchmark: throughput scaling + the saturation knee on an RTX A6000 ([inference-benchmark-report.md](./portfolio-lab/06-validation-reports/inference-benchmark-report.md)). **Part C (HAMi + GPU Operator coexistence) is a run-ready guide; Part E (Slurm real GRES, optional) is planned.** |
 
 ## Documentation site
 

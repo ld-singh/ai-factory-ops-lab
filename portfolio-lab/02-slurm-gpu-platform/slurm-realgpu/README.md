@@ -1,4 +1,4 @@
-# Slurm real GRES on a real GPU (Lesson 6, Part D)
+# Slurm real GRES on a real GPU (Lesson 6, Part E)
 
 > Part of [Lesson 6 - Real GPU](../../real-gpu-session/README.md) · The simulation
 > counterpart is [Lesson 2 - Slurm (fake GRES)](../README.md) · Course home:

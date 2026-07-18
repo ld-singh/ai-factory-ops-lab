@@ -206,9 +206,9 @@ Stay on this GPU and continue the [Lesson 6 session](../../real-gpu-session/READ
 
 - **Part B - [HAMi GPU sharing](../hami/hami-isolation-realgpu/README.md):** turn this one
   card into enforced slices and prove multi-pod co-residency - the highest-value add-on.
-- **Part C - [inference benchmark (vLLM)](../../04-inference-serving/README.md):** real
+- **Part D - [inference benchmark (vLLM)](../../04-inference-serving/README.md):** real
   TTFT / latency / tokens-per-second on one mid-range GPU.
-- **Part D - [Slurm real `--gres=gpu`](../../02-slurm-gpu-platform/slurm-realgpu/README.md):**
+- **Part E - [Slurm real `--gres=gpu`](../../02-slurm-gpu-platform/slurm-realgpu/README.md):**
   the real counterpart to the fake-GRES [Slurm lesson](../../02-slurm-gpu-platform/README.md).
 
 ---

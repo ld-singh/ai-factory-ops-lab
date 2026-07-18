@@ -121,5 +121,5 @@ Part A's core artifact. Capture it (from the repo root, writes a tarball):
 Then scp the gpu-evidence-*.tgz off this VM before teardown - it's the deliverable -
 and record it in portfolio-lab/06-validation-reports/real-gpu-validation-report.md.
 Clean up the test pod: kubectl delete pod cuda-smoke
-Then continue with Lesson 6 Part B (HAMi) and Part C (inference benchmark).
+Then continue with Lesson 6 Part B (HAMi) and Part D (inference benchmark).
 EOF

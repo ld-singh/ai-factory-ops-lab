@@ -80,8 +80,8 @@ kubectl logs cuda-smoke                    # nvidia-smi ran on the real GPU
 After that you have a real GPU cluster you drive from your laptop. Work the
 [Lesson 6 parts](../README.md): Part A evidence is already produced by the smoke test;
 then [Part B - HAMi](../../01-k8s-gpu-platform/hami/hami-isolation-realgpu/README.md),
-[Part C - inference benchmark](../../04-inference-serving/README.md), and
-[Part D - Slurm GRES](../../02-slurm-gpu-platform/slurm-realgpu/README.md). **Tear the VM
+[Part D - inference benchmark](../../04-inference-serving/README.md), and
+[Part E - Slurm GRES](../../02-slurm-gpu-platform/slurm-realgpu/README.md). **Tear the VM
 down the moment your evidence is captured.**
 
 ## The scripts
