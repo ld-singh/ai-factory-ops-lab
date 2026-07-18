@@ -23,7 +23,7 @@ You run these on one cheap card, in order. Each part is a full lab page of its o
 |---|---|---|---|---|
 | **A** | [Runtime path + telemetry](../01-k8s-gpu-platform/gpu-operator-real/README.md) | a CUDA pod actually executes on the GPU; real `DCGM_FI_*` metrics | Lessons 1 / 3 | ✅ validated |
 | **B** | [HAMi sharing + isolation](../01-k8s-gpu-platform/hami/hami-isolation-realgpu/README.md) | two pods share one card with an **enforced** memory cap | Lesson 1C sim | ✅ validated |
-| **C** | [HAMi + GPU Operator coexistence](../01-k8s-gpu-platform/hami/hami-gpu-operator-coexistence/README.md) | the Operator and HAMi on one node without fighting over `nvidia.com/gpu` | Lesson 1C concepts | 🟡 run-ready |
+| **C** | [HAMi + GPU Operator coexistence](../01-k8s-gpu-platform/hami/hami-gpu-operator-coexistence/README.md) | the Operator and HAMi on one node without fighting over `nvidia.com/gpu` | Lesson 1C concepts | ✅ validated |
 | **D** | [Inference benchmark](../04-inference-serving/inference-realgpu/README.md) | real tokens/sec and latency under load | Lesson 4 CPU tier | ✅ validated |
 | **E** | [Slurm real GRES](../02-slurm-gpu-platform/slurm-realgpu/README.md) | `--gres=gpu` actually confines a job to its device | Lesson 2 fake GRES | 🚧 planned (optional) |
 
@@ -39,7 +39,7 @@ You run these on one cheap card, in order. Each part is a full lab page of its o
 2. Pull *real* DCGM telemetry - the hardware counterpart of Lesson 3's synthetic stream. ✅
 3. Share one physical GPU between pods with HAMi and prove the memory cap is enforced. ✅
 4. Run HAMi alongside the NVIDIA GPU Operator on one node, the way most real clusters are
-   built. 🟡 *run-ready (Part C)*
+   built. ✅ *validated (Part C)*
 5. Produce real inference benchmark numbers - serve a model with vLLM and run the Lesson 4
    drills against it. ✅ *validated (Part D)*
 6. Enforce real `--gres=gpu` in Slurm - the hardware counterpart of Lesson 2's fake GRES.
@@ -182,7 +182,7 @@ deliberately cannot prove.
 Pending `CardInsufficientMemory` from the oversubscribe exercise - into the lab notebook,
 **separate** from Part A (they back different claims).
 
-### Part C - HAMi + GPU Operator coexistence · 🟡 run-ready
+### Part C - HAMi + GPU Operator coexistence · ✅ validated
 
 Part B keeps HAMi and the Operator apart. Most production clusters cannot: the Operator is how
 the driver, toolkit, and runtime get installed and managed. This part runs both on one node,
@@ -193,10 +193,11 @@ Full lab (the Helm values, the component-by-component behaviour, and the reboot 
 
 📸 **Capture:** `bash portfolio-lab/01-k8s-gpu-platform/hami/hami-gpu-operator-coexistence/scripts/capture-evidence.sh`
 snapshots all six artifacts (the Operator's absent device plugin, HAMi's virtual `nvidia.com/gpu`
-count, the default runtime, a fractional pod with the slice enforced, and DCGM still on physical
-counters) into a tarball. Record them in
-[`hami-gpu-operator-coexistence-validation.md`](../06-validation-reports/hami-gpu-operator-coexistence-validation.md) -
-that filled report is what flips this from run-ready to validated.
+count, the default runtime, two pods sharing one card with the slice enforced, and DCGM still on
+physical counters) into a tarball, recorded in
+[`hami-gpu-operator-coexistence-validation.md`](../06-validation-reports/hami-gpu-operator-coexistence-validation.md).
+Validated on an NVIDIA L40 (driver from the VM image); the Operator-managed-driver reboot case
+is the one part not yet covered.
 
 ### Part D - Real inference benchmark · ✅ validated
 
@@ -245,15 +246,14 @@ from "pending hardware run" to Complete:
 
 - [x] [`real-gpu-validation-report.md`](../06-validation-reports/real-gpu-validation-report.md) - runtime path + DCGM (Part A)
 - [x] [`hami-isolation-validation.md`](../06-validation-reports/hami-isolation-validation.md) - co-residency, virtualized `nvidia-smi`, allocation refusal, real-HW exhaustion, mechanism (Part B)
-- 🟡 [`hami-gpu-operator-coexistence-validation.md`](../06-validation-reports/hami-gpu-operator-coexistence-validation.md) - the Operator and HAMi side by side on one node, fractional pod still enforced (Part C - **run-ready, awaiting a hardware run**)
+- [x] [`hami-gpu-operator-coexistence-validation.md`](../06-validation-reports/hami-gpu-operator-coexistence-validation.md) - the Operator and HAMi side by side on one node, two pods sharing one card with the slice enforced (Part C)
 - [x] [`inference-benchmark-report.md`](../06-validation-reports/inference-benchmark-report.md) - the concurrency sweep + saturation knee (Part D)
 - 🚧 [`slurm-gres-validation.md`](../06-validation-reports/slurm-gres-validation.md) - the real `--gres=gpu` enforcement section (Part E - **planned future update, optional**)
 
-🔬 **What this session covers.** Parts A, B, and D give you the real single-node serving
-path: a CUDA pod executing, real DCGM telemetry, enforced GPU sharing, and real inference
-benchmarks - all three validated with captured output. Part C (HAMi + GPU Operator
-coexistence) is run-ready and awaiting a hardware run. Part E - enforced Slurm GRES - is a
-planned optional add-on.
+🔬 **What this session covers.** Parts A, B, C, and D give you the real single-node serving
+path: a CUDA pod executing, real DCGM telemetry, enforced GPU sharing, HAMi coexisting with the
+GPU Operator, and real inference benchmarks - all four validated with captured output. Part E -
+enforced Slurm GRES - is a planned optional add-on.
 None of this covers NCCL/NVLink/MIG/GPUDirect-RDMA, multi-node scale, or sharing-performance
 under sustained load. Full ledger:
 [`fake-vs-real-limitations.md`](../06-validation-reports/fake-vs-real-limitations.md).

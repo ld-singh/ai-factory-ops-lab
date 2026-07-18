@@ -4,10 +4,13 @@
 > getting-to-production companion to [Lesson 1C: GPU sharing with HAMi](../README.md) · Course
 > home: [AI Factory Operations Lab](../../../../README.md)
 
-> 🟡 **STATUS: RUN-READY GUIDE, pending real-hardware validation.** It is built on the
-> documented device-plugin conflict, the known workaround, and the reboot behaviour reported
-> upstream. Confirm every command against the current HAMi and GPU Operator docs before you
-> rely on it, and capture your own output when you run it.
+> ✅ **STATUS: VALIDATED** on a real NVIDIA L40 (48 GB), 2026-07-18: the GPU Operator (device
+> plugin disabled) and HAMi ran on one k3s node, two pods shared the card, and the slice was
+> enforced by HAMi-core, all while the Operator's DCGM/NFD/validator kept running. Captured
+> output:
+> [`hami-gpu-operator-coexistence-validation.md`](../../../06-validation-reports/hami-gpu-operator-coexistence-validation.md).
+> The Operator-managed-driver reboot case (`driver.enabled=true`) is called out below and is
+> **not** covered by that run. Confirm commands against the current HAMi and GPU Operator docs.
 
 ## Why this comes up
 
@@ -275,7 +278,10 @@ Operator's DCGM Exporter is still reporting real counters for the same physical 
 
 ```bash
 kubectl -n gpu-operator port-forward svc/nvidia-dcgm-exporter 9400:9400 &
+PF_PID=$!
+sleep 5                                                    # let the port-forward come up
 curl -s localhost:9400/metrics | grep DCGM_FI_DEV_FB_USED
+kill $PF_PID                                               # stop the port-forward
 ```
 
 DCGM reports **physical** GPU counters and is unaffected by HAMi's virtual accounting. So a
@@ -332,15 +338,21 @@ It applies the two share pods itself and captures six artifacts:
 | 5 | `5-share-pods.txt`, `5-in-pod-smi-*.txt`, `5-hami-core.txt` | two pods co-resident on one GPU, placed by the HAMi scheduler, each seeing its slice in-pod |
 | 6 | `6-dcgm-metrics.txt` | DCGM still reporting physical counters beside HAMi |
 
-Then record the results in
-[`hami-gpu-operator-coexistence-validation.md`](../../../06-validation-reports/hami-gpu-operator-coexistence-validation.md).
-**That filled report is what flips this part from run-ready to validated**, and it is the
-deliverable, not the VM.
+The filled-in results live in
+[`hami-gpu-operator-coexistence-validation.md`](../../../06-validation-reports/hami-gpu-operator-coexistence-validation.md)
+(validated on an NVIDIA L40). That report is the deliverable, not the VM.
 
 Some artifacts read host files (`/etc/rancher/k3s/...`), so run the script as a user with
 passwordless sudo or capture Artifact 4 by hand. The script tells you which.
 
 Also worth capturing if you test it: the reboot sequence below.
+
+> 🧹 **Tear the VM down the moment the tarball is on your laptop.** The evidence is the
+> deliverable; the VM has no residual value, and a forgotten GPU VM is the only way this gets
+> expensive. Confirm the `hami-coexist-evidence-*.tgz` is downloaded, then destroy the VM
+> **and its storage volume** (delete the boot/data disk too if it is billed separately). If
+> you are running Part C on the same rental as other Lesson 6 parts, tear down only after the
+> last one is captured.
 
 ## What this proves, and what it does not
 

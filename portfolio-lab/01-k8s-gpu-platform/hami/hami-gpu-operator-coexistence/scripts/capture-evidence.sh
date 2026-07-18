@@ -179,10 +179,13 @@ tar czf "$OUT.tgz" "$OUT"
 cat <<EOF
 
 === wrote $OUT.tgz ===
-scp it to your laptop and record it as the Part C coexistence evidence, e.g.:
-  scp -i <key> <user>@<vm-ip>:$PWD/$OUT.tgz \\
-    ./portfolio-lab/06-validation-reports/evidence/
-Then fill in:
-  portfolio-lab/06-validation-reports/hami-gpu-operator-coexistence-validation.md
-Clean up:  kubectl delete -f $LAB_DIR/manifests/   ; and tear the VM down.
+1. scp it to your laptop and record it as the Part C coexistence evidence, e.g.:
+     scp -i <key> <user>@<vm-ip>:$PWD/$OUT.tgz \\
+       ./portfolio-lab/06-validation-reports/evidence/
+2. Fill in:
+     portfolio-lab/06-validation-reports/hami-gpu-operator-coexistence-validation.md
+3. CONFIRM the tarball is on your laptop, then TEAR THE VM DOWN (and its storage volume).
+   The evidence is the deliverable; a forgotten GPU VM is the only way this gets expensive.
+   Clean up the pods first if you are keeping the VM for another part:
+     kubectl delete -f $LAB_DIR/manifests/
 EOF
