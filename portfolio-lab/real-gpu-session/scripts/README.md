@@ -77,12 +77,20 @@ kubectl get nodes -o jsonpath='{.items[0].status.allocatable.nvidia\.com/gpu}'; 
 kubectl logs cuda-smoke                    # nvidia-smi ran on the real GPU
 ```
 
-After that you have a real GPU cluster you drive from your laptop. Work the
-[Lesson 6 parts](../README.md): Part A evidence is already produced by the smoke test;
-then [Part B - HAMi](../../01-k8s-gpu-platform/hami/hami-isolation-realgpu/README.md),
-[Part D - inference benchmark](../../04-inference-serving/README.md), and
-[Part E - Slurm GRES](../../02-slurm-gpu-platform/slurm-realgpu/README.md). **Tear the VM
-down the moment your evidence is captured.**
+After that you have a real GPU cluster (GPU Operator with its device plugin enabled) that you
+drive from your laptop. This cluster serves **Part A** (evidence already produced by the smoke
+test) and **[Part D - inference benchmark](../../04-inference-serving/README.md)**, which reuses
+the same `nvidia.com/gpu` device plugin.
+
+**Part B and Part C need a different device-plugin setup**, so they do **not** reuse this
+cluster as-is:
+[Part B - HAMi isolation](../../01-k8s-gpu-platform/hami/hami-isolation-realgpu/README.md) runs
+HAMi **without** the Operator, and
+[Part C - HAMi + GPU Operator coexistence](../../01-k8s-gpu-platform/hami/hami-gpu-operator-coexistence/README.md)
+runs both together with the Operator's device plugin **disabled**. Use a fresh VM, or this one
+after `helm uninstall gpu-operator`. [Part E - Slurm GRES](../../02-slurm-gpu-platform/slurm-realgpu/README.md)
+is a separate track. The [Lesson 6 overview](../README.md#which-parts-share-a-cluster) has the
+full cluster-sharing table. **Tear the VM down the moment your evidence is captured.**
 
 ## The scripts
 

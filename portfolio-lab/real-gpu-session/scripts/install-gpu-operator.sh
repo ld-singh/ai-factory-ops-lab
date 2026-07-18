@@ -121,5 +121,10 @@ Part A's core artifact. Capture it (from the repo root, writes a tarball):
 Then scp the gpu-evidence-*.tgz off this VM before teardown - it's the deliverable -
 and record it in portfolio-lab/06-validation-reports/real-gpu-validation-report.md.
 Clean up the test pod: kubectl delete pod cuda-smoke
-Then continue with Lesson 6 Part B (HAMi) and Part D (inference benchmark).
+
+Next: this cluster (Operator device plugin enabled) also serves Part D (inference benchmark),
+so continue there on the SAME cluster. Part B (HAMi isolation) and Part C (HAMi + GPU Operator
+coexistence) need a different device-plugin setup - HAMi's plugin instead of / alongside the
+Operator's - so run them on a fresh VM or after 'helm uninstall gpu-operator', NOT on this
+cluster as-is. See the Lesson 6 overview 'Which parts share a cluster' table.
 EOF
