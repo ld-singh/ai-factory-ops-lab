@@ -223,6 +223,15 @@ has the per-GPU memory/core figures, which the sim lesson supplies via the
 `hami.io/node-nvidia-register` annotation. The split keeps the boundary clear: the sim
 proves the placement decision, the real-GPU lesson proves enforcement.
 
+**Getting to production:** most real clusters install the GPU stack with the NVIDIA GPU
+Operator, and running HAMi alongside it has one sharp edge (both ship a device plugin
+advertising `nvidia.com/gpu`).
+[`hami-gpu-operator-coexistence/`](./hami-gpu-operator-coexistence/README.md) walks the
+clean single-node setup: the Operator manages the base stack (in production typically the
+driver and toolkit too; on the course VM those come from the image, so it runs with
+`driver.enabled=false` and `toolkit.enabled=false`), HAMi owns the device plugin, and it
+covers the reboot race that trips people up. Validated on an NVIDIA L40.
+
 ---
 
 ## What you can and cannot learn here - the precise line

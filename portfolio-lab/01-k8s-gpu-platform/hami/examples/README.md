@@ -5,7 +5,7 @@
 > Confirm against the version you installed: https://project-hami.io/ and
 > https://github.com/Project-HAMi/HAMi
 >
-> These run in [Lesson 1C Part 3](../README.md#part-3----share-one-real-gpu-between-pods-do-this-during-your-lesson-2-rental),
+> These run in [Lesson 1C: Sharing on a real GPU](../README.md#sharing-on-a-real-gpu-the-enforcement-half),
 > on the **real GPU** from Lesson 6 - that's where the memory-cap enforcement is
 > actually proven. Capture the in-pod `nvidia-smi` and any allocation-failure
 > output into [`../../../06-validation-reports/`](../../../06-validation-reports/).
