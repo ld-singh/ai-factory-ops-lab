@@ -121,6 +121,7 @@ nav:
   - Runbooks:
       - Overview: runbooks/README.md
       - Device plugin not advertising GPUs: runbooks/device-plugin-not-advertising-gpus.md
+      - HAMi troubleshooting (GPU sharing): runbooks/hami-troubleshooting.md
       - k3s default runtime / containerd config: runbooks/k3s-default-runtime-containerd-config.md
       - GPU node not ready: runbooks/gpu-node-not-ready.md
       - GPU operator driver pod failing: runbooks/gpu-operator-driver-pod-failing.md

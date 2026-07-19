@@ -8,6 +8,7 @@ Slurm drain drill).
 ## Kubernetes / GPU stack
 
 - [Device plugin not advertising GPUs](device-plugin-not-advertising-gpus.md)
+- [HAMi troubleshooting (GPU sharing)](hami-troubleshooting.md)
 - [k3s default runtime / containerd config](k3s-default-runtime-containerd-config.md)
 - [GPU node not ready](gpu-node-not-ready.md)
 - [GPU Operator driver pod failing](gpu-operator-driver-pod-failing.md)
