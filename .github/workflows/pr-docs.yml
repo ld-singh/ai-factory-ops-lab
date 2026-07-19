@@ -1,0 +1,53 @@
+name: PR docs build
+
+# Validate the docs site on pull requests: sync the lesson markdown into docs/ and build
+# with MkDocs. This complements the deploy workflow (docs.yml), which only runs on push to
+# main - here we catch broken cross-links, missing nav entries, and build errors *before*
+# merge, so main always builds.
+on:
+  pull_request:
+    # Only when something that affects the built site changes.
+    paths:
+      - "portfolio-lab/**/*.md"
+      - "runbooks/**/*.md"
+      - "diagrams/**/*.md"
+      - "control-plane/**/*.md"
+      - "docs/**"
+      - "mkdocs.yml"
+      - "scripts/sync-docs.sh"
+      - "requirements-docs.txt"
+      - ".github/workflows/pr-docs.yml"
+  workflow_dispatch: {}
+
+# A newer push to the same PR cancels the in-progress check.
+concurrency:
+  group: pr-docs-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Silence Material for MkDocs' advocacy banner about a future MkDocs 2.0.
+    env:
+      NO_MKDOCS_2_WARNING: "true"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-docs.txt
+      - run: pip install -r requirements-docs.txt
+      - name: Sync lesson markdown into docs/
+        run: bash scripts/sync-docs.sh
+      - name: Build site (strict)
+        # --strict fails the check on broken internal links and missing nav pages, which is
+        # the whole point of a PR gate. It stays green for valid PRs because sync-docs.sh
+        # rewrites the lesson pages' code-file links (.sh/.yaml) to absolute GitHub URLs, and
+        # the few remaining relative-link notices (directory-style links) log at INFO, which
+        # --strict does not fail on. The deploy workflow builds without --strict so a stray
+        # link can never block a release; the stricter gate lives here, before merge.
+        run: mkdocs build --strict
