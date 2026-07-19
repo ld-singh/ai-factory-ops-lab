@@ -101,7 +101,7 @@ helm repo update hami-charts
 helm upgrade --install hami hami-charts/hami \
   --version 2.9.0 \
   -n kube-system \
-  --set scheduler.kubeScheduler.imageTag=vX.Y.Z \
+  --set scheduler.kubeScheduler.image.tag=vX.Y.Z \
   --wait
 kubectl -n kube-system get pods | grep -i hami
 ```
