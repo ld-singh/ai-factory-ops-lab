@@ -31,7 +31,7 @@ front.
 > - **Chart source.** The fleet uses the run.ai JFrog chart
 >   (`https://runai.jfrog.io/artifactory/api/helm/fake-gpu-operator-charts-prod`). The
 >   `ghcr.io/run-ai/...` OCI build is DRA-oriented and never populates `nvidia.com/gpu`.
-> - **`scheduler.kubeScheduler.imageTag`** is not used by KAI's chart; KAI versions
+> - **`scheduler.kubeScheduler.image.tag`** is not used by KAI's chart; KAI versions
 >   itself. (That knob is HAMi's, [Lesson 1C](../hami/README.md).)
 
 🎯 **Learning objectives** - after this lesson you can:
