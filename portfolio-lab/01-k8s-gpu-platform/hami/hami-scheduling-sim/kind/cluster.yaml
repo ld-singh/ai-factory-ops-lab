@@ -2,7 +2,7 @@
 # workers. The workers get labelled gpu=on (see the Makefile) so HAMi confines
 # scheduling to them; the control-plane is left unlabelled and out of GPU placement.
 # The node image tag is supplied by the Makefile (--image kindest/node:$K8S_VERSION)
-# so it stays matched to HAMi's scheduler.kubeScheduler.image.tag.
+# so it stays matched to HAMi's scheduler.kubeScheduler.imageTag.
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:

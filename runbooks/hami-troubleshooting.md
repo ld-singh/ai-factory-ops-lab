@@ -193,18 +193,13 @@ In China, keep the Aliyun default (drop the two `--set` flags). Do **not** use
 `docker.io/projecthami/hami`, into a path that does not exist.
 
 **Related trap: the sidecar tag must match the Kubernetes server version** (a top HAMi failure
-mode). Chart 2.9.0 resolves it automatically from the cluster (stripping the k3s suffix, so
-`v1.36.2+k3s1` becomes `v1.36.2`), so you usually do not set it at all. If you do pin it, the
-exact key is version-specific, so confirm it against the chart you are installing rather than
-copying a spelling:
+mode). The chart resolves this automatically from the cluster (stripping the k3s suffix, so
+`v1.36.2+k3s1` becomes `v1.36.2`), so you usually do not set it at all. If you do want to pin
+it, confirm the exact key against the chart version you are installing:
 
 ```bash
 helm show values hami-charts/hami --version <ver> | grep -A15 'kubeScheduler:'
 ```
-
-In chart 2.9.0 the key is `scheduler.kubeScheduler.image.tag`. A bare
-`scheduler.kubeScheduler.imageTag` is not a key in that chart, so a `--set` on it has no effect
-there; other chart versions may spell it differently, which is exactly why you verify.
 
 ---
 
