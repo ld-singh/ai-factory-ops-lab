@@ -84,10 +84,10 @@ containerd's `config.toml` directly: k3s regenerates that file on every start, s
 either overwritten or break the node.
 
 > ⚠️ **Ignore the script's `./install-hami.sh` suggestion.** That script is shared with Part B,
-> which installs HAMi next because it runs without the Operator. **Here the GPU Operator has to
-> go in first** (Step 3), with its device plugin disabled. Installing HAMi now would leave the
-> Operator's device plugin owning `nvidia.com/gpu`, which is the exact conflict this part
-> exists to avoid.
+> which installs HAMi next because it runs without the Operator. **Here the GPU Operator goes in
+> first** (Step 3), with its device plugin disabled, and HAMi only after (Step 4). Running
+> `install-hami.sh` straight from here would skip the Operator entirely, so you would not be
+> testing coexistence at all.
 
 ✅ **Verify:**
 

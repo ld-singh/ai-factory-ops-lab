@@ -80,9 +80,9 @@ This script is shared by two Lesson 6 parts. Continue with the one you are runni
       your laptop).
 
   Part C - HAMi + GPU Operator coexistence:
-      Do NOT run install-hami.sh yet. Install the GPU Operator FIRST with its device plugin
-      disabled (devicePlugin.enabled=false), then HAMi. Installing HAMi now would leave the
-      Operator's device plugin owning nvidia.com/gpu, which is the conflict that part exists
-      to avoid. Steps 3 and 4 of:
+      Do NOT run install-hami.sh yet. Follow Part C's install order: install the GPU Operator
+      FIRST with its device plugin disabled (devicePlugin.enabled=false), THEN HAMi. Running
+      install-hami.sh straight from here would skip the Operator entirely, so you would not be
+      testing coexistence at all. Steps 3 and 4 of:
       portfolio-lab/01-k8s-gpu-platform/hami/hami-gpu-operator-coexistence/README.md
 EOF
