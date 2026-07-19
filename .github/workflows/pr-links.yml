@@ -1,0 +1,65 @@
+name: PR link check
+
+# Catch broken links in the docs before merge (issue #21), complementing the mkdocs build
+# check (pr-docs.yml, #15). Two passes with different strictness:
+#   1. internal links (relative paths to files in the repo)  -> BLOCKING, deterministic
+#   2. external links (http/https URLs)                      -> ADVISORY, never blocks
+# Internal link rot (a lesson pointing at a renamed/moved file) is a real regression and is
+# fully under our control, so it fails the PR. External links depend on other people's sites
+# being up, so they are reported but never block a merge on a transient outage.
+on:
+  pull_request:
+    paths:
+      - "**/*.md"
+      - "lychee.toml"
+      - ".github/workflows/pr-links.yml"
+  workflow_dispatch: {}
+
+concurrency:
+  group: pr-links-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  links:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The source markdown is the single source of truth (docs/ holds generated copies and
+      # is gitignored, so it is not present on a fresh checkout). Check the lesson trees and
+      # the top-level docs.
+      - name: Check internal links (blocking)
+        uses: lycheeverse/lychee-action@v2
+        with:
+          # --offline verifies that every relative link points at a file that exists, and
+          # skips all URLs. This never touches the network, so it cannot be flaky.
+          args: >-
+            --offline
+            --no-progress
+            portfolio-lab/**/*.md
+            runbooks/**/*.md
+            diagrams/**/*.md
+            control-plane/**/*.md
+            ./*.md
+          fail: true
+
+      - name: Check external links (advisory)
+        uses: lycheeverse/lychee-action@v2
+        env:
+          # Authenticated GitHub requests avoid anonymous rate limiting (the repo has many
+          # github.com links). Uses the automatic, read-only workflow token.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          args: >-
+            --no-progress
+            portfolio-lab/**/*.md
+            runbooks/**/*.md
+            diagrams/**/*.md
+            control-plane/**/*.md
+            ./*.md
+          # Reachability of third-party sites is not something a PR should block on, so this
+          # pass reports dead external links without failing the check.
+          fail: false

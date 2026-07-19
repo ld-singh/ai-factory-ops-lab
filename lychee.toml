@@ -1,0 +1,23 @@
+# Config for the lychee link checker (CI: .github/workflows/pr-links.yml).
+# Docs: https://github.com/lycheeverse/lychee
+
+# Treat bot-blocked and rate-limited responses as OK so a live-but-unfriendly external
+# site does not fail the check. A genuine 404 (a real dead link) still fails.
+accept = ["200..=206", "403", "429"]
+
+# Be patient with slow or flaky external hosts before giving up.
+max_retries = 3
+retry_wait_time = 2
+timeout = 20
+
+# The labs use example endpoints like http://localhost:8000 / :9090; skip localhost and
+# any private/loopback address, none of which are reachable from CI.
+exclude_all_private = true
+
+# Hosts and placeholders that cannot be checked automatically:
+exclude = [
+  # <vm-ip>, <user>@<vm-ip> and similar placeholders written as URLs in the labs.
+  '^https?://<',
+  # LinkedIn returns 999/403 to any automated client, so it is never verifiable here.
+  'linkedin\.com',
+]
