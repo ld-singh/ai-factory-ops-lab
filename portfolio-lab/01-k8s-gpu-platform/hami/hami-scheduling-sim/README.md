@@ -49,7 +49,7 @@ Three pieces, in order (the Makefile does them):
    `nvidia.com/gpu` by patching node status through the API - no kubelet or driver. Use
    the JFrog `prod` chart; the `ghcr.io` OCI build is DRA-oriented and won't populate it.
 2. **HAMi** with `devicePlugin.enabled=false` (the real plugin needs NVML and crashes
-   GPU-free) and `mockDevicePlugin.enabled=false`. `scheduler.kubeScheduler.image.tag` is
+   GPU-free) and `mockDevicePlugin.enabled=false`. `scheduler.kubeScheduler.imageTag` is
    pinned to `K8S_VERSION`.
 3. **Node registration** - [`scripts/register-hami.sh`](scripts/register-hami.sh) writes
    `hami.io/node-nvidia-register` (the per-GPU `devmem`/`devcore` list the scheduler scores
@@ -65,9 +65,9 @@ resource and the HAMi scheduler/webhook run normally; KWOK fake nodes don't prov
 
 ## One `K8S_VERSION` feeds the node image and HAMi's scheduler image
 
-A mismatch between the cluster Kubernetes version and `scheduler.kubeScheduler.image.tag` is
+A mismatch between the cluster Kubernetes version and `scheduler.kubeScheduler.imageTag` is
 a common HAMi failure. The Makefile defines a single `K8S_VERSION` and passes it to both
-`kindest/node:vX.Y.Z` and `--set scheduler.kubeScheduler.image.tag=vX.Y.Z`.
+`kindest/node:vX.Y.Z` and `--set scheduler.kubeScheduler.imageTag=vX.Y.Z`.
 
 ## Resource semantics
 
