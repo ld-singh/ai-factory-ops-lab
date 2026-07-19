@@ -148,7 +148,7 @@ highest load that still keeps the promise" - is the whole point of the sweep.
 > requests into the running batch instead of queueing them, so it keeps **TTFT flat** and the
 > cost shows up in per-token speed and end-to-end latency instead. **Same trade-off, different
 > symptom** - don't memorize "load raises TTFT" as a law; you'll watch a real card protect TTFT
-> in [Part C](./inference-realgpu/README.md). That contrast is the point.
+> in [Part D](./inference-realgpu/README.md). That contrast is the point.
 
 ### Step 2 - Watch in-flight load steal an interactive request's latency
 
@@ -205,7 +205,7 @@ more tokens/sec while blowing everyone's latency.
 
 On this CPU server the knee is brutal and early: it has little real parallelism, so requests
 queue, `ttft_p95` spikes, and goodput collapses. **A real GPU behaves differently - and that's
-the point of [Part C](./inference-realgpu/README.md).** With **continuous batching**, the card
+the point of [Part D](./inference-realgpu/README.md).** With **continuous batching**, the card
 keeps first-token latency low under load, so saturation shows up as a *throughput ceiling and
 rising end-to-end latency* rather than a TTFT cliff. **Same drill, fuller picture** - you read
 the same metrics, but on real hardware you watch continuous batching actually protect TTFT, and
@@ -227,11 +227,11 @@ plug in a GPU sweep's numbers when you want a fleet size for real hardware.
 
 ---
 
-## On real hardware (Lesson 6, Part C)
+## On real hardware (Lesson 6, Part D)
 
 Everything above is the method - learned on CPU for free. To get throughput *numbers* for an
 actual GPU, you serve a model with vLLM and run the **same drills** against it. That's its own
-lab: **[Part C - Real inference benchmark](./inference-realgpu/README.md)** (serve with
+lab: **[Part D - Real inference benchmark](./inference-realgpu/README.md)** (serve with
 `make phase5-serve-gpu`, point the drills at `:8000`, capture the numbers).
 
 💡 **Why learn it on CPU first:** a correct load generator (streaming TTFT capture, percentile
