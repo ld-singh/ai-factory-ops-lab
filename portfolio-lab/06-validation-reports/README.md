@@ -21,6 +21,7 @@ Each time you finish a runnable lesson:
 | Report | Lesson | Mode | Fill in after… |
 |---|---|---|---|
 | [local-simulation-report.md](./local-simulation-report.md) | [1 - K8s GPU scheduling](../01-k8s-gpu-platform/README.md) | 🟦 Sim | `make phase1-up/-demo/-evidence` |
+| [gpu-scale-sim-validation.md](./gpu-scale-sim-validation.md) | [1D - GPU fleet scale simulation (Volcano)](../01-k8s-gpu-platform/volcano-scale-sim/README.md) | 🟦 Sim | `make up/volcano-up/demo/evidence` in the lesson dir ✅ |
 | [slurm-gres-validation.md](./slurm-gres-validation.md) | [2 - Slurm](../02-slurm-gpu-platform/README.md) | 🟦 Sim (+ real GRES in Lesson 6) | *Phase 3* |
 | [real-gpu-validation-report.md](./real-gpu-validation-report.md) | [6 - Real GPU](../real-gpu-session/README.md) (Part A) | 🟥 Real | The Lesson 6 hardware run ✅ |
 | [hami-isolation-validation.md](./hami-isolation-validation.md) | [6 - Real GPU](../real-gpu-session/README.md) (Part B - HAMi) | 🟥 Real | The Lesson 6 Part B run ✅ |

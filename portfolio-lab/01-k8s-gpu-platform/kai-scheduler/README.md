@@ -481,10 +481,16 @@ backed once those captures exist. See
 - **Gang scheduling:** non-negotiable for distributed training - without it, large
   jobs deadlock clusters.
 
+- **KAI vs Volcano:** KAI's focus is queue quota, borrowing, and reclaim on a
+  single fake fleet. [Lesson 1D](../volcano-scale-sim/README.md) complements it
+  with Volcano's `Queue`/`PodGroup` gang scheduling at fleet scale - read the two
+  back to back if you care about admission control for distributed jobs.
+
 📎 **Related runbook:** [kai-scheduler-queue-starvation.md](../../../runbooks/kai-scheduler-queue-starvation.md).
 
 ➡️ **Back to:** [Lesson 1](../README.md) · **Next:**
 [Lesson 1C - GPU sharing & fractional GPUs with HAMi](../hami/README.md) (the
 sharing concepts are free; its hands-on isolation half runs in the Lesson 6 rental),
-and eventually [Lesson 6 - Real GPU](../../real-gpu-session/README.md), where you
-finally run something below the kubelet on real hardware.
+then [Lesson 1D - GPU fleet scale simulation with Volcano](../volcano-scale-sim/README.md)
+for gang scheduling, and eventually [Lesson 6 - Real GPU](../../real-gpu-session/README.md),
+where you finally run something below the kubelet on real hardware.

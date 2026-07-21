@@ -33,7 +33,7 @@ Knowing exactly where that line sits is itself one of the skills this course tea
 
 | Tier | Lessons | You pay | You get |
 |---|---|---|---|
-| **$0 simulation** | 0, 1, 1B, 1C, 2, 3, 4, 5 | Nothing, a laptop runs it | Scheduling, queueing, GPU-sharing decisions, triage, observability design, lifecycle - most of the course |
+| **$0 simulation** | 0, 1, 1B, 1C, 1D, 2, 3, 4, 5 | Nothing, a laptop runs it | Scheduling, queueing, gang scheduling, GPU-sharing decisions, triage, observability design, lifecycle - most of the course |
 | **$5-10 one GPU session** | 6 (the real-GPU capstone) | A few hours on one entry-level GPU VM | The real runtime path, enforced sharing, real telemetry and benchmarks |
 
 ## The lessons
@@ -63,6 +63,14 @@ Knowing exactly where that line sits is itself one of the skills this course tea
     Fractional GPUs: schedule slices on fakes, then prove memory isolation on one real GPU.
 
     [:octicons-arrow-right-24: Open](portfolio-lab/01-k8s-gpu-platform/hami/README.md)
+
+-   :material-chart-timeline-variant: __1D - Fleet scale sim (Volcano)__
+
+    ---
+
+    Generate a fake GPU fleet from a topology file and watch Volcano gang scheduling refuse a job all-or-nothing.
+
+    [:octicons-arrow-right-24: Open](portfolio-lab/01-k8s-gpu-platform/volcano-scale-sim/README.md)
 
 -   :material-check-decagram: __2 - Real GPU validation__
 
