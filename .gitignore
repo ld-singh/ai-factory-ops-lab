@@ -12,7 +12,7 @@ __pycache__/
 *.pyc
 .venv/
 kubeconfig*
-portfolio-lab/07-gpu-cluster-scale-sim/generated/
+portfolio-lab/01-k8s-gpu-platform/volcano-scale-sim/generated/
 
 # Personal career toolkit - never push
 private/

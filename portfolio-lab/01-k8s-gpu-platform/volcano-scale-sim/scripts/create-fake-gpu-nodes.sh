@@ -53,7 +53,7 @@ metadata:
     node-role.kubernetes.io/gpu-worker: ""
     type: kwok
     gpu-pool: ${pool}
-    ai-factory-ops-lab/lesson: "7"
+    ai-factory-ops-lab/lesson: "1D"
     ai-factory-ops-lab/scale-sim: "true"
     run.ai/simulated-gpu-node-pool: ${pool}
     nvidia.com/gpu.product: ${product}

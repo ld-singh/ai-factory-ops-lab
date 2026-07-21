@@ -1,4 +1,4 @@
-# Lesson 7 - GPU Fleet Scale Simulation with Volcano
+# Lesson 1D - GPU Fleet Scale Simulation with Volcano
 
 SHELL := /bin/bash
 TOPOLOGY ?= topology/small.json
@@ -29,5 +29,5 @@ status: ## Show fake GPU fleet and Volcano scheduling state
 evidence: ## Capture nodes, queues, PodGroups, Pods, and events into the validation report area
 	./scripts/collect-scale-evidence.sh
 
-down: ## Remove Lesson 7 workloads and fake nodes; pass REMOVE_VOLCANO=1 to uninstall Volcano too
+down: ## Remove Lesson 1D workloads and fake nodes; pass REMOVE_VOLCANO=1 to uninstall Volcano too
 	REMOVE_VOLCANO=$(REMOVE_VOLCANO) ./scripts/down.sh

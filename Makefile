@@ -10,7 +10,7 @@ LAB2 := portfolio-lab/02-slurm-gpu-platform
 LAB3 := portfolio-lab/03-observability
 LAB4 := portfolio-lab/04-inference-serving
 LAB5 := portfolio-lab/05-bcm-style-cluster-lifecycle
-LAB7 := portfolio-lab/07-gpu-cluster-scale-sim
+LAB7 := portfolio-lab/01-k8s-gpu-platform/volcano-scale-sim
 
 .DEFAULT_GOAL := help
 
@@ -151,7 +151,9 @@ phase6-drill: ## Run the node provision -> health-gate -> patch -> retire lifecy
 
 
 # ---------------------------------------------------------------------------
-# Phase 7 - GPU fleet scale simulation with Volcano (no GPU required)
+# Phase 7 targets - Lesson 1D: GPU fleet scale simulation with Volcano (no GPU
+# required). Target numbers are historical module numbers (see the note in the
+# root README's "Quick reference" section) and no longer match the lesson number.
 # ---------------------------------------------------------------------------
 .PHONY: phase7-up phase7-volcano phase7-demo phase7-status phase7-evidence phase7-down
 phase7-up: ## Create a topology-driven KWOK fake GPU fleet; pass TOPOLOGY=...
@@ -164,13 +166,13 @@ phase7-volcano: ## Install Volcano scheduler for queue/gang scheduling drills
 phase7-demo: ## Run Volcano Queue/PodGroup GPU scale scheduling scenarios
 	TOPOLOGY=$${TOPOLOGY:-$(LAB7)/topology/small.json} $(LAB7)/scripts/run-volcano-demo.sh
 
-phase7-status: ## Show Lesson 7 fake fleet and Volcano scheduling state
+phase7-status: ## Show Lesson 1D fake fleet and Volcano scheduling state
 	$(LAB7)/scripts/status.sh
 
-phase7-evidence: ## Capture Lesson 7 scheduling evidence
+phase7-evidence: ## Capture Lesson 1D scheduling evidence
 	$(LAB7)/scripts/collect-scale-evidence.sh
 
-phase7-down: ## Remove Lesson 7 workloads and fake scale nodes
+phase7-down: ## Remove Lesson 1D workloads and fake scale nodes
 	REMOVE_VOLCANO=$${REMOVE_VOLCANO:-0} $(LAB7)/scripts/down.sh
 
 # ---------------------------------------------------------------------------

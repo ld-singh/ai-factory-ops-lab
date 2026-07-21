@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 LESSON_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
-REPO_ROOT="$(cd -- "${LESSON_DIR}/../.." && pwd)"
+REPO_ROOT="$(cd -- "${LESSON_DIR}/../../.." && pwd)"
 
 ts="$(date +%Y%m%d-%H%M%S)"
 out="${REPO_ROOT}/portfolio-lab/06-validation-reports/evidence/gpu-scale-${ts}"

@@ -6,7 +6,7 @@ TOPOLOGY="${TOPOLOGY:-topology/small.json}"
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 LESSON_DIR="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
-REPO_ROOT="$(cd -- "${LESSON_DIR}/../.." && pwd)"
+REPO_ROOT="$(cd -- "${LESSON_DIR}/../../.." && pwd)"
 LAB1="${REPO_ROOT}/portfolio-lab/01-k8s-gpu-platform"
 
 if [[ "$TOPOLOGY" != /* ]]; then
