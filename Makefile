@@ -6,11 +6,11 @@
 SHELL := /bin/bash
 CLUSTER_NAME ?= ai-factory-lab
 LAB1 := portfolio-lab/01-k8s-gpu-platform
+LAB1D := $(LAB1)/volcano-scale-sim
 LAB2 := portfolio-lab/02-slurm-gpu-platform
 LAB3 := portfolio-lab/03-observability
 LAB4 := portfolio-lab/04-inference-serving
 LAB5 := portfolio-lab/05-bcm-style-cluster-lifecycle
-LAB7 := portfolio-lab/01-k8s-gpu-platform/volcano-scale-sim
 
 .DEFAULT_GOAL := help
 
@@ -151,29 +151,29 @@ phase6-drill: ## Run the node provision -> health-gate -> patch -> retire lifecy
 
 
 # ---------------------------------------------------------------------------
-# Phase 7 targets - Lesson 1D: GPU fleet scale simulation with Volcano (no GPU
-# required). Target numbers are historical module numbers (see the note in the
-# root README's "Quick reference" section) and no longer match the lesson number.
+# Lesson 1D - GPU fleet scale simulation with Volcano (no GPU required).
+# Named for the lesson, not a phase number: this lesson belongs to the Lesson 1
+# scheduling family and reuses the Lesson 1 fake fleet.
 # ---------------------------------------------------------------------------
-.PHONY: phase7-up phase7-volcano phase7-demo phase7-status phase7-evidence phase7-down
-phase7-up: ## Create a topology-driven KWOK fake GPU fleet; pass TOPOLOGY=...
-	$(LAB7)/scripts/check-scale-prereqs.sh
-	CLUSTER_NAME=$(CLUSTER_NAME) TOPOLOGY=$${TOPOLOGY:-$(LAB7)/topology/small.json} $(LAB7)/scripts/up.sh
+.PHONY: phase1d-up phase1d-volcano phase1d-demo phase1d-status phase1d-evidence phase1d-down
+phase1d-up: ## Lesson 1D: create a topology-driven KWOK fake GPU fleet; pass TOPOLOGY=...
+	$(LAB1D)/scripts/check-scale-prereqs.sh
+	CLUSTER_NAME=$(CLUSTER_NAME) TOPOLOGY=$${TOPOLOGY:-$(LAB1D)/topology/small.json} $(LAB1D)/scripts/up.sh
 
-phase7-volcano: ## Install Volcano scheduler for queue/gang scheduling drills
-	VOLCANO_VERSION=$${VOLCANO_VERSION:-v1.10.0} $(LAB7)/scripts/install-volcano.sh
+phase1d-volcano: ## Lesson 1D: install Volcano scheduler for queue/gang scheduling drills
+	VOLCANO_VERSION=$${VOLCANO_VERSION:-v1.10.0} $(LAB1D)/scripts/install-volcano.sh
 
-phase7-demo: ## Run Volcano Queue/PodGroup GPU scale scheduling scenarios
-	TOPOLOGY=$${TOPOLOGY:-$(LAB7)/topology/small.json} $(LAB7)/scripts/run-volcano-demo.sh
+phase1d-demo: ## Lesson 1D: run Volcano Queue/PodGroup GPU scale scheduling scenarios
+	TOPOLOGY=$${TOPOLOGY:-$(LAB1D)/topology/small.json} $(LAB1D)/scripts/run-volcano-demo.sh
 
-phase7-status: ## Show Lesson 1D fake fleet and Volcano scheduling state
-	$(LAB7)/scripts/status.sh
+phase1d-status: ## Lesson 1D: show fake fleet and Volcano scheduling state
+	$(LAB1D)/scripts/status.sh
 
-phase7-evidence: ## Capture Lesson 1D scheduling evidence
-	$(LAB7)/scripts/collect-scale-evidence.sh
+phase1d-evidence: ## Lesson 1D: capture scheduling evidence
+	$(LAB1D)/scripts/collect-scale-evidence.sh
 
-phase7-down: ## Remove Lesson 1D workloads and fake scale nodes
-	REMOVE_VOLCANO=$${REMOVE_VOLCANO:-0} $(LAB7)/scripts/down.sh
+phase1d-down: ## Lesson 1D: remove workloads and fake scale nodes
+	REMOVE_VOLCANO=$${REMOVE_VOLCANO:-0} $(LAB1D)/scripts/down.sh
 
 # ---------------------------------------------------------------------------
 # Docs site (MkDocs Material) -> https://ld-singh.github.io/ai-factory-ops-lab/
