@@ -100,6 +100,7 @@ nav:
       - "1C - GPU sharing (HAMi, sim)":
           - Overview: portfolio-lab/01-k8s-gpu-platform/hami/README.md
           - "Scheduling sim (no GPU)": portfolio-lab/01-k8s-gpu-platform/hami/hami-scheduling-sim/README.md
+      - "1D - GPU fleet scale simulation (Volcano)": portfolio-lab/01-k8s-gpu-platform/volcano-scale-sim/README.md
       - "2 - Slurm workload management": portfolio-lab/02-slurm-gpu-platform/README.md
       - "3 - GPU observability": portfolio-lab/03-observability/README.md
       - "4 - Inference serving": portfolio-lab/04-inference-serving/README.md
@@ -111,8 +112,7 @@ nav:
           - "Part B - HAMi isolation (real GPU)": portfolio-lab/01-k8s-gpu-platform/hami/hami-isolation-realgpu/README.md
           - "Part C - Inference benchmark (real GPU)": portfolio-lab/04-inference-serving/inference-realgpu/README.md
           - "Part D - Slurm real GRES": portfolio-lab/02-slurm-gpu-platform/slurm-realgpu/README.md
-      - "7 - GPU fleet scale simulation": portfolio-lab/07-gpu-cluster-scale-sim/README.md
-      - "Security (planned)": portfolio-lab/07-security/README.md
+      - "7 - Security (planned)": portfolio-lab/07-security/README.md
   - Deep dives:
       - kind (local cluster): portfolio-lab/01-k8s-gpu-platform/kind/README.md
       - KWOK (fake nodes): portfolio-lab/01-k8s-gpu-platform/kwok/README.md
@@ -141,8 +141,8 @@ nav:
       - Overview: portfolio-lab/06-validation-reports/README.md
       - Fake vs real limitations: portfolio-lab/06-validation-reports/fake-vs-real-limitations.md
       - Local simulation report: portfolio-lab/06-validation-reports/local-simulation-report.md
+      - GPU scale simulation (Volcano): portfolio-lab/06-validation-reports/gpu-scale-sim-validation.md
       - Slurm GRES validation: portfolio-lab/06-validation-reports/slurm-gres-validation.md
       - Real GPU validation: portfolio-lab/06-validation-reports/real-gpu-validation-report.md
       - Inference benchmark: portfolio-lab/06-validation-reports/inference-benchmark-report.md
-      - GPU scale simulation (Volcano): portfolio-lab/06-validation-reports/gpu-scale-sim-validation.md
   - About: about.md

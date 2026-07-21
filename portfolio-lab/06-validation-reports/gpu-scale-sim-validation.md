@@ -1,7 +1,7 @@
-# GPU Fleet Scale Simulation Validation Report - Lesson 7 (Volcano)
+# GPU Fleet Scale Simulation Validation Report - Lesson 1D (Volcano)
 
 > Your [lab notebook](./README.md) entry for
-> [Lesson 7](../07-gpu-cluster-scale-sim/README.md).
+> [Lesson 1D](../01-k8s-gpu-platform/volcano-scale-sim/README.md).
 > Captured after `make up`, `make volcano-up`, `make demo`, `make evidence`
 > (from the lesson directory), on the `small.json` topology.
 
@@ -9,14 +9,14 @@
 
 | Item | Value |
 |---|---|
-| Date | 2026-07-08 |
+| Date | 2026-07-21 |
 | Host OS | Linux |
 | kind version | v0.32.0 |
 | Kubernetes version | v1.36.1 |
 | KWOK release | v0.8.0 |
 | Volcano | v1.10.0 (`volcanosh/vc-scheduler:v1.10.0`, upstream installer manifest) |
 | GPU layer | run.ai fake-gpu-operator 0.0.59 (values rendered from `topology/small.json`) |
-| Evidence directory | `evidence/gpu-scale-20260708-235359/` |
+| Evidence directory | `evidence/gpu-scale-20260721-093643/` |
 
 ## Simulated fleet
 

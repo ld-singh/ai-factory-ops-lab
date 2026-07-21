@@ -272,6 +272,7 @@ curious:
 - `fake-gpu-operator/` - the GPU layer (advertises GPUs + DCGM metrics on KWOK nodes)
 - `kai-scheduler/` - Lesson 1B: queue/quota scheduling concepts and KAI Scheduler notes
 - `hami/` - Lesson 1C: GPU sharing / fractional GPUs with HAMi
+- `volcano-scale-sim/` - Lesson 1D: topology-driven fake fleet at scale + Volcano gang scheduling
 - `workloads/` - the four demo workloads (schedulable, two Pending, queue pressure)
 - `gpu-operator-real/` - Lesson 6: real GPU validation guide
 - `scripts/` - setup and demo automation
@@ -280,5 +281,7 @@ curious:
 where you turn the queue-pressure pile into policy - quota, borrowing, reclaim, and
 gang scheduling - all on this same fake fleet. Then
 [Lesson 1C - GPU sharing with HAMi](./hami/README.md) (concepts free; its hands-on
-part piggybacks on the Lesson 6 rental), and [Lesson 6](./gpu-operator-real/README.md)
+part piggybacks on the Lesson 6 rental), then
+[Lesson 1D - GPU fleet scale simulation with Volcano](./volcano-scale-sim/README.md)
+for gang scheduling on a bigger fake fleet, and [Lesson 6](./gpu-operator-real/README.md)
 runs the manifests on real hardware.
