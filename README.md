@@ -204,9 +204,9 @@ message rather than pretending to work.
 
 `make help` is the full command index. The per-lesson loops:
 
-> **Note:** the `make phaseN-*` target numbers are historical *module* numbers and no
-> longer line up with lesson numbers (the renumber kept the targets stable). Each
-> comment below states the lesson it belongs to.
+> **Note:** most `make phaseN-*` target numbers are historical *module* numbers and no
+> longer line up with lesson numbers (an earlier renumber kept the targets stable). Each
+> comment below states the lesson it belongs to; `phase1d-*` is named for its lesson.
 
 ```bash
 # Lesson 1 - Kubernetes fake-GPU scheduling (kind + KWOK + fake-gpu-operator)
@@ -218,8 +218,8 @@ make phase1-up && make phase1-demo && make phase1-evidence && make phase1-down
 # Lesson 1C - GPU sharing with HAMi (scheduling sim, no GPU; own Makefile)
 ( cd portfolio-lab/01-k8s-gpu-platform/hami/hami-scheduling-sim && make up && make demo-fractional )
 
-# Lesson 1D - GPU fleet scale simulation with Volcano (topology-driven fake fleet; targets: phase7-*)
-make phase7-up && make phase7-volcano && make phase7-demo && make phase7-evidence && make phase7-down
+# Lesson 1D - GPU fleet scale simulation with Volcano (topology-driven fake fleet)
+make phase1d-up && make phase1d-volcano && make phase1d-demo && make phase1d-evidence && make phase1d-down
 
 # Lesson 2 - Slurm-in-Docker with fake GRES  (targets: phase3-*)
 make phase3-up && make phase3-demo && make phase3-drain && make phase3-evidence && make phase3-down
