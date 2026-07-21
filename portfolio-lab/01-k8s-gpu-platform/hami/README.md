@@ -254,6 +254,8 @@ proves the placement decision, the real-GPU lesson proves enforcement.
 
 ➡️ **Next:** run the hands-on lab - [HAMi scheduling simulation](./hami-scheduling-sim/README.md)
 (free, no GPU). Then continue to
+[Lesson 1D - GPU fleet scale simulation with Volcano](../volcano-scale-sim/README.md)
+for gang scheduling at fleet scale, or on to
 [Lesson 2 - Slurm GPU Workload Management](../../02-slurm-gpu-platform/README.md).
 The real isolation half of this lesson is run later, in
 [Lesson 6 - Real GPU](../../real-gpu-session/README.md), alongside the other
