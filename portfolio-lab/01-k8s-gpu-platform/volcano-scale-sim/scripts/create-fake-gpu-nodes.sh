@@ -21,7 +21,8 @@ echo "Creating KWOK fake GPU nodes from $TOPOLOGY"
 echo "Planned scale: ${total_nodes} fake nodes, ${total_gpus} fake GPUs"
 
 tmp="$(mktemp)"
-trap 'rm -f "$tmp"' EXIT
+planned="$(mktemp)"
+trap 'rm -f "$tmp" "$planned"' EXIT
 
 jq -r '
   .pools
@@ -82,6 +83,34 @@ NODE
 done
 
 kubectl apply -f "$tmp"
+
+# Fake nodes from a previous run of a *different* topology keep the scale-sim
+# label, so they stay part of this fleet: they inflate the GPU pool until the
+# overflow scenario (sized from the topology file) fits and schedules instead of
+# staying Pending, which silently destroys the point of the lesson. Switching
+# topologies is a documented workflow, so reconcile rather than refuse.
+awk '/^  name: /{print $2}' "$tmp" | sort -u > "$planned"
+stale="$(kubectl get nodes -l ai-factory-ops-lab/scale-sim=true \
+  -o jsonpath='{range .items[*]}{.metadata.name}{"\n"}{end}' 2>/dev/null \
+  | sort -u | comm -23 - "$planned" || true)"
+
+if [[ -n "$stale" ]]; then
+  stale_count="$(echo "$stale" | wc -l | tr -d ' ')"
+  echo
+  echo "Found ${stale_count} fake scale node(s) from a previous topology:"
+  echo "$stale" | sed 's/^/  /' | head -10
+  [[ "$stale_count" -gt 10 ]] && echo "  ... and $((stale_count - 10)) more"
+  if [[ "${KEEP_STALE_NODES:-0}" == "1" ]]; then
+    echo "KEEP_STALE_NODES=1: leaving them in place."
+    echo "WARNING: they still count toward this fleet, so the overflow-gang"
+    echo "scenario may schedule instead of staying Pending. Evidence captured"
+    echo "from this cluster will not demonstrate gang scheduling."
+  else
+    echo "Removing them so this fleet matches ${TOPOLOGY}."
+    echo "(set KEEP_STALE_NODES=1 to keep them)"
+    echo "$stale" | xargs -r kubectl delete node
+  fi
+fi
 
 echo
 echo "Waiting for fake-gpu-operator to advertise nvidia.com/gpu..."

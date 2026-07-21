@@ -105,6 +105,24 @@ API server has enough CPU and memory:
 make up TOPOLOGY=topology/large-1k.json
 ```
 
+> **Switching topologies is safe to do directly.** Fake nodes from a previous,
+> larger topology keep this lesson's `scale-sim` label, so they would otherwise
+> stay part of the fleet - and because the demo sizes `overflow-gang` from the
+> *topology file*, a leftover fleet makes the overflow job **fit and schedule**
+> instead of staying Pending, quietly removing the gang-scheduling behaviour this
+> lesson exists to show. `make up` therefore reconciles the fleet to the topology
+> you asked for and reports what it removed:
+>
+> ```text
+> Found 155 fake scale node(s) from a previous topology:
+>   kwok-scale-a100-2
+>   ...
+> Removing them so this fleet matches topology/small.json.
+> ```
+>
+> Pass `KEEP_STALE_NODES=1` to keep them; the script then warns that evidence
+> captured from that cluster will not demonstrate gang scheduling.
+
 ## Step 1 - Stand up the scale fleet
 
 ```bash
