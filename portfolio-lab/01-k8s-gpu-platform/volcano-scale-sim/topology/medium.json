@@ -1,0 +1,30 @@
+{
+  "name": "medium",
+  "description": "Medium control-plane pressure profile: 160 fake nodes, 1024 fake GPUs",
+  "pools": {
+    "a100": {
+      "nodes": 64,
+      "gpusPerNode": 8,
+      "gpuMemoryMiB": 81920,
+      "product": "NVIDIA-A100-SXM4-80GB",
+      "cpu": 96,
+      "memory": "1024Gi"
+    },
+    "h100": {
+      "nodes": 32,
+      "gpusPerNode": 8,
+      "gpuMemoryMiB": 81920,
+      "product": "NVIDIA-H100-80GB-HBM3",
+      "cpu": 128,
+      "memory": "1536Gi"
+    },
+    "l40s": {
+      "nodes": 64,
+      "gpusPerNode": 4,
+      "gpuMemoryMiB": 46068,
+      "product": "NVIDIA-L40S",
+      "cpu": 64,
+      "memory": "512Gi"
+    }
+  }
+}

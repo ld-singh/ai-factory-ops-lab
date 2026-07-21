@@ -100,6 +100,7 @@ nav:
       - "1C - GPU sharing (HAMi, sim)":
           - Overview: portfolio-lab/01-k8s-gpu-platform/hami/README.md
           - "Scheduling sim (no GPU)": portfolio-lab/01-k8s-gpu-platform/hami/hami-scheduling-sim/README.md
+      - "1D - GPU fleet scale simulation (Volcano)": portfolio-lab/01-k8s-gpu-platform/volcano-scale-sim/README.md
       - "2 - Slurm workload management": portfolio-lab/02-slurm-gpu-platform/README.md
       - "3 - GPU observability": portfolio-lab/03-observability/README.md
       - "4 - Inference serving": portfolio-lab/04-inference-serving/README.md
@@ -142,6 +143,7 @@ nav:
       - Overview: portfolio-lab/06-validation-reports/README.md
       - Fake vs real limitations: portfolio-lab/06-validation-reports/fake-vs-real-limitations.md
       - Local simulation report: portfolio-lab/06-validation-reports/local-simulation-report.md
+      - GPU scale simulation (Volcano): portfolio-lab/06-validation-reports/gpu-scale-sim-validation.md
       - Slurm GRES validation: portfolio-lab/06-validation-reports/slurm-gres-validation.md
       - Real GPU validation: portfolio-lab/06-validation-reports/real-gpu-validation-report.md
       - HAMi isolation validation: portfolio-lab/06-validation-reports/hami-isolation-validation.md
