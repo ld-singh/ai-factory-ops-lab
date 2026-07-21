@@ -1,7 +1,11 @@
-# Lesson 7 - GPU Fleet Scale Simulation with Volcano
+# Lesson 1D - GPU Fleet Scale Simulation with Volcano
 
-> Course home: [AI Factory Operations Lab](../../README.md) · Previous:
-> [Lesson 6 - Real GPU](../real-gpu-session/README.md)
+> Course home: [AI Factory Operations Lab](../../../README.md) · Previous:
+> [Lesson 1C - GPU sharing with HAMi](../hami/README.md) · Next:
+> [Lesson 2 - Slurm workload management](../../02-slurm-gpu-platform/README.md)
+>
+> See also: [Lesson 1B - Queue-based scheduling with KAI Scheduler](../kai-scheduler/README.md)
+> for the complementary queue-quota/borrowing/reclaim model this lesson does not cover.
 
 In this lesson you turn the small fake GPU fleet from Lesson 1 into a **scale
 simulation harness**. You model hundreds or thousands of fake GPU nodes, create
@@ -48,7 +52,7 @@ make check
 
 ## Why Volcano here?
 
-Lesson 1B already covers KAI Scheduler for queue-based scheduling. Lesson 7 uses
+Lesson 1B already covers KAI Scheduler for queue-based scheduling. Lesson 1D uses
 Volcano because it is a good fit for a **large-scale batch/HPC-style GPU cluster
 simulation**:
 
@@ -105,7 +109,7 @@ make up TOPOLOGY=topology/large-1k.json
 
 ```bash
 # From this lesson directory
-cd portfolio-lab/07-gpu-cluster-scale-sim
+cd portfolio-lab/01-k8s-gpu-platform/volcano-scale-sim
 make up
 ```
 
@@ -224,7 +228,7 @@ portfolio-lab/06-validation-reports/evidence/
 **Checkpoint** - expected output, and what lands in the directory:
 
 ```text
-Evidence written to: .../portfolio-lab/06-validation-reports/evidence/gpu-scale-20260708-235359
+Evidence written to: .../portfolio-lab/06-validation-reports/evidence/gpu-scale-20260721-093643
 ```
 
 ```text
@@ -234,7 +238,7 @@ volcano-pods.txt  volcano-queues.yaml
 ```
 
 The captured run for this lesson is written up in the validation report:
-[`gpu-scale-sim-validation.md`](../06-validation-reports/gpu-scale-sim-validation.md).
+[`gpu-scale-sim-validation.md`](../../06-validation-reports/gpu-scale-sim-validation.md).
 
 ## Step 5 - Tear down
 
