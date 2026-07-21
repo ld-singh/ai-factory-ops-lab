@@ -228,14 +228,17 @@ portfolio-lab/06-validation-reports/evidence/
 **Checkpoint** - expected output, and what lands in the directory:
 
 ```text
-Evidence written to: .../portfolio-lab/06-validation-reports/evidence/gpu-scale-20260721-093643
+Evidence written to: .../portfolio-lab/06-validation-reports/evidence/gpu-scale-20260721-171717
 ```
 
 ```text
 events.txt  fake-gpu-operator-pods.txt  nodes-wide.txt  nodes.yaml
 podgroups.yaml  pods-wide.txt  pods.yaml  README.txt
-volcano-pods.txt  volcano-queues.yaml
+versions.txt  volcano-pods.txt  volcano-queues.yaml
 ```
+
+`versions.txt` records the Kubernetes, Volcano, fake-gpu-operator, and KWOK
+versions of the run, so the bundle can be graded without trusting your notes.
 
 The captured run for this lesson is written up in the validation report:
 [`gpu-scale-sim-validation.md`](../../06-validation-reports/gpu-scale-sim-validation.md).

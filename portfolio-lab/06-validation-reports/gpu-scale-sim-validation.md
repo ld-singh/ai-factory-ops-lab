@@ -16,7 +16,11 @@
 | KWOK release | v0.8.0 |
 | Volcano | v1.10.0 (`volcanosh/vc-scheduler:v1.10.0`, upstream installer manifest) |
 | GPU layer | run.ai fake-gpu-operator 0.0.59 (values rendered from `topology/small.json`) |
-| Evidence directory | `evidence/gpu-scale-20260721-093643/` |
+| Evidence directory | `evidence/gpu-scale-20260721-171717/` |
+
+Every version above is recorded in `versions.txt` inside the evidence directory
+(`kubectl version`, the three Volcano deployment images, `helm list -A`, and the
+KWOK controller image), so this table can be checked against the bundle alone.
 
 ## Simulated fleet
 
@@ -87,10 +91,22 @@ real hardware). Pods on KWOK nodes are simulated - no real container runs. See
 
 ## Notes / surprises
 
-- Right after pod creation, Volcano briefly reports the gang as
-  `2 Pending, 33 minAvailable` - it evaluates the PodGroup while the pods are
-  still being created, then converges to the full `33 Pending` verdict within a
-  couple of scheduling cycles. Harmless, but surprising in `events.txt`.
+- Volcano evaluates a PodGroup as soon as it exists, before its pods are created,
+  so `events.txt` opens with gangs judged against nothing at all:
+
+  ```text
+  Warning   Unschedulable   podgroup/overflow-gang   0/0 tasks in gang unschedulable: pod group is not ready, 33 minAvailable
+  Warning   Unschedulable   podgroup/needs-b200      0/0 tasks in gang unschedulable: pod group is not ready, 4 minAvailable
+  ```
+
+  Both converge to their real verdicts ~30s later. A `0/0 tasks in gang`
+  warning is a startup artefact, not a failure - `fit-gang` passes through the
+  same state and still reaches `pod group is ready`.
+- The overflow gang emits 68 warnings of the form `Pod gpu-scale/overflow-gang-N
+  can possibly be assigned to kwok-scale-a100-0`. Read literally that sounds like
+  success; it is Volcano naming a node the pod *would* fit on while still binding
+  none of them, because the gang as a whole is short. It is the per-pod
+  counterpart of the all-or-nothing verdict above.
 - The Volcano admission webhook rejects Queue objects for a few seconds after
   the deployment reports Ready (the webhook paths register late); the demo
   script retries queue creation for exactly this reason.

@@ -19,6 +19,22 @@ kubectl get events -n gpu-scale --sort-by=.lastTimestamp > "${out}/events.txt" |
 kubectl get pods -n volcano-system -o wide > "${out}/volcano-pods.txt" || true
 kubectl -n gpu-operator get pods -o wide > "${out}/fake-gpu-operator-pods.txt" || true
 
+# Component versions, so the report's environment table is verifiable from the
+# bundle alone rather than from whatever happened to be installed that day.
+{
+  echo "# kubectl version"
+  kubectl version -o yaml 2>/dev/null || true
+  echo
+  echo "# Volcano images"
+  kubectl -n volcano-system get deploy -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.template.spec.containers[*].image}{"\n"}{end}' 2>/dev/null || true
+  echo
+  echo "# Helm releases"
+  helm list -A 2>/dev/null || true
+  echo
+  echo "# KWOK controller image"
+  kubectl get deploy -A -o jsonpath='{range .items[?(@.metadata.name=="kwok-controller")]}{.metadata.namespace}{"\t"}{.spec.template.spec.containers[*].image}{"\n"}{end}' 2>/dev/null || true
+} > "${out}/versions.txt"
+
 cat > "${out}/README.txt" <<EOF
 GPU scale simulation evidence
 
