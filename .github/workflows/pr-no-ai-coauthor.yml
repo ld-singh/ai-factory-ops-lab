@@ -1,0 +1,83 @@
+name: PR guard - no AI co-author trailers
+
+# Blocks a PR whose commit messages credit an AI tool as a co-author via a
+# `Co-authored-by:` trailer (Claude, Codex, Copilot, ChatGPT, Gemini, ...).
+#
+# This is deliberately narrow: it checks ONLY `Co-authored-by:` trailer lines in commit
+# messages. It does NOT object to a contributor saying, in the PR description or in commit
+# body prose, that they used an AI assistant - that disclosure is welcome. What it stops is
+# a machine trailer that lists a tool as a repository contributor, which credits the tool as
+# an author and inflates the contributors graph. A tool is an assistant, not a co-author.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: pr-no-ai-coauthor-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Need the PR's commits and the base so we can diff the range.
+          fetch-depth: 0
+
+      - name: Scan PR commit messages for AI co-author trailers
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          # Case-insensitive identifiers for AI assistants, matched only inside
+          # `Co-authored-by:` trailer lines (name or email). Extend this list as needed.
+          PATTERN='claude|codex|copilot|chatgpt|gpt-[0-9]|openai|anthropic|gemini|google bard|\bbard\b|cursor|devin[- ]?ai|noreply@anthropic\.com|noreply@openai\.com'
+
+          fail=0
+          for sha in $(git rev-list "$BASE..$HEAD"); do
+            # Match only real Co-authored-by TRAILERS: a git trailer always ends in an
+            # <email>. Requiring `<...@...>` means prose that merely quotes the words
+            # "Co-authored-by:" (e.g. a commit message describing this very check) is not
+            # flagged - only an actual trailer that names an AI tool.
+            hits="$(git show -s --format='%B' "$sha" \
+                     | grep -iE '^[[:space:]]*co-authored-by:[[:space:]].*<[^>]+@[^>]+>[[:space:]]*$' \
+                     | grep -iE "$PATTERN" || true)"
+            if [ -n "$hits" ]; then
+              subject="$(git show -s --format='%s' "$sha")"
+              echo "::error::Commit ${sha:0:12} (\"$subject\") has an AI co-author trailer:"
+              printf '%s\n' "$hits" | sed 's/^/    /'
+              fail=1
+            fi
+          done
+
+          if [ "$fail" -ne 0 ]; then
+            cat <<'MSG'
+
+          ------------------------------------------------------------------
+          This PR credits an AI tool as a co-author via a Co-authored-by: trailer.
+
+          Please remove that trailer from the commit message(s). You are very welcome to
+          mention in the PR description that an AI assistant helped - just not as a
+          repository co-author, since a tool is an assistant, not a contributor.
+
+          To fix, reword the offending commit(s) and force-push the branch, e.g.:
+
+            git rebase -i <base>      # mark the commits 'reword', delete the Co-authored-by line
+            git push --force-with-lease
+
+          For a single most-recent commit:
+
+            git commit --amend         # delete the Co-authored-by line, save
+            git push --force-with-lease
+          ------------------------------------------------------------------
+          MSG
+            exit 1
+          fi
+
+          echo "OK: no AI co-author trailers in this PR's commits."
