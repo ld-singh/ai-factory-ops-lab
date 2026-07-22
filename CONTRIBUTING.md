@@ -46,6 +46,19 @@ These are the principles the whole project is built on. Please keep to them:
 4. **Teach the concept, keep it readable.** Every command pairs with the *why*, and steps
    have an expected output and a checkpoint.
 
+## Using AI assistants
+
+AI coding assistants are welcome here. If one helped, feel free to say so in the PR
+description. Two expectations:
+
+- **You own the change.** Whatever you submit, you understand it and stand behind it, the same
+  as any hand-written contribution. Assistant output that you have not read and reasoned about
+  does not belong in a PR.
+- **No `Co-authored-by:` trailers for tools.** Do not credit an assistant (Claude, Codex,
+  Copilot, ChatGPT, Gemini, ...) as a commit co-author. A tool is an assistant, not a
+  contributor, and a machine trailer inflates the contributors graph. CI blocks these
+  automatically; a plain mention in the PR description is the right way to disclose AI help.
+
 ## Pull request flow
 
 1. Fork and branch (`feat/...`, `docs/...`, or `lesson/...`).
