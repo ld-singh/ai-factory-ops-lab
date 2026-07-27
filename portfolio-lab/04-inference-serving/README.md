@@ -1,8 +1,8 @@
-# Lesson 4 - Inference Serving
+# Lesson 4A - Inference benchmarks
 
 > Course home: [AI Factory Operations Lab](../../README.md) · Previous:
 > [Lesson 3 - Observability](../03-observability/README.md) · Next:
-> [Lesson 5 - BCM-Style Cluster Lifecycle](../05-bcm-style-cluster-lifecycle/README.md)
+> [Lesson 4B - The KV cache](./kv-cache/README.md)
 
 > ✅ **STATUS: RUNNABLE.** A tiny CPU-served model plus a stdlib load generator let you
 > study what makes LLM serving its own discipline - the prefill/decode split, latency
@@ -268,8 +268,17 @@ CPU or a GPU is behind the endpoint.
 This table is the course's capstone argument: Lessons 1–2 weren't scheduler trivia - they
 were the decision framework for *placing* these three shapes.
 
+## Going deeper
+
+- **[Lesson 4B - The KV cache](./kv-cache/README.md)** (free, no GPU): the vocabulary table
+  above says "how many fit is a *memory* question." 4B is that memory. Size the KV cache from a
+  model's config, and learn the levers (context, GQA, quantization, PagedAttention, prefix
+  caching, offload) that decide real concurrency.
+
 ## What's in this directory
 
+- [`kv-cache/`](./kv-cache/README.md) - Lesson 4B: the KV cache, and `kv-calc.py`, a stdlib
+  KV-memory / concurrency calculator.
 - [`harness/loadgen.py`](./harness/loadgen.py) - the load generator (stdlib only): streaming
   TTFT capture, TPOT, p50/p95/p99, tokens/sec, goodput-at-SLO. Modes: `sweep`
   (concurrency / input / output axis) and `mixed` (the batching drill).
@@ -293,4 +302,6 @@ point and capacity - the serving operator's core skills, all on your laptop. The
 hardware throughput numbers and KV-cache memory limits. Full map of what each tier covers:
 [`fake-vs-real-limitations.md`](../06-validation-reports/fake-vs-real-limitations.md).
 
-➡️ **Next:** [Lesson 5 - BCM-Style Cluster Lifecycle](../05-bcm-style-cluster-lifecycle/README.md).
+➡️ **Next:** [Lesson 4B - The KV cache](./kv-cache/README.md) (the memory limit behind the
+concurrency you just measured), then
+[Lesson 5 - BCM-Style Cluster Lifecycle](../05-bcm-style-cluster-lifecycle/README.md).

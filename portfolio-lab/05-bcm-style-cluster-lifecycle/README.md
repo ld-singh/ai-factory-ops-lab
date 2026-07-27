@@ -1,7 +1,7 @@
 # Lesson 5 - BCM-Style Cluster Lifecycle (Conceptual)
 
 > Course home: [AI Factory Operations Lab](../../README.md) · Previous:
-> [Lesson 4 - Inference Serving](../04-inference-serving/README.md) · Next:
+> [Lesson 4B - The KV cache](../04-inference-serving/kv-cache/README.md) · Next:
 > [Lesson 6 - Real GPU](../real-gpu-session/README.md)
 
 > 🟡 **STATUS: RUNNABLE DRILL (Phase 6), conceptual mapping.**
