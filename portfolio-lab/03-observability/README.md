@@ -2,7 +2,7 @@
 
 > Course home: [AI Factory Operations Lab](../../README.md) · Previous:
 > [Lesson 2 - Slurm GPU Platform](../02-slurm-gpu-platform/README.md) · Next:
-> [Lesson 4 - Inference Serving](../04-inference-serving/README.md)
+> [Lesson 4A - Inference benchmarks](../04-inference-serving/README.md)
 
 > ✅ **STATUS: RUNNABLE.** One self-contained lab. You stand up a real
 > Prometheus/Grafana stack, point it at a **synthetic DCGM exporter** (no GPU),
@@ -283,4 +283,4 @@ alerting, and dashboard/runbook wiring - all provable for free. Real GPU telemet
 XID behaviour, and thermals require Lesson 6 hardware. Ledger:
 [`fake-vs-real-limitations.md`](../06-validation-reports/fake-vs-real-limitations.md).
 
-➡️ **Next:** [Lesson 4 - Inference Serving](../04-inference-serving/README.md).
+➡️ **Next:** [Lesson 4A - Inference benchmarks](../04-inference-serving/README.md).
