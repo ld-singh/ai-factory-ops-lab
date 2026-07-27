@@ -233,7 +233,7 @@ count of long-lived user sessions. That footprint is exactly what the calculator
 
 **In a multi-replica deployment**, prefix-cache-aware routing can send a follow-up request to a
 replica that still holds the matching conversation prefix, balancing that cache affinity against
-replica load. That routing is [Lesson 4D](../README.md) (planned).
+replica load. That routing is Lesson 4D (the inference gateway lesson, planned).
 
 ## PagedAttention: why real servers get close to these numbers
 

@@ -67,6 +67,19 @@ def main():
                     help="how many requests share that prefix")
     args = ap.parse_args()
 
+    # Fail fast on values that would divide by zero or print nonsense.
+    for name, val in (("--layers", args.layers), ("--kv-heads", args.kv_heads),
+                      ("--head-dim", args.head_dim), ("--context", args.context),
+                      ("--gpu-mem-gib", args.gpu_mem_gib), ("--params-b", args.params_b)):
+        if val <= 0:
+            ap.error(f"{name} must be positive (got {val})")
+    if args.overhead_gib < 0:
+        ap.error(f"--overhead-gib cannot be negative (got {args.overhead_gib})")
+    if args.prefix_tokens < 0:
+        ap.error(f"--prefix-tokens cannot be negative (got {args.prefix_tokens})")
+    if args.prefix_requests < 1:
+        ap.error(f"--prefix-requests must be at least 1 (got {args.prefix_requests})")
+
     elem = DTYPE_BYTES[args.dtype]
     per_tok = kv_bytes_per_token(args.layers, args.kv_heads, args.head_dim, elem)
     per_req = per_tok * args.context
