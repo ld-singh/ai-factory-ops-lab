@@ -59,7 +59,7 @@
   <rect x="82" y="366" width="150" height="6" rx="3" fill="url(#accent)"/>
 
   <!-- tagline -->
-  <text x="80" y="424" fill="#cbd5e1" font-size="27" font-weight="500">Stand up real GPU infra — K8s scheduling, GPU sharing, Slurm,</text>
+  <text x="80" y="424" fill="#cbd5e1" font-size="27" font-weight="500">Build GPU infra on your laptop: K8s scheduling, GPU sharing, Slurm,</text>
   <text x="80" y="462" fill="#cbd5e1" font-size="27" font-weight="500">observability &amp; vLLM inference. Break it. Diagnose it. Prove it.</text>
 
   <!-- feature pills -->
@@ -90,6 +90,6 @@
   <rect x="0" y="592" width="1280" height="48" fill="#06100c"/>
   <rect x="0" y="592" width="1280" height="2" fill="url(#accent)" opacity="0.5"/>
   <text x="80" y="622" fill="#34d399" font-size="19" font-weight="700">$0 to start on your laptop</text>
-  <text x="333" y="622" fill="#64748b" font-size="19">·  real-GPU capstone from ~$5–10</text>
+  <text x="333" y="622" fill="#64748b" font-size="19">·  real-GPU capstone from ~$5-10</text>
   <text x="1200" y="622" text-anchor="end" fill="#94a3b8" font-size="19" font-weight="600">simulation + real · scope always explicit</text>
 </svg>

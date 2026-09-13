@@ -1,5 +1,5 @@
 site_name: AI Factory Operations Lab
-site_description: A hands-on, mostly-free course in AI/HPC GPU infrastructure operations - Kubernetes GPU scheduling, queueing (KAI), GPU sharing (HAMi), Slurm, observability, inference, and cluster lifecycle.
+site_description: Learn GPU infrastructure without owning a GPU. A hands-on, mostly-free course in AI/HPC GPU infrastructure operations - Kubernetes GPU scheduling, queueing (KAI), GPU sharing (HAMi), Volcano, Slurm, DCGM observability, and vLLM inference serving - built, broken, and diagnosed on your laptop, then validated on one real GPU.
 site_author: Lovedeep Singh
 site_url: https://ld-singh.github.io/ai-factory-ops-lab/
 
@@ -93,6 +93,7 @@ copyright: >
 # Pages are referenced at their synced paths under docs/.
 nav:
   - Home: index.md
+  - Start here: start-here.md
   - Overview & setup: course.md
   - Lessons:
       - "1 - Kubernetes GPU scheduling": portfolio-lab/01-k8s-gpu-platform/README.md
