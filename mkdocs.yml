@@ -103,6 +103,7 @@ nav:
       - "1D - GPU fleet scale simulation (Volcano)": portfolio-lab/01-k8s-gpu-platform/volcano-scale-sim/README.md
       - "2 - Slurm workload management": portfolio-lab/02-slurm-gpu-platform/README.md
       - "3 - GPU observability": portfolio-lab/03-observability/README.md
+      - "3B - Inference observability": portfolio-lab/03-observability/inference-observability/README.md
       - "4 - Inference serving":
           - "4A - Inference benchmarks": portfolio-lab/04-inference-serving/README.md
           - "4B - The KV cache": portfolio-lab/04-inference-serving/kv-cache/README.md

@@ -1,0 +1,84 @@
+# PrometheusRule - INFERENCE (token-level) SLO alerts, from vLLM's Prometheus
+# metrics. These are the signals you page on when serving an LLM, distinct from the
+# GPU/DCGM alerts in ../../manifests/alerts.yaml. Thresholds and `for:` windows are
+# lab-friendly so the break-it drill (POST /scenario?name=saturation) trips them in
+# under a minute; lengthen them on a real fleet. Metric names follow vLLM's docs and
+# shift between versions, so confirm against the vLLM you run.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: inference-alerts
+  namespace: gpu-observability
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: inference.slo
+      rules:
+        - alert: InferenceTTFTSLOBreached
+          # p95 time-to-first-token over the 1s interactive SLO.
+          expr: >
+            histogram_quantile(0.95,
+              sum(rate(vllm:time_to_first_token_seconds_bucket[5m])) by (le, model_name)) > 1
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "p95 TTFT over SLO for {{ $labels.model_name }}"
+            runbook: "runbooks/gpu-capacity-planning.md"
+
+        - alert: InferenceErrorRateHigh
+          expr: >
+            sum(rate(vllm:request_failure_total[5m])) by (model_name)
+            /
+            clamp_min(sum(rate(vllm:request_success_total[5m])
+                        + rate(vllm:request_failure_total[5m])) by (model_name), 1)
+            > 0.01
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Inference error rate above 1% for {{ $labels.model_name }}"
+            runbook: "runbooks/gpu-capacity-planning.md"
+
+        - alert: InferenceQueueBacklog
+          # Requests waiting for a slot: the server is admission-limited.
+          expr: vllm:num_requests_waiting > 20
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Inference queue backing up for {{ $labels.model_name }} ({{ $value }} waiting)"
+            runbook: "runbooks/gpu-capacity-planning.md"
+
+    - name: inference.memory
+      rules:
+        - alert: InferenceKVCacheNearFull
+          expr: vllm:gpu_cache_usage_perc > 0.95
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "KV cache near full for {{ $labels.model_name }} ({{ $value }})"
+            runbook: "runbooks/gpu-memory-pressure.md"
+
+        - alert: InferencePreemptions
+          # Preemptions mean the KV cache ran out and running requests were evicted.
+          expr: sum(rate(vllm:num_preemptions_total[5m])) by (model_name) > 0
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Requests being preempted under KV pressure for {{ $labels.model_name }}"
+            runbook: "runbooks/gpu-memory-pressure.md"
+
+    - name: inference.health
+      rules:
+        - alert: VLLMMetricsAbsent
+          expr: absent(vllm:num_requests_running) == 1
+          for: 1m
+          labels:
+            severity: critical
+          annotations:
+            summary: "vLLM inference metrics are not being scraped"
+            runbook: "runbooks/dcgm-exporter-no-metrics.md"

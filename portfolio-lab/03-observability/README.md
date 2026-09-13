@@ -259,8 +259,18 @@ absent, queue starvation) - control-plane alerts are fully testable for free.
 
 ---
 
+## Going deeper
+
+- **[Lesson 3B - Inference observability](./inference-observability/README.md)** (free, no
+  GPU): the other half of the picture. This lesson watches the **GPU**; 3B watches the
+  **serving layer**, the token-level SLOs (TTFT, TPOT, goodput, queue depth, KV cache usage)
+  you page on when serving an LLM, on this same Prometheus/Grafana stack. Best read after
+  [Lesson 4A](../04-inference-serving/README.md) for the vocabulary.
+
 ## What's in this directory
 
+- [`inference-observability/`](./inference-observability/README.md) - Lesson 3B: a synthetic
+  vLLM metrics exporter, the token-SLO queries, and inference alert rules.
 - [`fake-dcgm-exporter/app.py`](./fake-dcgm-exporter/app.py) - the synthetic DCGM metrics
   source (~150 lines of Python) and its `/scenario` switch.
 - [`manifests/`](./manifests/) - `exporter.yaml`, `servicemonitor.yaml`, and `alerts.yaml`
