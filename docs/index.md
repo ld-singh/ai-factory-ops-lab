@@ -4,115 +4,199 @@ hide:
   - toc
 ---
 
-# AI Factory Operations Lab
+# Learn GPU Infrastructure Without Owning a GPU
 
-![AI Factory Operations Lab](assets/social-preview.svg){ width="820" }
+![AI Factory Operations Lab](assets/social-preview.svg){ .hero-image width="880" }
 
-**A hands-on course in AI/HPC GPU infrastructure operations.** You do not read this
-course, you run it: stand things up, break them on purpose, diagnose them the way you
-would on a real cluster, and capture the evidence. Most of it needs **no GPU at all**;
-one optional session uses a single cheap rented GPU and is clearly marked.
+<p class="hero-subtitle">Hands-on GPU Infrastructure Engineering</p>
 
-[Get started](portfolio-lab/01-k8s-gpu-platform/README.md){ .md-button .md-button--primary }
-[Browse on GitHub](https://github.com/ld-singh/ai-factory-ops-lab){ .md-button }
+**Build, break, troubleshoot and operate production-style AI infrastructure on your laptop.
+Then validate the hardware-specific parts on real GPUs.**
 
-## The scope boundary
+<p class="hero-badges">
+<span>💻 $0 to start</span>
+<span>🚫 No GPU required</span>
+<span class="opt">🟥 Optional real-GPU capstone</span>
+</p>
 
-Every lesson declares one of two modes and states exactly what it proves and what it
-does not:
+[Start Learning](start-here.md){ .md-button .md-button--primary }
+[View Learning Path](#the-lessons){ .md-button }
 
-- **Simulation (no GPU).** kind + KWOK fake nodes, the fake-gpu-operator, Slurm with
-  fake GRES. Proves control-plane behaviour: scheduling, queueing, sharing decisions,
-  triage. Nothing below the kubelet.
-- **Real GPU (one cheap NVIDIA GPU).** Real driver, container toolkit, CUDA pod, DCGM
-  telemetry, enforced GPU sharing. Proves the runtime path, single-node.
+You do not read this course, you run it: stand things up, break them on purpose, diagnose
+them the way you would on a real cluster, and capture the evidence. Most of it needs **no GPU
+at all**; one optional session uses a single cheap rented GPU and is clearly marked.
 
-Knowing exactly where that line sits is itself one of the skills this course teaches.
+---
+
+## How you learn here: Build, Break, Diagnose, Prove
+
+Every lesson runs the same loop, the one an operator actually lives in:
+
+<div class="grid cards" markdown>
+
+-   :material-hammer-wrench: __Build__
+
+    Stand up the system or capability: a fake GPU fleet, a scheduler, a serving stack.
+
+-   :material-flash: __Break__
+
+    Introduce a realistic failure, capacity limit, or queue condition, on purpose.
+
+-   :material-stethoscope: __Diagnose__
+
+    Read the same signals and tools an operator uses in production to find the cause.
+
+-   :material-clipboard-check: __Prove__
+
+    Capture the evidence of what happened and what you fixed. A lesson is "done" only when
+    its evidence exists, not when a command runs.
+
+</div>
+
+---
 
 ## What it costs
 
 | Tier | Lessons | You pay | You get |
 |---|---|---|---|
-| **$0 simulation** | 0, 1, 1B, 1C, 1D, 2, 3, 4, 5 | Nothing, a laptop runs it | Scheduling, queueing, gang scheduling, GPU-sharing decisions, triage, observability design, lifecycle - most of the course |
-| **$5-10 one GPU session** | 6 (the real-GPU capstone) | A few hours on one entry-level GPU VM | The real runtime path, enforced sharing, real telemetry and benchmarks |
+| **$0 simulation** | 1 through 5 (with 1B/1C/1D, 3B, 4A/4B) | Nothing, a laptop runs it | Scheduling, queueing, gang scheduling, GPU-sharing decisions, observability design, inference and capacity, lifecycle. Most of the course |
+| **$5-10 one-GPU capstone** | 6 | A few hours on one entry-level GPU VM | The real runtime path, enforced GPU sharing, real telemetry and inference benchmarks |
+
+Every lesson declares its **mode** and states exactly what it proves and what it does not:
+
+- **🟦 Simulation (no GPU).** kind + KWOK fake nodes, the fake-gpu-operator, Slurm with fake
+  GRES, synthetic DCGM and vLLM metrics. Proves control-plane behaviour: scheduling, queueing,
+  sharing *decisions*, observability *design*. Nothing below the kubelet.
+- **🟥 Real GPU (one cheap NVIDIA GPU).** Real driver, container toolkit, CUDA pod, DCGM
+  telemetry, enforced GPU sharing, real inference numbers. Proves the runtime path, single node.
+
+Knowing exactly where that line sits is itself one of the skills this course teaches.
+
+---
 
 ## The lessons
 
+New here? **[Start Here](start-here.md)** first for orientation, then work the lessons in order.
+Each card leads with what you will be able to *do*.
+
 <div class="grid cards" markdown>
 
--   :material-kubernetes: __1 - Kubernetes GPU scheduling__
+-   :material-kubernetes: __1 · Diagnose why a GPU pod stays Pending__
 
     ---
 
-    Build a fake GPU fleet with kind + KWOK and diagnose why GPU pods stay Pending.
+    🟦 Simulation · No GPU · Beginner · ~30-45 min (est)
 
-    [:octicons-arrow-right-24: Start here](portfolio-lab/01-k8s-gpu-platform/README.md)
+    Build a fake GPU fleet with kind + KWOK and the fake-gpu-operator, then walk the
+    driver-to-pod path to find why work will not schedule.
 
--   :material-format-list-numbered: __1B - Queue scheduling (KAI)__
+    [:octicons-arrow-right-24: Open](portfolio-lab/01-k8s-gpu-platform/README.md)
+
+-   :material-format-list-numbered: __1B · Control GPU access between teams__
 
     ---
 
-    Install NVIDIA's KAI Scheduler on a fake fleet and enforce per-team queue quota.
+    🟦 Simulation · No GPU · Intermediate · ~30 min (est)
+
+    NVIDIA KAI Scheduler · queue quotas · borrowing · gang scheduling, enforced on a fake fleet.
 
     [:octicons-arrow-right-24: Open](portfolio-lab/01-k8s-gpu-platform/kai-scheduler/README.md)
 
--   :material-fraction-one-half: __1C - GPU sharing (HAMi)__
+-   :material-fraction-one-half: __1C · Share one GPU between pods__
 
     ---
 
-    Fractional GPUs: schedule slices on fakes, then prove memory isolation on one real GPU.
+    🟦 Simulation (+🟥 real half in 6) · Intermediate · ~30 min (est)
+
+    HAMi fractional GPUs: prove the scheduling *decision* on fakes; the enforced memory slice
+    is proven on a real GPU in the capstone.
 
     [:octicons-arrow-right-24: Open](portfolio-lab/01-k8s-gpu-platform/hami/README.md)
 
--   :material-chart-timeline-variant: __1D - Fleet scale sim (Volcano)__
+-   :material-chart-timeline-variant: __1D · Watch gang scheduling refuse a job__
 
     ---
 
-    Generate a fake GPU fleet from a topology file and watch Volcano gang scheduling refuse a job all-or-nothing.
+    🟦 Simulation · No GPU · Intermediate · ~30 min (est)
+
+    Volcano · topology-driven fake fleets · Queue / PodGroup gang scheduling, all-or-nothing.
 
     [:octicons-arrow-right-24: Open](portfolio-lab/01-k8s-gpu-platform/volcano-scale-sim/README.md)
 
--   :material-check-decagram: __2 - Real GPU validation__
+-   :material-server: __2 · Schedule GPU jobs on an HPC cluster__
 
     ---
 
-    Prove the full driver to toolkit to device-plugin to pod path on real hardware.
+    🟦 Simulation · No GPU · Intermediate · ~40 min (est)
 
-    [:octicons-arrow-right-24: Open](portfolio-lab/01-k8s-gpu-platform/gpu-operator-real/README.md)
-
--   :material-server: __3 - Slurm workload management__
-
-    ---
-
-    A Slurm-in-Docker cluster with fake GRES: GPU jobs, QoS caps, queue pressure, drain/resume.
+    Slurm-in-Docker with fake GRES · GPU jobs · QoS caps · queue pressure · drain and resume.
 
     [:octicons-arrow-right-24: Open](portfolio-lab/02-slurm-gpu-platform/README.md)
 
--   :material-chart-line: __4 - GPU observability__
+-   :material-chart-line: __3 · See a GPU fleet and trip its alerts__
 
     ---
 
-    Prometheus/Grafana over synthetic DCGM metrics; build dashboards and trip alerts on purpose.
+    🟦 Simulation · No GPU · Beginner · ~20 min
+
+    Prometheus · Grafana · synthetic DCGM · build dashboards and break them on purpose.
 
     [:octicons-arrow-right-24: Open](portfolio-lab/03-observability/README.md)
 
--   :material-rocket-launch: __5 - Inference serving__
+-   :material-speedometer: __3B · Alert on token-level inference SLOs__
 
     ---
 
-    A load harness for TTFT, p95/p99, tokens-per-sec; $0 CPU tier, real numbers on a GPU.
+    🟦 Simulation · No GPU · Intermediate · ~25 min (est)
+
+    Synthetic vLLM metrics · TTFT / goodput / queue depth / KV usage · SLO alerts that fire.
+
+    [:octicons-arrow-right-24: Open](portfolio-lab/03-observability/inference-observability/README.md)
+
+-   :material-rocket-launch: __4A · Find where a serving stack saturates__
+
+    ---
+
+    🟦 Simulation (CPU) · No GPU · Intermediate · ~30 min (est)
+
+    A load harness for TTFT · TPOT · p95/p99 · tokens/sec · goodput, and the saturation knee.
 
     [:octicons-arrow-right-24: Open](portfolio-lab/04-inference-serving/README.md)
 
--   :material-cog-sync: __6 - Cluster lifecycle__
+-   :material-memory: __4B · Size GPU memory to concurrent users__
 
     ---
 
-    A runnable provision to health-gate to patch to retire node-lifecycle drill, mapped to BCM.
+    🟦 Simulation · No GPU · Intermediate · ~25 min (est)
+
+    The KV cache calculator · PagedAttention · GQA · prefix caching · the concurrency limit.
+
+    [:octicons-arrow-right-24: Open](portfolio-lab/04-inference-serving/kv-cache/README.md)
+
+-   :material-cog-sync: __5 · Run a node from provision to retire__
+
+    ---
+
+    🟨 Concept + drill · No GPU · Intermediate · ~25 min (est)
+
+    A provision to health-gate to patch to retire lifecycle drill, mapped to BCM-style ops.
 
     [:octicons-arrow-right-24: Open](portfolio-lab/05-bcm-style-cluster-lifecycle/README.md)
 
+-   :material-medal: __6 · The AI Factory Operator Capstone__
+
+    ---
+
+    🟥 Real GPU · ~$5-10 · Advanced · ~1-2 hours
+
+    One rented GPU. Prove what simulation cannot: the runtime path + real DCGM, enforced HAMi
+    sharing, HAMi with the GPU Operator, and a real inference benchmark. Then tear it down.
+
+    [:octicons-arrow-right-24: Open](portfolio-lab/real-gpu-session/README.md)
+
 </div>
+
+---
 
 ## Run the first loop
 
@@ -125,11 +209,14 @@ make phase1-demo    # schedulable + intentionally-Pending GPU workloads
 make phase1-down    # tear it down
 ```
 
+New to the course? **[Start Here](start-here.md)** explains the prerequisites, the modes, how
+evidence works, and exactly what to run first.
+
 ---
 
 ⭐ **Finding this useful?** [Star it on GitHub](https://github.com/ld-singh/ai-factory-ops-lab/stargazers)
-— it helps other engineers find the course.
+so other engineers find the course.
 
-Built by **[Lovedeep Singh](https://www.linkedin.com/in/lovedeep-singh-cloud-infra/)** —
+Built by **[Lovedeep Singh](https://www.linkedin.com/in/lovedeep-singh-cloud-infra/)**,
 Cloud Infrastructure Architect (AWS, Azure, Kubernetes & DevSecOps), building secure, governed
 cloud platforms. See [About](about.md) for more.

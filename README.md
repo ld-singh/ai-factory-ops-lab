@@ -4,7 +4,7 @@
 
 # AI Factory Operations Lab
 
-**Hands-on GPU/HPC infrastructure operations — learn it free on your laptop, prove it on one cheap GPU.**
+**Learn GPU infrastructure without owning a GPU.** Hands-on GPU/HPC infrastructure operations: build, break and diagnose it free on your laptop, then validate the hardware-specific parts on one cheap GPU.
 
 [![GitHub stars](https://img.shields.io/github/stars/ld-singh/ai-factory-ops-lab?style=flat-square&logo=github&color=f9c513)](https://github.com/ld-singh/ai-factory-ops-lab/stargazers)
 [![Read the course](https://img.shields.io/badge/course-read%20online-2ea043?style=flat-square&logo=readthedocs&logoColor=white)](https://ld-singh.github.io/ai-factory-ops-lab/)
@@ -16,7 +16,7 @@
 
 [**📖 Read the course online →**](https://ld-singh.github.io/ai-factory-ops-lab/)
 
-### ⭐ Star this repo if it helps you — it makes the work visible and helps other engineers find it.
+### ⭐ Star this repo if it helps you. It makes the work visible and helps other engineers find it.
 
 </div>
 
@@ -108,9 +108,11 @@ optional **Lesson 6** at the end.
 | **1D** | [GPU fleet scale simulation - Volcano](./portfolio-lab/01-k8s-gpu-platform/volcano-scale-sim/README.md) | 🟦 Sim | No | Scale fake GPU fleets from topology JSON, create queue pressure, and validate Volcano Queue/PodGroup gang-scheduling behaviour |
 | **2** | [Slurm GPU workload management](./portfolio-lab/02-slurm-gpu-platform/README.md) | 🟦 Sim | No | Run a Slurm-in-Docker cluster with fake GRES; schedule GPU jobs, QoS caps, queue pressure, drain/resume |
 | **3** | [GPU observability](./portfolio-lab/03-observability/README.md) | 🟦 Sim | No | Stand up Prometheus/Grafana over synthetic DCGM; build dashboards + SLO alerts; **trip them on purpose** |
-| **4** | [Inference serving](./portfolio-lab/04-inference-serving/README.md) | 🟦 Sim/harness | No | Run the $0 CPU load harness for TTFT/p95-p99/tokens-per-sec; real benchmark numbers come in Lesson 6 |
+| **3B** | [Inference observability](./portfolio-lab/03-observability/inference-observability/README.md) | 🟦 Sim | No | Token-level SLOs from synthetic vLLM metrics: TTFT/goodput/queue-depth/KV-usage, and alerts that fire under saturation |
+| **4A** | [Inference benchmarks](./portfolio-lab/04-inference-serving/README.md) | 🟦 Sim/harness | No | Run the $0 CPU load harness for TTFT/p95-p99/tokens-per-sec and find the saturation knee; real numbers come in Lesson 6 |
+| **4B** | [The KV cache](./portfolio-lab/04-inference-serving/kv-cache/README.md) | 🟦 Sim | No | Size the KV cache from a model's config: concurrency limits, PagedAttention, GQA, prefix caching |
 | **5** | [BCM-style cluster lifecycle](./portfolio-lab/05-bcm-style-cluster-lifecycle/README.md) | 🟨 Concept+drill | No | Run a provision→health-gate→patch→retire node-lifecycle drill; map it to BCM |
-| **6** | [Real GPU (one-rental capstone)](./portfolio-lab/real-gpu-session/README.md) | 🟥 Real | Opt (1) | The **only** real-GPU lesson: in one rental, prove the GPU runtime path + real DCGM, HAMi sharing, Slurm GRES, and the inference benchmark - then tear down |
+| **6** | [AI Factory Operator Capstone (real GPU)](./portfolio-lab/real-gpu-session/README.md) | 🟥 Real | Opt (1) | The **only** real-GPU lesson: in one rental, prove the GPU runtime path + real DCGM, HAMi sharing, HAMi + GPU Operator coexistence, and the inference benchmark, then tear down (real Slurm GRES is planned) |
 | **★** | [Your lab notebook](./portfolio-lab/06-validation-reports/) | - | - | Capture evidence; a lesson is only "done" when its report holds real output |
 
 > **Lessons 0–5 (including 1B, 1C, 1D) run entirely on a laptop with no GPU.** The only real
@@ -127,15 +129,16 @@ Designed to be as close to free as is practical. The cost ladder:
 
 | Tier | Lessons | What you pay | What you get |
 |---|---|---|---|
-| **$0 - simulation** | 0, 1, 1B, 1C, 1D, 2, 3, 4, 5 | Nothing - a laptop runs it | All scheduling, queueing, sharing-*decision*, triage, observability-design, lifecycle, and scale-simulation skills. |
-| **$5-10 - one GPU session** | 6 (the capstone) | A few hours on one rented entry-level NVIDIA GPU VM | The real runtime path, enforced GPU sharing, real DCGM telemetry, real Slurm GRES, and real inference benchmarks |
+| **$0 - simulation** | 0, 1, 1B, 1C, 1D, 2, 3, 3B, 4A, 4B, 5 | Nothing - a laptop runs it | All scheduling, queueing, sharing-*decision*, triage, observability-design, inference-capacity, lifecycle, and scale-simulation skills. |
+| **$5-10 - one GPU session** | 6 (the capstone) | A few hours on one rented entry-level NVIDIA GPU VM | The real runtime path, enforced GPU sharing, real DCGM telemetry, and real inference benchmarks (real Slurm GRES is planned) |
 
 Three habits keep the paid tier at $5-10:
 
 1. **It's already one rental session.** Lesson 6 is the only real-GPU lesson by design:
-   it runs the GPU runtime path, HAMi sharing, Slurm GRES, and the inference benchmark
-   back-to-back on a single machine. Set up the host once, run all phases, capture
-   evidence as you go, tear down. See [Lesson 6](./portfolio-lab/real-gpu-session/README.md).
+   it runs the GPU runtime path, HAMi sharing, HAMi + GPU Operator coexistence, and the
+   inference benchmark back-to-back on a single machine (real Slurm GRES is a planned add-on).
+   Set up the host once, run the phases, capture evidence as you go, tear down. See
+   [Lesson 6](./portfolio-lab/real-gpu-session/README.md).
 2. **Cheapest GPU that works.** Everything real-mode here needs only one
    entry-level datacenter or consumer NVIDIA GPU (T4/L4/A10G-class). You never need
    an A100/H100 in this course.
@@ -334,11 +337,11 @@ only contains configuration, automation and documentation written for this cours
 
 ## ⭐ Found this useful?
 
-If this course helped you get hands-on with GPU/HPC infrastructure, **[give it a star](https://github.com/ld-singh/ai-factory-ops-lab/stargazers)** — it takes a second, makes the work visible, and helps other engineers find it. Issues, ideas, and PRs are welcome too.
+If this course helped you get hands-on with GPU/HPC infrastructure, **[give it a star](https://github.com/ld-singh/ai-factory-ops-lab/stargazers)**. It takes a second, makes the work visible, and helps other engineers find it. Issues, ideas, and PRs are welcome too.
 
 ## 👤 Author
 
-**Lovedeep Singh** — Cloud Infrastructure Architect · AWS, Azure, Kubernetes & DevSecOps · building secure, governed cloud platforms.
+**Lovedeep Singh**, Cloud Infrastructure Architect · AWS, Azure, Kubernetes & DevSecOps · building secure, governed cloud platforms.
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-connect-0a66c2?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/lovedeep-singh-cloud-infra/)
 [![GitHub](https://img.shields.io/badge/GitHub-ld--singh-181717?style=flat-square&logo=github&logoColor=white)](https://github.com/ld-singh)
